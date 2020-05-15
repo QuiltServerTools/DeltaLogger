@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "watchtower",
+  "version": "${version}",
+
+  "name": "WatchTower",
+  "description": "Log block events",
+  "authors": [
+    "unsupervised@tutanota.com"
+  ],
+  "contact": {
+    "homepage": "https://lambdacraft.dev",
+    "sources": "https://github.com/Lambdacraft/watchtower"
+  },
+
+  "license": "All rights reserved",
+  "icon": "assets/modid/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "dev.lambdacraft.watchtower.ExampleMod"
+    ]
+  },
+  "mixins": [
+    "watchtower.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.7.4",
+    "fabric": "*",
+    "minecraft": "1.16.x"
+  },
+  "suggests": {
+    "flamingo": "*"
+  }
+}
