@@ -1,10 +1,5 @@
 package dev.lambdacraft.watchtower.mixins;
 
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
-
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -16,6 +11,7 @@ import net.minecraft.network.ClientConnection;
 import net.minecraft.server.PlayerManager;
 import net.minecraft.server.network.ServerPlayerEntity;
 
+/** Hook to log player session */
 @Mixin(PlayerManager.class)
 public abstract class PlayerEventsMixin {
   @Inject(at = @At("TAIL"), method = "remove")

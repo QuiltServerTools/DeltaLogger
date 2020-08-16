@@ -9,6 +9,9 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 
+/**
+ * POJO representing a block placement
+ */
 public class Placement {
   private String playerName;
   private Instant time;

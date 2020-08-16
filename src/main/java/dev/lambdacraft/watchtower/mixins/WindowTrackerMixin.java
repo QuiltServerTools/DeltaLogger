@@ -21,7 +21,6 @@ public abstract class WindowTrackerMixin implements ServerPlayPacketListener {
     at = @At(value = "INVOKE", target = "net.minecraft.screen.ScreenHandler.sendContentUpdates()V"),
     method = "onClickWindow")
   public void onClickWindow(ClickWindowC2SPacket packet, CallbackInfo info) {
-    // TODO AHHH
     ((ITransactable)this.player.currentScreenHandler).trackLatestTransactions();
   }
 }

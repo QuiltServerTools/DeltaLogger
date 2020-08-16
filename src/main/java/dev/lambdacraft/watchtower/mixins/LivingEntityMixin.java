@@ -16,6 +16,7 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.World;
 
+/** Log name tagged entity death reason */
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends Entity {
 

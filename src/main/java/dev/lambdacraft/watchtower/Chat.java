@@ -4,7 +4,6 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.HashMap;
 
 import net.minecraft.entity.player.PlayerEntity;
@@ -19,6 +18,9 @@ import net.minecraft.util.math.BlockPos;
 
 import static net.minecraft.util.Formatting.*;
 
+/**
+ * Utility class to make sending chat messages easier
+ */
 public class Chat {
   private static final HashMap<Class, Formatting> textColorMap;
   private static final DateTimeFormatter dtf;

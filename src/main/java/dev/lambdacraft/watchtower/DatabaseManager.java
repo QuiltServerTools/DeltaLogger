@@ -35,6 +35,14 @@ import dev.lambdacraft.watchtower.beans.Transaction;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 
+/**
+ * Handles inserting POJOs into the database. All POJOs are inserted into a
+ * queue and pulled in order of priority. This is to ensure that foreign table
+ * references are processed in the correct order, otherwise foreign key
+ * constraints would fail. Foreign key constraints have been removed from the
+ * SQL schema because shared host providers use outdated MySQL versions that
+ * lack foreign key constraints.
+ */
 public class DatabaseManager implements Runnable {
   private static DatabaseManager manager;
   public static DateTimeFormatter timeFormat;
@@ -89,6 +97,9 @@ public class DatabaseManager implements Runnable {
     return manager;
   }
 
+  /**
+   * Configure and init Hikari connection pool
+   */
   private static HikariDataSource getDataSource(Properties props) {
     HikariConfig config = new HikariConfig();
     config.setJdbcUrl(String.join("",
@@ -136,6 +147,10 @@ public class DatabaseManager implements Runnable {
   public static String getTime() {
     return timeFormat.format(java.time.Instant.now());
   }
+
+  /**
+   * QUEUE Operation classes to insert into the priority queue
+   */
   static abstract class QueueOperation {
     public abstract PreparedBatch addBindings(PreparedBatch batch);
     public abstract PreparedBatch prepareBatch(Handle handle);

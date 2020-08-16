@@ -15,6 +15,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.World;
 
+/** Log creeper explosion events and the creeper's player target */
 @Mixin(CreeperEntity.class)
 public class CreeperMixin extends HostileEntity {
   protected CreeperMixin(EntityType<? extends HostileEntity> type, World world) {

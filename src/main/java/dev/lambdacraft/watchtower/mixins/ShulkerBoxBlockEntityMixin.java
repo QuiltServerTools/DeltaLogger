@@ -16,11 +16,13 @@ import net.minecraft.block.entity.ShulkerBoxBlockEntity;
 import net.minecraft.block.entity.LootableContainerBlockEntity;
 import net.minecraft.nbt.CompoundTag;
 
+/**
+ * Assign UUID to shulker entities
+ */
 @Mixin(ShulkerBoxBlockEntity.class)
 public abstract class ShulkerBoxBlockEntityMixin extends LootableContainerBlockEntity implements IWatchTowerId {
   protected ShulkerBoxBlockEntityMixin(BlockEntityType<?> blockEntityType) {
     super(blockEntityType);
-    // TODO Auto-generated constructor stub
   }
 
   private UUID watchtowerid = UUID.randomUUID();
@@ -29,10 +31,8 @@ public abstract class ShulkerBoxBlockEntityMixin extends LootableContainerBlockE
   public void fromTag(BlockState state, CompoundTag tag, CallbackInfo info) {
     if (tag.containsUuid(ItemUtils.NBT_TAG_KEY)) {
       this.watchtowerid = tag.getUuid(ItemUtils.NBT_TAG_KEY);
-      // System.out.println("HAS UUID " + this.watchtowerid);
     } else {
       this.watchtowerid = UUID.randomUUID();
-      // System.out.println("ASSIGNED UUID " + this.watchtowerid);
     }
   }
 

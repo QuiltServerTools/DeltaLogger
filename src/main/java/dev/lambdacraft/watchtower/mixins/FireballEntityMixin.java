@@ -8,7 +8,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import dev.lambdacraft.watchtower.DatabaseManager;
 import net.minecraft.entity.Entity;
@@ -20,6 +19,7 @@ import net.minecraft.entity.projectile.FireballEntity;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 
+/** Log fireball explosions and the fireballing entity's target */
 @Mixin(FireballEntity.class)
 
 // onCollision
@@ -35,7 +35,7 @@ public class FireballEntityMixin extends AbstractFireballEntity {
   private void tryLogFireballExplosion(HitResult result, CallbackInfo info) {
     Entity owner = this.getOwner();
     if (
-      !this.world.getGameRules().getBoolean(GameRules.field_19388)
+      !this.world.getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING)
       || !(owner instanceof GhastEntity)
       || owner == null
     ) return;

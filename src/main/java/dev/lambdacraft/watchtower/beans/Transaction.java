@@ -9,6 +9,10 @@ import net.minecraft.text.MutableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 
+/**
+ * POJO representing an accounting of transaction interactions with inventory
+ * screens.
+ */
 public class Transaction {
   private Instant time;
   private String playerName;

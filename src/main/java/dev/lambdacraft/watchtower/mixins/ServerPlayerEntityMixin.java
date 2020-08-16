@@ -27,9 +27,8 @@ import net.minecraft.world.World;
 
 @Mixin(ServerPlayerEntity.class)
 public abstract class ServerPlayerEntityMixin extends PlayerEntity {
-  public ServerPlayerEntityMixin(World world, BlockPos blockPos, GameProfile gameProfile) {
-    super(world, blockPos, gameProfile);
-    // TODO Auto-generated constructor stub
+  public ServerPlayerEntityMixin(World world, BlockPos pos, float yaw, GameProfile profile) {
+    super(world, pos, yaw, profile);
   }
 
   @Inject(at = @At(value = "RETURN", ordinal = 2), method = "openHandledScreen")
@@ -40,21 +39,12 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity {
       if (nameableContainerFactory instanceof LockableContainerBlockEntity && !(nameableContainerFactory instanceof ChestBlockEntity)) {
         BlockEntity be = (BlockEntity) nameableContainerFactory;
         UUID uuid = ((IWatchTowerId)be).getWatchTowerId();
-        // TODO ahhh
         ((IWatchTowerId)this.currentScreenHandler).setWatchTowerId(uuid);
-        // System.out.println("INSTANCE OF " + ((IWatchTowerId)this.container).getWatchTowerId());
 
         Identifier blockId = Registry.BLOCK.getId(be.getCachedState().getBlock());
         DatabaseManager.getSingleton().queueOp(new DatabaseManager.ContainerUpdate(
           uuid, blockId, be.getPos(), this.getUuid(), DatabaseManager.getTime(), null
         ));
       }
-
-      // if (BlockEntity.class.isInstance(nameableContainerFactory)) {
-      //   BlockPos pos = ((BlockEntity)nameableContainerFactory).getPos();
-      //   System.out.println("POS " + pos);
-      // } else {
-      //   System.out.println("NOPE");
-      // }
   }
 }

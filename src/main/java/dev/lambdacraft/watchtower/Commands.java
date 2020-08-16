@@ -21,6 +21,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * WatchTower admin commands
+ */
 public class Commands {
   private Commands() {}
   private static HashMap<PlayerEntity, Boolean> toolMap = new HashMap<>();
@@ -39,6 +42,9 @@ public class Commands {
     return toolMap.getOrDefault(p, false);
   }
 
+  /**
+   * Triggers tool inspection mode
+   */
   private static int toggleTool(CommandContext<ServerCommandSource> ctx) {
     PlayerEntity p;
     try {
@@ -52,6 +58,11 @@ public class Commands {
     return 1;
   }
 
+  /**
+   * Take a list of item stacks to drop at a player
+   * @param player
+   * @param combinedInventory
+   */
   public static void dropItemsAtPlayer(PlayerEntity player, List<DefaultedList<ItemStack>> combinedInventory) {
     Iterator<DefaultedList<ItemStack>> var1 = combinedInventory.iterator();
 
@@ -68,6 +79,13 @@ public class Commands {
     }
   }
 
+  /**
+   * Command to duplicate items of player and spit them at the feet of the command
+   * source entity. Mainly intended foor getting banned player's inventory.
+   * @param ctx
+   * @return
+   * @throws CommandSyntaxException
+   */
   private static int takeItems(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
     try {
       PlayerEntity caller = ctx.getSource().getPlayer();

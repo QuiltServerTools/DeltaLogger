@@ -74,10 +74,9 @@ public abstract class ChestBlockMixin extends AbstractChestBlock<ChestBlockEntit
 
   public Optional<UUID> getWatchTowerIdAt(final BlockState state, final World world, final BlockPos pos) {
     return this.getSource(state, world, pos, false).apply(UUID_RETRIEVER);
-    // return opt.orElseThrow();
   }
 
-  /** Log chest opening */
+  /** Log chest opening in container table hook */
   @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;incrementStat(Lnet/minecraft/stat/Stat;)V"), method = "onUse")
   public void onUse(final BlockState state, final World world, final BlockPos pos, 
     final PlayerEntity player, final Hand hand, final BlockHitResult hit, final CallbackInfoReturnable<ActionResult> ret) {

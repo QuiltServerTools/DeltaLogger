@@ -16,6 +16,10 @@ import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.block.entity.LockableContainerBlockEntity;
 import net.minecraft.nbt.CompoundTag;
 
+/** 
+ * Log most container entity access events which have LockableContainerBlockEntity
+ * as a super class.
+ */
 @Mixin(LockableContainerBlockEntity.class)
 public abstract class LockableContainerBlockEntityMixin extends BlockEntity implements IWatchTowerId {
   public LockableContainerBlockEntityMixin(BlockEntityType<?> type) {

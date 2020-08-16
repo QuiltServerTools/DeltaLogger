@@ -2,6 +2,9 @@ package dev.lambdacraft.watchtower.beans;
 
 import java.util.UUID;
 
+/**
+ * POJO representing a player session
+ */
 public class Player {
   private UUID uuid;
   private String name;

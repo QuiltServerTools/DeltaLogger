@@ -32,6 +32,9 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
 import net.minecraft.util.registry.Registry;
 
+/**
+ * Hooks to log the transaction events with inventory screens
+ */
 @Mixin(ScreenHandler.class)
 public abstract class ContainerMixin implements IWatchTowerId, ITransactable {
 	private static final Logger LOG = LogManager.getLogger();

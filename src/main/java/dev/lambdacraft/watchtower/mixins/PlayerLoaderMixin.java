@@ -32,6 +32,10 @@ public abstract class PlayerLoaderMixin implements IPlayerLoader {
   @Shadow
   private File playerDataDir;
 
+  /**
+   * Method to get a listing all of a player's inventory from their save state,
+   * including their enderchest.
+   */
   @Override
   public List<DefaultedList<ItemStack>> loadPlayerInventory(UUID uuid) {
     CompoundTag compoundTag = null;
