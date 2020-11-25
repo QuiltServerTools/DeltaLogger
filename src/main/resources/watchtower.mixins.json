@@ -15,8 +15,7 @@
     "LockableContainerBlockEntityMixin",
     "PlayerEventsMixin",
     "PlayerLoaderMixin",
-    "ServerPlayerEntityMixin",
-    "WindowTrackerMixin"
+    "ServerPlayerEntityMixin"
   ],
   "client": [
   ],

@@ -42,7 +42,9 @@ public abstract class ContainerMixin implements IWatchTowerId, ITransactable {
   private List<Pair<Item, Integer>> watchTowerTransactions = new ArrayList<>();
 
   public List<Pair<Item, Integer>> getTransactions() {
-    if (watchTowerTransactions == null) watchTowerTransactions = new ArrayList<>();
+    if (watchTowerTransactions == null) {
+      watchTowerTransactions = new ArrayList<>();
+    }
     return watchTowerTransactions;
   }
 
@@ -63,8 +65,8 @@ public abstract class ContainerMixin implements IWatchTowerId, ITransactable {
     ITransactable transactable = (ITransactable)this;
     Map<Item, Integer> transactions = ItemUtils.compressTransactions(transactable.getTransactions());
     transactions.forEach((item, count) -> {
+      if (count == 0) return;
       Identifier id = Registry.ITEM.getId(item);
-      // System.out.println("QUEUE " + id + " " + count);
       // if (containerId == null) {
       //   LOG.warn(String.join("", "Unable to add container transaction for ", id.toString(), " by player ", player.getName().asString(), " skipping.."));
       //   return;
@@ -73,26 +75,5 @@ public abstract class ContainerMixin implements IWatchTowerId, ITransactable {
         player.getUuid(), containerId, DatabaseManager.getTime(), id, count, null
       ));
     });
-  }
-
-  public void trackLatestTransactions() {
-    List<Pair<Item, Integer>> transactions = new ArrayList<>();
-    int playerSlotStartIndex = this.slots.size() - 9 * 4;
-    for(int j = 0; j < playerSlotStartIndex; ++j) {
-       ItemStack afterStack = this.slots.get(j).getStack();
-       ItemStack beforeStack = this.trackedStacks.get(j);
-       if (!ItemStack.areItemsEqualIgnoreDamage(beforeStack, afterStack)) {
-          // System.out.println(j + " beforeStack " + beforeStack + " afterStack " + afterStack);
-          if (beforeStack.isItemEqual(afterStack) || beforeStack.isEmpty() || afterStack.isEmpty()) {
-            Item item = beforeStack.isEmpty() ? afterStack.getItem() : beforeStack.getItem();
-            transactions.add(new Pair<>(item, afterStack.getCount() - beforeStack.getCount()));
-          } else {
-            transactions.add(new Pair<>(beforeStack.getItem(), -beforeStack.getCount()));
-            transactions.add(new Pair<>(afterStack.getItem(), afterStack.getCount()));
-          }
-       }
-    }
-
-    getTransactions().addAll(transactions);
   }
 }

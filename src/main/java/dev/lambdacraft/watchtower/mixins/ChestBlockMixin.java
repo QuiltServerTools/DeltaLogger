@@ -14,6 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import dev.lambdacraft.watchtower.DatabaseManager;
 import dev.lambdacraft.watchtower.IChestBlockUUID;
 import dev.lambdacraft.watchtower.IWatchTowerId;
+import dev.lambdacraft.watchtower.ItemUtils;
 import net.minecraft.block.AbstractChestBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ChestBlock;
@@ -88,6 +89,7 @@ public abstract class ChestBlockMixin extends AbstractChestBlock<ChestBlockEntit
         DatabaseManager.getSingleton().queueOp(new DatabaseManager.ContainerUpdate(
           chestWId, Registry.BLOCK.getId(this), pos, player.getUuid(), DatabaseManager.getTime(), dimension
         ));
+        ItemUtils.registerContentListener(player.currentScreenHandler);
       });;
   }
 

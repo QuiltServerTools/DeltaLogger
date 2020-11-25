@@ -70,7 +70,6 @@ public class ExampleMod implements ModInitializer {
 			HashSet<Identifier> dimensionIds = new HashSet<>();
 			server.getWorlds().forEach(world -> {
 				Identifier dimid = world.getRegistryKey().getValue();
-				System.out.println("FOUND DIM " + dimid);
 				dimensionIds.add(dimid);
 			});
 

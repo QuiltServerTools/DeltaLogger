@@ -11,6 +11,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 
 import dev.lambdacraft.watchtower.DatabaseManager;
 import dev.lambdacraft.watchtower.IWatchTowerId;
+import dev.lambdacraft.watchtower.ItemUtils;
 
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -45,6 +46,7 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity {
         DatabaseManager.getSingleton().queueOp(new DatabaseManager.ContainerUpdate(
           uuid, blockId, be.getPos(), this.getUuid(), DatabaseManager.getTime(), null
         ));
+        ItemUtils.registerContentListener(this.currentScreenHandler);
       }
   }
 }

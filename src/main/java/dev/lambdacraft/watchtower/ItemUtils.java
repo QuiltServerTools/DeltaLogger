@@ -5,10 +5,12 @@ import java.util.List;
 import java.util.Map;
 
 import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.ScreenHandlerListener;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Pair;
+import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.registry.Registry;
 
 public class ItemUtils {
@@ -81,5 +83,46 @@ public class ItemUtils {
     });
 
     return transactions;
+  }
+
+  public static void registerContentListener(ScreenHandler target) {
+    ScreenHandlerListener listener = new ScreenHandlerListener() {
+      private ItemStack[] beforeStacks;
+      @Override
+      public void onHandlerRegistered(ScreenHandler handler, DefaultedList<ItemStack> stacks) {
+        beforeStacks = new ItemStack[stacks.size()];
+        for (int i = 0; i < stacks.size(); i++) {
+          beforeStacks[i] = stacks.get(i).copy();
+        }
+      }
+
+      @Override
+      public void onSlotUpdate(ScreenHandler handler, int slotId, ItemStack afterStack) {
+        int playerSlotStartIndex = handler.slots.size() - 9 * 4;
+        // Don't track player's own slot changes
+        if (slotId >= playerSlotStartIndex) return;
+
+        ItemStack beforeStack = beforeStacks[slotId];
+        List<Pair<Item, Integer>> transactions = ((ITransactable)handler).getTransactions();
+        
+        if (beforeStack.isItemEqual(afterStack) || beforeStack.isEmpty() || afterStack.isEmpty()) {
+          // if same item then subtract and do transaction
+          Item item = beforeStack.isEmpty() ? afterStack.getItem() : beforeStack.getItem();
+          transactions.add(new Pair<>(item, afterStack.getCount() - beforeStack.getCount()));
+        } else {
+          // else treat as item swap
+          transactions.add(new Pair<>(beforeStack.getItem(), -beforeStack.getCount()));
+          transactions.add(new Pair<>(afterStack.getItem(), afterStack.getCount()));
+        }
+
+        beforeStacks[slotId] = afterStack;
+      }
+
+      @Override
+      public void onPropertyUpdate(ScreenHandler handler, int property, int value) {
+        // TODO Auto-generated method stub
+      }
+    };
+    target.addListener(listener);
   }
 }
