@@ -17,6 +17,7 @@ import com.google.common.collect.Sets;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import dev.lambdacraft.watchtower.command.Commands;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
@@ -32,7 +33,7 @@ public class ModInit implements ModInitializer {
 
 	public Properties loadConfig() {
 		
-		Path configPath = Paths.get(FabricLoader.getInstance().getConfigDir().toString(), "watchtower.properties");
+		Path configPath = Paths.get(FabricLoader.getInstance().getConfigDir().toString(), "worlddelta.properties");
 		Properties props = new Properties();
 		try {
 			props.load(new FileInputStream(configPath.toString()));

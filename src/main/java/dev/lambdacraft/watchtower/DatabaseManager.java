@@ -57,7 +57,7 @@ public class DatabaseManager implements Runnable {
   private DatabaseManager(Properties config) {
     try {
       initJdbi(getDataSource(config));
-      LOG.info("WatchTower started");
+      LOG.info("WorldDelta started");
     } catch (IOException e) {
       e.printStackTrace();
       // System.exit(0);

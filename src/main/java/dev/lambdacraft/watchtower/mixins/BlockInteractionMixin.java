@@ -25,7 +25,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import dev.lambdacraft.watchtower.Chat;
-import dev.lambdacraft.watchtower.Commands;
+import dev.lambdacraft.watchtower.command.Commands;
 import dev.lambdacraft.watchtower.DatabaseManager;
 import dev.lambdacraft.watchtower.IChestBlockUUID;
 import dev.lambdacraft.watchtower.IWatchTowerId;
@@ -49,7 +49,6 @@ public class BlockInteractionMixin {
     BlockPos pos = hit.getBlockPos();
     BlockState state = world.getBlockState(pos);
     if (
-      !holdingInHand(player, Items.DIAMOND_SWORD) ||
       !Commands.hasToolEnabled(player)
     ) {
       ret.setReturnValue(block.onUse(state, world, pos, player, hand, hit));

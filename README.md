@@ -1,10 +1,10 @@
-# WatchTower
+# WorldDelta
 
-Block and chest/container inventory tracking tool for fabric modloader that uses MySQL as data storage.
+Block and chest/container inventory tracking tool for fabric that can be configured to use MySQL or SQLite.
 
 ## Setup
 
-Place the mod jar in the mods folder of your server directory and launch your fabric server once to make it generate a `config/watchtower.properties`. Or make a file called `watchtower.properties` in the `config` folder of your server directory. Put the following as the file content:
+Place the mod jar in the mods folder of your server directory and launch your fabric server once to make it generate a `config/worlddelta.properties`. Or make a file called `worlddelta.properties` in the `config` folder of your server directory. Put the following as the file content:
 
 ```
 # Config for WatchTower
