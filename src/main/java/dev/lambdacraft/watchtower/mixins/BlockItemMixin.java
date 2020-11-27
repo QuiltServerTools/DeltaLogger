@@ -6,7 +6,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import dev.lambdacraft.watchtower.DatabaseManager;
-import dev.lambdacraft.watchtower.ExampleMod;
+import dev.lambdacraft.watchtower.ModInit;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
@@ -16,7 +16,6 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
-import net.minecraft.world.dimension.DimensionType;
 
 @Mixin(BlockItem.class)
 public abstract class BlockItemMixin extends Item {
@@ -51,7 +50,7 @@ public abstract class BlockItemMixin extends Item {
   
       DatabaseManager.getSingleton().queueOp(new DatabaseManager.BlockUpdate(player.getUuid(), id, true, pos, dimension));
     } catch (Exception e) {
-      ExampleMod.LOG.warn("Problem in WatchTower placement");
+      ModInit.LOG.warn("Problem in WatchTower placement");
       e.printStackTrace();
     }
   }

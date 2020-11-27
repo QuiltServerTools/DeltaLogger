@@ -50,7 +50,6 @@ public class BlockInteractionMixin {
     BlockState state = world.getBlockState(pos);
     if (
       !holdingInHand(player, Items.DIAMOND_SWORD) ||
-      !world.getServer().getPlayerManager().isOperator(player.getGameProfile()) ||
       !Commands.hasToolEnabled(player)
     ) {
       ret.setReturnValue(block.onUse(state, world, pos, player, hand, hit));

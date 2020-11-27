@@ -19,7 +19,7 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "dev.lambdacraft.watchtower.ExampleMod"
+      "dev.lambdacraft.watchtower.ModInit"
     ]
   },
   "mixins": [

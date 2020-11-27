@@ -18,20 +18,21 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.event.server.ServerStartCallback;
-import net.fabricmc.fabric.api.event.server.ServerStopCallback;
-import net.fabricmc.fabric.api.registry.CommandRegistry;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
-public class ExampleMod implements ModInitializer {
+public class ModInit implements ModInitializer {
 	public static final Logger LOG = LogManager.getLogger();
 	public static Properties CONFIG;
 	public static Thread dmThread;
 
 	public Properties loadConfig() {
-		Path configPath = Paths.get(FabricLoader.getInstance().getConfigDirectory().toString(), "watchtower.properties");
+		
+		Path configPath = Paths.get(FabricLoader.getInstance().getConfigDir().toString(), "watchtower.properties");
 		Properties props = new Properties();
 		try {
 			props.load(new FileInputStream(configPath.toString()));
@@ -65,7 +66,7 @@ public class ExampleMod implements ModInitializer {
 	public void onInitialize() {
 		DatabaseManager dm = DatabaseManager.init(loadConfig());
 
-		ServerStartCallback.EVENT.register((server) -> {
+		ServerLifecycleEvents.SERVER_STARTED.register((server) -> {
 
 			HashSet<Identifier> dimensionIds = new HashSet<>();
 			server.getWorlds().forEach(world -> {
@@ -84,15 +85,17 @@ public class ExampleMod implements ModInitializer {
 
 			ids.forEach(dm::queueRegistryUpdate);
 
-			ExampleMod.dmThread = new Thread(dm);
-			ExampleMod.dmThread.start();
+			ModInit.dmThread = new Thread(dm);
+			ModInit.dmThread.start();
 		});
 
-    CommandRegistry.INSTANCE.register(false, dispatcher -> Commands.register(dispatcher));
+		CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
+			Commands.register(dispatcher);
+		});
 
-		ServerStopCallback.EVENT.register((server) -> {
+		ServerLifecycleEvents.SERVER_STOPPED.register((server) -> {
 			dm.stop();
-			for (int i = 1; i <= 2 * 30 && ExampleMod.dmThread.isAlive(); ++i) {
+			for (int i = 1; i <= 2 * 30 && ModInit.dmThread.isAlive(); ++i) {
 				try {
 					Thread.sleep(500);
 				} catch (InterruptedException e) {
@@ -100,7 +103,7 @@ public class ExampleMod implements ModInitializer {
 				}
 				if (i == 60) {
 					LOG.warn("WatchTower: Taking too long to finish up queue!");
-					ExampleMod.dmThread.interrupt();
+					ModInit.dmThread.interrupt();
 				}
 			}
 		});
