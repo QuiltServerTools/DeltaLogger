@@ -10,6 +10,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import dev.lambdacraft.watchtower.DatabaseManager;
+import dev.lambdacraft.watchtower.SQLUtils;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -30,7 +31,7 @@ public class CreeperMixin extends HostileEntity {
       
       DatabaseManager.getSingleton().queueOp(new DatabaseManager.MobGriefUpdate(
         playerTarget.getUuid(),
-        DatabaseManager.getTime(),
+        SQLUtils.getUTCStringTimeNow(),
         Registry.ENTITY_TYPE.getId(EntityType.CREEPER),
         this.getBlockPos()
       ));

@@ -18,6 +18,7 @@ import dev.lambdacraft.watchtower.DatabaseManager;
 import dev.lambdacraft.watchtower.ITransactable;
 import dev.lambdacraft.watchtower.IWatchTowerId;
 import dev.lambdacraft.watchtower.ItemUtils;
+import dev.lambdacraft.watchtower.SQLUtils;
 
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
@@ -71,7 +72,7 @@ public abstract class ContainerMixin implements IWatchTowerId, ITransactable {
       //   return;
       // }
       DatabaseManager.getSingleton().queueOp(new DatabaseManager.ContainerTransaction(
-        player.getUuid(), containerId, DatabaseManager.getTime(), id, count, null
+        player.getUuid(), containerId, SQLUtils.getUTCStringTimeNow(), id, count, null
       ));
     });
   }

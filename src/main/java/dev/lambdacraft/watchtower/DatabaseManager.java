@@ -1,8 +1,10 @@
 package dev.lambdacraft.watchtower;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.sql.Timestamp;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -27,12 +29,17 @@ import org.apache.logging.log4j.Logger;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.PreparedBatch;
+import org.jdbi.v3.sqlite3.SQLitePlugin;
 
 import dev.lambdacraft.watchtower.beans.Placement;
 import dev.lambdacraft.watchtower.beans.Player;
 import dev.lambdacraft.watchtower.beans.Transaction;
+import static dev.lambdacraft.watchtower.SQLUtils.*;
+
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.WorldSavePath;
 
 /**
  * Handles inserting POJOs into the database. All POJOs are inserted into a
@@ -44,33 +51,77 @@ import net.minecraft.util.math.BlockPos;
  */
 public class DatabaseManager implements Runnable {
   private static DatabaseManager manager;
-  public static DateTimeFormatter timeFormat;
-  static {
-    timeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneOffset.UTC);
+
+  public enum DatabaseType {
+    SQLITE("SQLite"),
+    MYSQL("MySQL");
+
+    private final String s;
+    DatabaseType(String s) {
+      this.s = s;
+    }
+    @Override
+    public String toString() {
+      return s;
+    }
   }
 
   private Jdbi jdbi;
+  public static DatabaseType dbType;
+  
   private PriorityBlockingQueue<QueueOperation> pq = new PriorityBlockingQueue<>(10, Comparator.comparingInt(QueueOperation::getPriority));
   private final AtomicBoolean running = new AtomicBoolean(false);
   public static final Logger LOG = LogManager.getLogger();
 
-  private DatabaseManager(Properties config) {
+  private DatabaseManager() {}
+  public static DatabaseManager create() {
+    if (manager != null) throw new Error("Only one DB manager should exist at a time!");
+    manager = new DatabaseManager();
+    return manager;
+  }
+
+  public void connect(MinecraftServer server) {
     try {
-      initJdbi(getDataSource(config));
-      LOG.info("WorldDelta started");
+      if (ModInit.CONFIG.getProperty("use_sqlite").equals("true")) {
+        dbType = DatabaseType.SQLITE;
+        initJdbiSQLite(server);
+      } else {
+        dbType = DatabaseType.MYSQL;
+        initJdbiMySQL(getMySQLDataSource());
+      }
+      createTables();
+      registerRowMappers(jdbi);
+      
+      LOG.info("WorldDelta started with " + dbType + " database");
     } catch (IOException e) {
       e.printStackTrace();
       // System.exit(0);
     }
   }
 
-  private Jdbi initJdbi(DataSource source) throws IOException {
+  private Jdbi initJdbiSQLite(MinecraftServer server) {
+    try {
+      // Database file
+      File databaseFile = new File(server.getSavePath(WorldSavePath.ROOT).toFile(), "watchtower.sqlite");
+  
+      jdbi = Jdbi.create("jdbc:sqlite:" + databaseFile.getPath().replace('\\', '/'))
+        .installPlugin(new SQLitePlugin());
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return jdbi;
+  }
+
+  private Jdbi initJdbiMySQL(DataSource source) throws IOException {
     jdbi = Jdbi.create(source);
-    createTables();
+    return jdbi;
+  }
+
+  private Jdbi registerRowMappers(Jdbi jdbi) {
     jdbi.registerRowMapper(Placement.class, (rs, ctx) -> {
       return new Placement(
         rs.getString("playername"),
-        rs.getTimestamp("date").toInstant(),
+        getInstantFromDBTimeString(rs.getString("date")),
         new Identifier(rs.getString("blockname")),
         new BlockPos(rs.getInt("x"), rs.getInt("y"), rs.getInt("z")),
         rs.getBoolean("placed"),
@@ -78,18 +129,13 @@ public class DatabaseManager implements Runnable {
       );
     });
     jdbi.registerRowMapper(Transaction.class, (rs, ctx) -> new Transaction(
-      rs.getTimestamp("date").toInstant(),
+      getInstantFromDBTimeString(rs.getString("date")),
       rs.getString("playername"),
       new Identifier(rs.getString("itemname")),
       rs.getInt("itemcount"),
       UUID.fromString(rs.getString("uuid"))
     ));
     return jdbi;
-  }
-
-  public static DatabaseManager init(Properties config) {
-    manager = new DatabaseManager(config);
-    return manager;
   }
 
   public static DatabaseManager getSingleton() {
@@ -99,8 +145,9 @@ public class DatabaseManager implements Runnable {
   /**
    * Configure and init Hikari connection pool
    */
-  private static HikariDataSource getDataSource(Properties props) {
+  private static HikariDataSource getMySQLDataSource() {
     HikariConfig config = new HikariConfig();
+    Properties props = ModInit.CONFIG;
     config.setJdbcUrl(String.join("",
       "jdbc:mysql://", props.getProperty("host"), ":", props.getProperty("port"), "/", props.getProperty("database")
     ));
@@ -135,16 +182,12 @@ public class DatabaseManager implements Runnable {
 
   public void createTables() throws IOException {
     URL url = DatabaseManager.class.getResource("/data/watchtower/tables.sql");
-    String tableSql = Resources.toString(url,  StandardCharsets.UTF_8);
+    String tableSql = preproccessSQL(Resources.toString(url,  StandardCharsets.UTF_8));
     jdbi.useHandle(handle -> {
       handle.createScript(tableSql).execute();
       // handle.execute("CREATE FUNCTION BIN_TO_UUID(b BINARY(16), f BOOLEAN) RETURNS CHAR(36) DETERMINISTIC BEGIN DECLARE hexStr CHAR(32); SET hexStr = HEX(b); RETURN LOWER(CONCAT(IF(f,SUBSTR(hexStr, 9, 8),SUBSTR(hexStr, 1, 8)), '-', IF(f,SUBSTR(hexStr, 5, 4),SUBSTR(hexStr, 9, 4)), '-', IF(f,SUBSTR(hexStr, 1, 4),SUBSTR(hexStr, 13, 4)), '-', SUBSTR(hexStr, 17, 4), '-', SUBSTR(hexStr, 21))); END;");
       // handle.execute("CREATE FUNCTION UUID_TO_BIN(uuid CHAR(36), f BOOLEAN) RETURNS BINARY(16) DETERMINISTIC BEGIN RETURN UNHEX(CONCAT(IF(f,SUBSTRING(uuid, 15, 4),SUBSTRING(uuid, 1, 8)),SUBSTRING(uuid, 10, 4),IF(f,SUBSTRING(uuid, 1, 8),SUBSTRING(uuid, 15, 4)),SUBSTRING(uuid, 20, 4),SUBSTRING(uuid, 25))); END;");
     });
-  }
-
-  public static String getTime() {
-    return timeFormat.format(java.time.Instant.now());
   }
 
   /**
@@ -172,7 +215,7 @@ public class DatabaseManager implements Runnable {
     public PreparedBatch prepareBatch(Handle handle) {
       return handle.prepareBatch(String.join(" ",
         "INSERT INTO players (uuid, name, lastonline) VALUES (:id, :name, :lastonline)",
-        "ON DUPLICATE KEY UPDATE uuid=:id, name=:name, lastonline=:lastonline"
+        onDuplicateKeyUpdate("uuid"), "uuid=:id, name=:name, lastonline=:lastonline"
       ));
     }
 
@@ -210,7 +253,7 @@ public class DatabaseManager implements Runnable {
     public int getPriority() { return 2; }
 
     public BlockUpdate(UUID playerid, Identifier blockid, boolean placed, BlockPos pos, Identifier dimensionid) {
-      this.date = DatabaseManager.getTime();
+      this.date = getUTCStringTimeNow();
       this.placed = placed;
       this.pos = pos;
       this.playerid = playerid;
@@ -265,7 +308,8 @@ public class DatabaseManager implements Runnable {
         // "(SELECT id FROM registry WHERE name=:dimensionid)",
         "FROM players, registry",
         "WHERE players.uuid=:player AND registry.name=:itemtype",
-        "ON DUPLICATE KEY UPDATE lastaccess=:lastaccess, x=:x, y=:y, z=:z, lastplayer=players.id"
+        onDuplicateKeyUpdate("uuid"), "lastaccess=:lastaccess, x=:x, y=:y, z=:z,",
+        "lastplayer=(SELECT id FROM players WHERE players.uuid=:player)"
       ));
     }
 
@@ -340,7 +384,7 @@ public class DatabaseManager implements Runnable {
       return handle.prepareBatch(String.join("",
         "INSERT INTO killed_entities (name, source, killerid, date, x, y, z) ",
         "VALUES (:name, :source, ",
-          "IF(:killerid IS NULL, NULL, (SELECT id FROM players WHERE uuid=:killerid)), ",
+          "(CASE WHEN :killerid IS NULL THEN NULL ELSE (SELECT id FROM players WHERE uuid=:killerid) END), ",
           ":date, :x, :y, :z)"
       ));
     }
@@ -405,7 +449,7 @@ public class DatabaseManager implements Runnable {
       return jdbi.withHandle(handle -> handle
         .select(
           String.join(" ",
-            "SELECT P.name AS `playername`, date, IT.name AS `blockname`, x, y, z, placed, DT.name as `dimension`",
+            "SELECT P.name AS `playername`,", getDateFormatted("date"), ", IT.name AS `blockname`, x, y, z, placed, DT.name as `dimension`",
             "FROM placements",
             "INNER JOIN players as P ON P.id=playerid",
             "INNER JOIN registry as IT ON IT.id=type",
@@ -429,7 +473,7 @@ public class DatabaseManager implements Runnable {
       return jdbi.withHandle(handle -> handle
         .select(
           String.join(" ",
-            "SELECT C.uuid, CT.date, R.name as `itemname`, CT.itemcount, P.name as `playername`",
+            "SELECT C.uuid,", getDateFormatted("CT.date", "date"), ", R.name as `itemname`, CT.itemcount, P.name as `playername`",
             "FROM container_transactions as CT",
             "INNER JOIN registry as R ON CT.itemtype = R.id",
             "INNER JOIN players as P ON CT.playerid = P.id",
@@ -453,7 +497,7 @@ public class DatabaseManager implements Runnable {
       return jdbi.withHandle(handle -> handle
         .select(
           String.join(" ",
-            "SELECT C.uuid, CT.date, R.name as `itemname`, CT.itemcount, P.name as `playername`",
+            "SELECT C.uuid,", getDateFormatted("CT.date", "date"), ", R.name as `itemname`, CT.itemcount, P.name as `playername`",
             "FROM container_transactions as CT",
             "INNER JOIN registry as R ON CT.itemtype = R.id",
             "INNER JOIN players as P ON CT.playerid = P.id",

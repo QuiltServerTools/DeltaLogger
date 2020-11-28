@@ -15,6 +15,7 @@ import dev.lambdacraft.watchtower.DatabaseManager;
 import dev.lambdacraft.watchtower.IChestBlockUUID;
 import dev.lambdacraft.watchtower.IWatchTowerId;
 import dev.lambdacraft.watchtower.ItemUtils;
+import dev.lambdacraft.watchtower.SQLUtils;
 import net.minecraft.block.AbstractChestBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ChestBlock;
@@ -87,7 +88,7 @@ public abstract class ChestBlockMixin extends AbstractChestBlock<ChestBlockEntit
         Identifier dimension = world.getRegistryKey().getValue();
   
         DatabaseManager.getSingleton().queueOp(new DatabaseManager.ContainerUpdate(
-          chestWId, Registry.BLOCK.getId(this), pos, player.getUuid(), DatabaseManager.getTime(), dimension
+          chestWId, Registry.BLOCK.getId(this), pos, player.getUuid(), SQLUtils.getUTCStringTimeNow(), dimension
         ));
         ItemUtils.registerContentListener(player.currentScreenHandler);
       });;

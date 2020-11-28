@@ -8,6 +8,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import dev.lambdacraft.watchtower.DatabaseManager;
+import dev.lambdacraft.watchtower.SQLUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -38,7 +39,7 @@ public abstract class LivingEntityMixin extends Entity {
       me.getCustomName().asString(),
       source.getName(),
       killerid,
-      DatabaseManager.getTime(),
+      SQLUtils.getUTCStringTimeNow(),
       me.getBlockPos()
     ));
   }

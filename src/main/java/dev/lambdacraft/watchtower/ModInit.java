@@ -38,6 +38,8 @@ public class ModInit implements ModInitializer {
 		try {
 			props.load(new FileInputStream(configPath.toString()));
 		} catch (FileNotFoundException e) {
+			props.setProperty("use_sqlite", "true");
+
 			props.setProperty("host", "");
 			props.setProperty("port", "3306");
 			props.setProperty("username", "");
@@ -53,8 +55,7 @@ public class ModInit implements ModInitializer {
 				ioe.printStackTrace();
 			}
 
-			LOG.warn("Created configuration file for WatchTower, please configure!");
-			System.exit(0);
+			LOG.info("Optional configuration for WatchTower created in `config` directory. Using SQLite by default.");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -65,9 +66,11 @@ public class ModInit implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		DatabaseManager dm = DatabaseManager.init(loadConfig());
+		loadConfig();
+		DatabaseManager dm = DatabaseManager.create();
 
 		ServerLifecycleEvents.SERVER_STARTED.register((server) -> {
+			dm.connect(server);
 
 			HashSet<Identifier> dimensionIds = new HashSet<>();
 			server.getWorlds().forEach(world -> {

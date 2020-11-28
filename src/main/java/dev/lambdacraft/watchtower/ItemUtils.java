@@ -1,6 +1,7 @@
 package dev.lambdacraft.watchtower;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -124,5 +125,26 @@ public class ItemUtils {
       }
     };
     target.addListener(listener);
+  }
+
+  /**
+   * Take a list of item stacks to drop at a player
+   * @param player
+   * @param combinedInventory
+   */
+  public static void dropItemsAtPlayer(PlayerEntity player, List<DefaultedList<ItemStack>> combinedInventory) {
+    Iterator<DefaultedList<ItemStack>> var1 = combinedInventory.iterator();
+
+    while(var1.hasNext()) {
+       List<ItemStack> list = var1.next();
+
+       for(int i = 0; i < list.size(); ++i) {
+          ItemStack itemStack = (ItemStack)list.get(i);
+          if (!itemStack.isEmpty()) {
+             player.dropItem(itemStack, true, false);
+             list.set(i, ItemStack.EMPTY);
+          }
+       }
+    }
   }
 }

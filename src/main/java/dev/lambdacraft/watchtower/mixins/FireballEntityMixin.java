@@ -10,6 +10,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import dev.lambdacraft.watchtower.DatabaseManager;
+import dev.lambdacraft.watchtower.SQLUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -44,7 +45,7 @@ public class FireballEntityMixin extends AbstractFireballEntity {
 
     DatabaseManager.getSingleton().queueOp(new DatabaseManager.MobGriefUpdate(
       ((PlayerEntity)ghast.getTarget()).getUuid(),
-      DatabaseManager.getTime(),
+      SQLUtils.getUTCStringTimeNow(),
       Registry.ENTITY_TYPE.getId(EntityType.GHAST),
       this.getBlockPos()
     ));

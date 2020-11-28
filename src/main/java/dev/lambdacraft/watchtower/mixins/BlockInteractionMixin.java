@@ -8,7 +8,6 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.LockableContainerBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
-import net.minecraft.item.Items;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
@@ -25,7 +24,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import dev.lambdacraft.watchtower.Chat;
-import dev.lambdacraft.watchtower.command.Commands;
+import dev.lambdacraft.watchtower.command.InspectCommand;
 import dev.lambdacraft.watchtower.DatabaseManager;
 import dev.lambdacraft.watchtower.IChestBlockUUID;
 import dev.lambdacraft.watchtower.IWatchTowerId;
@@ -48,9 +47,7 @@ public class BlockInteractionMixin {
     Block block = ((BlockState)(Object)this).getBlock();
     BlockPos pos = hit.getBlockPos();
     BlockState state = world.getBlockState(pos);
-    if (
-      !Commands.hasToolEnabled(player)
-    ) {
+    if (!InspectCommand.hasToolEnabled(player)) {
       ret.setReturnValue(block.onUse(state, world, pos, player, hand, hit));
       return;
     }

@@ -6,6 +6,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import dev.lambdacraft.watchtower.DatabaseManager;
+import dev.lambdacraft.watchtower.SQLUtils;
 import dev.lambdacraft.watchtower.beans.Player;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.server.PlayerManager;
@@ -19,7 +20,7 @@ public abstract class PlayerEventsMixin {
     DatabaseManager.getSingleton().queuePlayerUpdate(new Player(
       player.getUuid(),
       player.getName().asString(),
-      DatabaseManager.getTime()
+      SQLUtils.getUTCStringTimeNow()
     ));
   }
 
@@ -30,7 +31,7 @@ public abstract class PlayerEventsMixin {
     DatabaseManager.getSingleton().queuePlayerUpdate(new Player(
       player.getUuid(),
       player.getName().asString(),
-      DatabaseManager.getTime()
+      SQLUtils.getUTCStringTimeNow()
     ));
   }
 }
