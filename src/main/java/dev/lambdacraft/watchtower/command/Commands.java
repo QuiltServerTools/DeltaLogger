@@ -9,7 +9,7 @@ import net.minecraft.server.command.ServerCommandSource;
 
 public final class Commands {
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-        LiteralCommandNode<ServerCommandSource> deltaNode = CommandManager.literal("wt")
+        LiteralCommandNode<ServerCommandSource> deltaNode = CommandManager.literal("dl")
                 .requires(source -> source.hasPermissionLevel(3)).build();
 
         dispatcher.getRoot().addChild(deltaNode);

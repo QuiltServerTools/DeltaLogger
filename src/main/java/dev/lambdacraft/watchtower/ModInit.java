@@ -33,7 +33,7 @@ public class ModInit implements ModInitializer {
 
 	public Properties loadConfig() {
 		
-		Path configPath = Paths.get(FabricLoader.getInstance().getConfigDir().toString(), "worlddelta.properties");
+		Path configPath = Paths.get(FabricLoader.getInstance().getConfigDir().toString(), "deltalogger.properties");
 		Properties props = new Properties();
 		try {
 			props.load(new FileInputStream(configPath.toString()));
@@ -50,12 +50,12 @@ public class ModInit implements ModInitializer {
 			props.setProperty("maxLifetime", "290000");
 
 			try {
-				props.store(new FileWriter(configPath.toString()), "Config for WatchTower");
+				props.store(new FileWriter(configPath.toString()), "Config for DeltaLogger");
 			} catch (IOException ioe) {
 				ioe.printStackTrace();
 			}
 
-			LOG.info("Optional configuration for WatchTower created in `config` directory. Using SQLite by default.");
+			LOG.info("Optional configuration for DeltaLogger created in `config` directory. Using SQLite by default.");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

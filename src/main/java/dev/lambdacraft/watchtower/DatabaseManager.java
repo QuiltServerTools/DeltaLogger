@@ -102,7 +102,7 @@ public class DatabaseManager implements Runnable {
   private Jdbi initJdbiSQLite(MinecraftServer server) {
     try {
       // Database file
-      File databaseFile = new File(server.getSavePath(WorldSavePath.ROOT).toFile(), "watchtower.sqlite");
+      File databaseFile = new File(server.getSavePath(WorldSavePath.ROOT).toFile(), "dl.db");
   
       jdbi = Jdbi.create("jdbc:sqlite:" + databaseFile.getPath().replace('\\', '/'))
         .installPlugin(new SQLitePlugin());
