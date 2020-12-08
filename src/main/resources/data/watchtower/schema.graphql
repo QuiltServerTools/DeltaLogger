@@ -1,0 +1,39 @@
+schema {
+  query: Query
+}
+
+type Query {
+  players: [Player]!
+  playerById(id: Int): Player
+  playerByUUID(uuid: ID): Player
+  placements: [Placement]!
+  transactions: [Transaction]!
+}
+
+type Player {
+  id: Int
+  name: String
+  uuid: ID
+  lastOnlineTime: String
+}
+
+type Placement {
+  id: Int
+  playerName: String
+  time: String
+  blockType: ID
+  x: Int
+  y: Int
+  z: Int
+  placed: Boolean
+  dimension: ID
+}
+
+type Transaction {
+  id: Int
+  playerName: String
+  time: String
+  itemType: ID
+  count: Int
+  containerUUID: ID
+}

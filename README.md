@@ -44,53 +44,6 @@ This mod also requires the fabric api mod, which you can find [here](https://www
 ## Support
 
 Support can be obtained on the discord found [here](https://discord.gg/UxHnDWr)
-
-## Example SQL queries
-
-Query to check all container transactions of EXAMPLE_PLAYER_NAME
-```sql
-SELECT date, P.name, I.name, itemcount, C.x, C.z, PC.name, CT.name
-FROM container_transactions
-INNER JOIN players as P on playerid=P.id
-INNER JOIN registry as I on itemtype=I.id
-INNER JOIN containers as C on containerid=C.id
-INNER JOIN players as PC on C.firstplayer=PC.id
-INNER JOIN registry as CT on CT.id=C.itemtype
-WHERE P.name="EXAMPLE_PLAYER_NAME"
-ORDER BY date DESC;
-```
-
-Query to check all placements in x coordinate between 60 and 100, z between 130 and 170, in the overworld dimension. For block removals use `placed = 0`
-```sql
-SELECT P.name, PC.date, R.name, PC.placed, DR.name, PC.x, PC.y, PC.z
-FROM placements as PC
-INNER JOIN players as P ON PC.playerid = P.id
-INNER JOIN registry as R ON PC.type = R.id
-INNER JOIN registry as DR ON PC.dimensionid = DR.id
-WHERE x > 60 AND x < 100 AND z > 130 AND z < 170 AND DR.name = "minecraft:overworld" AND placed = 1
-ORDER BY date DESC;
-```
-
-Query to check player's mined diamond ores
-```sql
-SELECT P.name, PC.date, R.name, PC.placed, DR.name, PC.x, PC.y, PC.z
-FROM placements as PC
-INNER JOIN players as P ON PC.playerid = P.id
-INNER JOIN registry as R ON PC.type = R.id
-INNER JOIN registry as DR ON PC.dimensionid = DR.id
-WHERE R.name = "minecraft:diamond_ore" AND P.name="EXAMPLE_PLAYER_NAME" AND placed = 0
-ORDER BY date DESC;
-```
-
-Check for mob explosion griefing and which players the mobs targetted
-```sql
-SELECT date, M.name, P.name, x, y, z
-FROM mob_grief
-INNER JOIN players as P on P.id = target
-INNER JOIN registry as M on M.id = entity_type
-ORDER BY date DESC;
-```
-
 ## License
 
 Licensed under AGPL with additional linking permission. See LICENSE file.

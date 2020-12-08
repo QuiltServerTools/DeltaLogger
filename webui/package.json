@@ -1,0 +1,35 @@
+{
+  "name": "deltalogger-web",
+  "version": "0.0.1",
+  "description": "Web interface for DeltaLogger: minecraft game logging software",
+  "main": "index.js",
+  "repository": "https://github.com/fabricservertools/DeltaLogger",
+  "author": "unsupervisednn",
+  "license": "AGPL",
+  "scripts": {
+    "dev": "parcel dev src/index.html",
+    "build": "parcel build src/index.html",
+    "typecheck": "ts --noEmit"
+  },
+  "dependencies": {
+    "@chakra-ui/react": "^1.0.2",
+    "@emotion/react": "^11.1.2",
+    "@emotion/styled": "^11.0.0",
+    "@reach/router": "^1.3.4",
+    "framer-motion": "^2.9.5",
+    "immer": "^8.0.0",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
+    "react-helmet": "^6.1.0",
+    "react-table": "^7.6.2",
+    "react-window": "^1.8.6",
+    "styled-components": "^5.2.1"
+  },
+  "devDependencies": {
+    "@types/react": "^17.0.0",
+    "@types/react-dom": "^17.0.0",
+    "@types/styled-components": "^5.1.4",
+    "parcel-bundler": "^1.12.4",
+    "typescript": "^4.1.2"
+  }
+}

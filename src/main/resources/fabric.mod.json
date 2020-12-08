@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "id": "watchtower",
+  "id": "deltalogger",
   "version": "${version}",
 
-  "name": "WatchTower",
-  "description": "Block and chest transaction logger for Fabric mod servers",
+  "name": "DeltaLogger",
+  "description": "Change logger for Fabric mod servers",
   "authors": [
     "unsupervised@tutanota.com"
   ],
   "contact": {
-    "homepage": "https://lambdacraft.dev",
-    "sources": "https://github.com/Lambdacraft/watchtower"
+    "homepage": "https://github.com/fabricservertools/deltalogger",
+    "sources": "https://github.com/fabricservertools/deltalogger"
   },
 
   "license": "AGPL",
@@ -19,11 +19,11 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "dev.lambdacraft.watchtower.ModInit"
+      "com.github.fabricservertools.deltalogger.ModInit"
     ]
   },
   "mixins": [
-    "watchtower.mixins.json"
+    "deltalogger.mixins.json"
   ],
 
   "depends": {

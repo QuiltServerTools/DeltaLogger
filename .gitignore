@@ -30,3 +30,8 @@ bin/
 
 run/
 .source
+
+# webui
+node_modules/
+.cache/
+webui/dist/
