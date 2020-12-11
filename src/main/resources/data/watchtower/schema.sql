@@ -1,16 +1,35 @@
+/** KV-STORE for misc configuration things */
+CREATE TABLE IF NOT EXISTS `kv_store` (
+  `id` /**!PRIMARY_KEY*/,
+  `key` VARCHAR(255) NOT NULL UNIQUE,
+  `value` VARCHAR(255)
+);
+CREATE UNIQUE INDEX IF NOT EXISTS `kv_store_key` ON kv_store(`key`);
+
 CREATE TABLE IF NOT EXISTS `players` (
   `id` /**!PRIMARY_KEY*/,
-  `uuid` varchar(255) NOT NULL UNIQUE,
-  `name` varchar(255) NOT NULL,
+  `uuid` VARCHAR(255) NOT NULL UNIQUE,
+  `name` VARCHAR(255) NOT NULL,
   `last_online_time` DATETIME NOT NULL
 );
 CREATE UNIQUE INDEX IF NOT EXISTS `players_uuid_idx` ON players(`uuid`);
 CREATE INDEX IF NOT EXISTS `players_name_idx` ON players(`name`);
 
+CREATE TABLE IF NOT EXISTS `perms` (
+  `id` /**!PRIMARY_KEY*/,
+  `player_id` INTEGER UNSIGNED NOT NULL,
+  `password_hash` VARCHAR(255),
+  `temporary_pass` BOOLEAN NOT NULL,
+  `salt` VARCHAR(255),
+  `roll_back` BOOLEAN NOT NULL,
+  `delete` BOOLEAN NOT NULL,
+  FOREIGN KEY (`player_id`) REFERENCES players(`id`)
+);
+CREATE UNIQUE INDEX IF NOT EXISTS `perms_player_id_idx` ON `perms`(`player_id`);
 
 CREATE TABLE IF NOT EXISTS `registry` (
   `id` /**!SMALL_PRIMARY_KEY*/,
-  `name` varchar(255) NOT NULL
+  `name` VARCHAR(255) NOT NULL
 );
 CREATE UNIQUE INDEX IF NOT EXISTS `registry_name_idx` ON registry(`name`);
 
@@ -37,7 +56,7 @@ CREATE INDEX IF NOT EXISTS `placements_type_idx` ON placements(`type`);
 
 CREATE TABLE IF NOT EXISTS `containers` (
   `id` /**!PRIMARY_KEY*/,
-  `uuid` varchar(255) NOT NULL,
+  `uuid` VARCHAR(255) NOT NULL,
   `last_access` DATETIME NOT NULL,
   `item_type` SMALLINT UNSIGNED NOT NULL,
   `x` INTEGER NOT NULL,

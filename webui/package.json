@@ -12,11 +12,14 @@
     "typecheck": "ts --noEmit"
   },
   "dependencies": {
+    "@apollo/client": "^3.3.4",
     "@chakra-ui/react": "^1.0.2",
     "@emotion/react": "^11.1.2",
     "@emotion/styled": "^11.0.0",
     "@reach/router": "^1.3.4",
+    "constate": "^3.1.0",
     "framer-motion": "^2.9.5",
+    "graphql": "^15.4.0",
     "immer": "^8.0.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
@@ -26,10 +29,14 @@
     "styled-components": "^5.2.1"
   },
   "devDependencies": {
+    "@types/node": "^14.14.12",
+    "@types/reach__router": "^1.3.6",
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
+    "@types/react-helmet": "^6.1.0",
     "@types/styled-components": "^5.1.4",
     "parcel-bundler": "^1.12.4",
     "typescript": "^4.1.2"
-  }
+  },
+  "browserslist": ["Chrome 78"]
 }

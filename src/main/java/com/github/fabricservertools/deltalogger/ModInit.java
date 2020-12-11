@@ -14,7 +14,7 @@ import java.util.Set;
 
 import com.github.fabricservertools.deltalogger.command.Commands;
 import com.github.fabricservertools.deltalogger.dao.RegistryDAO;
-import com.github.fabricservertools.deltalogger.gql.HttpServer;
+import com.github.fabricservertools.deltalogger.gql.ApiServer;
 import com.google.common.collect.Sets;
 
 import org.apache.logging.log4j.LogManager;
@@ -71,7 +71,7 @@ public class ModInit implements ModInitializer {
 
 		ServerLifecycleEvents.SERVER_STARTED.register((server) -> {
 			dm = DatabaseManager.create(server.getSavePath(WorldSavePath.ROOT).toFile());
-			HttpServer.start();
+			ApiServer.start();
 
 			HashSet<Identifier> dimensionIds = new HashSet<>();
 			server.getWorlds().forEach(world -> {

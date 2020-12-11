@@ -12,6 +12,7 @@ public class DebugRunner {
     Path configPath = Paths.get(new File("").getAbsolutePath(), "config", "deltalogger.properties");
     ModInit.loadConfig(configPath);
 		DatabaseManager dm = DatabaseManager.create(null);
-    HttpServer.start();
+    // HttpServer.start();
+    ApiServer.start();
   }
 }

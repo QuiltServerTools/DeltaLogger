@@ -4,7 +4,6 @@ import static com.github.fabricservertools.deltalogger.SQLUtils.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -29,7 +28,7 @@ import org.jdbi.v3.core.statement.PreparedBatch;
 import org.jdbi.v3.sqlite3.SQLitePlugin;
 
 /**
- * Handles inserting POJOs into the database. All POJOs are inserted into a
+ * Handles inserting QueueOperations into the database. All QOs are inserted into a
  * queue and pulled in order of priority. This is to ensure that foreign table
  * references are processed in the correct order, otherwise foreign key
  * constraints would fail. Foreign key constraints have been removed from the
@@ -123,7 +122,10 @@ public class DatabaseManager implements Runnable {
     HikariConfig config = new HikariConfig();
     Properties props = ModInit.CONFIG;
     config.setJdbcUrl(String.join("",
-      "jdbc:mysql://", props.getProperty("host"), ":", props.getProperty("port"), "/", props.getProperty("database")
+      "jdbc:mysql://",
+      props.getProperty("host"), ":",
+      props.getProperty("port"), "/",
+      props.getProperty("database")
     ));
     config.setUsername(props.getProperty("username"));
     config.setPassword(props.getProperty("password"));
@@ -155,8 +157,12 @@ public class DatabaseManager implements Runnable {
   }
 
   public void createTables() throws IOException {
-    URL url = DatabaseManager.class.getResource("/data/watchtower/schema.sql");
-    String tableSql = preproccessSQL(Resources.toString(url,  StandardCharsets.UTF_8));
+    String tableSql = preproccessSQL(
+      Resources.toString(
+        DatabaseManager.class.getResource("/data/watchtower/schema.sql"), 
+        StandardCharsets.UTF_8
+      )
+    );
     jdbi.useHandle(handle -> {
       handle.createScript(tableSql).execute();
       // handle.execute("CREATE FUNCTION BIN_TO_UUID(b BINARY(16), f BOOLEAN) RETURNS CHAR(36) DETERMINISTIC BEGIN DECLARE hexStr CHAR(32); SET hexStr = HEX(b); RETURN LOWER(CONCAT(IF(f,SUBSTR(hexStr, 9, 8),SUBSTR(hexStr, 1, 8)), '-', IF(f,SUBSTR(hexStr, 5, 4),SUBSTR(hexStr, 9, 4)), '-', IF(f,SUBSTR(hexStr, 1, 4),SUBSTR(hexStr, 13, 4)), '-', SUBSTR(hexStr, 17, 4), '-', SUBSTR(hexStr, 21))); END;");
