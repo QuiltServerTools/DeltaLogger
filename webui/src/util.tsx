@@ -8,13 +8,13 @@ export function url(ending: string): string {
   return process.env.BASE_URL + ending;
 }
 
-export function fetchJson(_url: string, requestInit: RequestInit, token?: string) {
+export function fetchJson(_url: string, requestInit: RequestInit, useToken: boolean = true) {
   return fetch(url(_url), {
     ...requestInit,
     // ...(isDevEnv() ? { mode: 'no-cors' } : {}),
     headers: {
       ...requestInit.headers,
-      ...(token ? { 'Authorization': token } : {}),
+      ...(useToken ? { 'Authorization': localStorage.getItem('token') as string } : {}),
       'Content-Type': 'application/json'
     }
   }).then(r => r.json())

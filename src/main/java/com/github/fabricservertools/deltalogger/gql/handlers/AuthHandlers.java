@@ -12,11 +12,14 @@ import io.javalin.http.UnauthorizedResponse;
 
 public class AuthHandlers {
   public static final Handler validateHandler = ctx -> {
+    if (ctx.method() == "OPTIONS") return;
     Optional<DecodedJWT> ojwt = Optional
       .ofNullable(ctx.header("Authorization"))
       .map(hv -> hv.replaceFirst("^Bearer ", ""))
       .map(token -> token.isEmpty() ? null : token)
-      .flatMap(token -> DAO.auth.verifyJWT(token));
+      .flatMap(token -> {
+        return DAO.auth.verifyJWT(token);
+      });
 
     if (ojwt.isPresent()) {
       ctx.attribute("token", ojwt.get());
@@ -55,7 +58,7 @@ public class AuthHandlers {
     if (oToken.isPresent()) {
       HashMap<String, String> resp = new HashMap<>();
       resp.put("token", oToken.get());
-      ctx.json(resp);
+      ctx.status(200).json(resp);
     } else {
       throw new BadRequestResponse();
     }

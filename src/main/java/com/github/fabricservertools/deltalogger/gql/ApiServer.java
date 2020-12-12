@@ -28,8 +28,8 @@ public class ApiServer {
     app
       .get("/hello", ctx -> ctx.result("Hello World"))
       .post("/auth", AuthHandlers.provideJwtHandler)
-      .before("/change-pass", AuthHandlers.validateHandler)
-      .post("/change-pass", AuthHandlers.changePassHandler)
+      .before("/auth/change-pass", AuthHandlers.validateHandler)
+      .post("/auth/change-pass", AuthHandlers.changePassHandler)
       .before("/graphql", AuthHandlers.validateHandler)
       .post("/graphql", new GraphqlHandler());
   }

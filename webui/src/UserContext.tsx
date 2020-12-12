@@ -1,9 +1,11 @@
 import * as React from 'react'
 import constate from 'constate'
 
-interface UserInfo {
-  userId: string;
-  userName: string;
+export interface UserInfo {
+  iat: number;
+  temporary: boolean;
+  user_name: string;
+  user_id: string;
 }
 
 function useUserInfo() {
