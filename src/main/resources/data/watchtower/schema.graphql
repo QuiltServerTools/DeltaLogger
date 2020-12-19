@@ -3,10 +3,10 @@ schema {
 }
 
 type Query {
-  players: [Player]!
+  players(offset: Int, limit: Int): [Player]!
   playerById(id: Int): Player
   playerByUUID(uuid: ID): Player
-  placements: [Placement]!
+  placements(offset: Int, limit: Int): [Placement]!
   transactions: [Transaction]!
 }
 

@@ -102,12 +102,13 @@ public class ModInit implements ModInitializer {
 			dm.stop();
 			for (int i = 1; i <= 2 * 30 && ModInit.dmThread.isAlive(); ++i) {
 				try {
+					// FIXME hangs on /stop command
 					Thread.sleep(500);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
 				if (i == 60) {
-					LOG.warn("WatchTower: Taking too long to finish up queue!");
+					LOG.warn("DeltaLogger: Taking too long to finish up queue!");
 					ModInit.dmThread.interrupt();
 				}
 			}

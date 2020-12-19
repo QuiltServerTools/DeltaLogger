@@ -94,4 +94,13 @@ public class SQLUtils {
     ZonedDateTime dateTimeInTz = ZonedDateTime.ofInstant(instant, zoneId);
     return timeFormat.format(dateTimeInTz);
   }
+
+  public static String offsetOrZeroLatest(String table, int offset) {
+    return String.join(" ",
+      "(CASE",
+      "WHEN " + offset +" = 0 THEN (SELECT MAX(`id`) FROM " + table + ")",
+      "ELSE " + offset,
+      "END)"
+    );
+  }
 }

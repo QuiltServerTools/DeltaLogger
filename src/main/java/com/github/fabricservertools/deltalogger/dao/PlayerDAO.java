@@ -42,9 +42,9 @@ public class PlayerDAO {
       .one()));
   }
 
-  public List<Player> getPlayers() {
+  public List<Player> getPlayers(int offset, int limit) {
     return jdbi.withHandle(handle -> handle
-      .createQuery("SELECT * FROM players")
+      .select("SELECT * FROM players LIMIT ?,?", offset, limit)
       .mapTo(Player.class)
       .list());
   }

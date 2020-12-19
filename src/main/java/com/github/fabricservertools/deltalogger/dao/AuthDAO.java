@@ -16,6 +16,7 @@ import javax.crypto.spec.PBEKeySpec;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.github.fabricservertools.deltalogger.SQLUtils;
 
@@ -32,18 +33,15 @@ public class AuthDAO {
     sr = new SecureRandom();
 
     jwtSecret = jdbi.withHandle(handle -> handle
-      .createQuery("SELECT value FROM kv_store WHERE key='jwt_secret'")
+      .createQuery("SELECT `value` FROM kv_store WHERE `key`='jwt_secret'")
       .mapTo(String.class)
       .findOne()
     ).orElseGet(() -> {
       String generated = b64Encode(genSalt());
-      int result = jdbi.withHandle(handle -> handle
-          .createUpdate("INSERT INTO kv_store (key, value) VALUES ('jwt_secret',?)")
+      jdbi.withHandle(handle -> handle
+          .createUpdate("INSERT IGNORE INTO kv_store (`key`, `value`) VALUES ('jwt_secret',?) ")
           .bind(0, generated)
           .execute());
-      if (result != 1) {
-        throw new Error("Problem generating jwt secret. Aborting.");
-      }
       return generated;
     });
 
@@ -89,6 +87,8 @@ public class AuthDAO {
     DecodedJWT djwt = null;
     try {
       djwt = jwtVerifier.verify(token);
+    } catch(SignatureVerificationException e) {
+      return Optional.empty();
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -138,6 +138,20 @@ public class AuthDAO {
     );
   }
 
+  private boolean extractBool(Object value) {
+    boolean ret = false;
+    boolean failed = false;
+    try {
+      ret = (Boolean) value;
+    } catch (ClassCastException e) {
+      failed = true;
+    }
+    if (failed) {
+      ret = ((Integer) value) == 1;
+    }
+    return ret;
+  }
+
   public Optional<String> generateJWT(String username, String password) {
     Algorithm algorithm = Algorithm.HMAC256(jwtSecret);
 
@@ -149,7 +163,7 @@ public class AuthDAO {
           return JWT.create()
             .withClaim("user_id", (String) m.get("uuid"))
             .withClaim("user_name", username.toLowerCase())
-            .withClaim("temporary", (Integer) m.get("temporary_pass") == 1)
+            .withClaim("temporary", extractBool(m.get("temporary_pass")))
             .withIssuedAt(new Date())
             .sign(algorithm);
         }

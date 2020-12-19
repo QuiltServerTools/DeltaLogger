@@ -97,7 +97,6 @@ CREATE INDEX IF NOT EXISTS `container_tx_player_id_idx` ON container_transaction
 CREATE INDEX IF NOT EXISTS `container_tx_container_id_idx` ON container_transactions(`container_id`);
 CREATE INDEX IF NOT EXISTS `container_tx_item_type_idx` ON container_transactions(`item_type`);
 
-
 CREATE TABLE IF NOT EXISTS `killed_entities` (
   `id` /**!PRIMARY_KEY*/,
   `name` VARCHAR(100) NOT NULL,

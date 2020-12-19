@@ -9,19 +9,19 @@ type Props = {
 }
 
 const GET_PLACEMENTS = () => gql`
-  {
-    placements {
-      id
-      playerName
-      blockType
-      placed
-      x
-      y
-      z
-      time
-      dimension
-    }
+{
+  placements {
+    id
+    playerName
+    blockType
+    placed
+    x
+    y
+    z
+    time
+    dimension
   }
+}
 `
 
 const PLACEMENT_COLUMNS = [
@@ -74,10 +74,52 @@ function PlacementsTable() {
   )
 }
 
+const GET_PLAYERS = () => gql`
+query {
+  players {
+    id
+    name
+    uuid
+    lastOnlineTime
+  }
+}
+`
+
+const PLAYERS_COLUMNS = [
+  {
+    Header: 'id',
+    accessor: 'id'
+  },
+  {
+    Header: 'name',
+    accessor: 'name'
+  },
+  {
+    Header: 'uuid',
+    accessor: 'uuid'
+  },
+  {
+    Header: 'Last Online Time',
+    accessor: 'lastOnlineTime'
+  },
+]
+
+function PlayersTable() {
+  const { loading, error, data } = useQuery(GET_PLAYERS())
+  return (
+    <DataTable
+      loading={loading}
+      columns={PLAYERS_COLUMNS}
+      data={data?.players}
+    />
+  )
+}
+
 function Dashboard(props: Props) {
   return (
     <React.Fragment>
       <PlacementsTable />
+      <PlayersTable />
     </React.Fragment>
   )
 }

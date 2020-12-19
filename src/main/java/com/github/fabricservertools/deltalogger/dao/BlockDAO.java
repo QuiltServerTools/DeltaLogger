@@ -43,9 +43,25 @@ public class BlockDAO {
     );
   }
 
-  public List<Placement> getPlacements() {
+  /**
+   * Get latest placements
+   * @param idOffset must be the id of the row to offset from, if offset is 0 then get latest
+   * @param limit the number of rows to return
+   * @return
+   */
+  public List<Placement> getLatestPlacements(int idOffset, int limit) {
     return jdbi.withHandle(handle -> handle
-      .createQuery(SELECT_PLACEMENT)
+      .select(String.join(" ",
+        "SELECT PL.id, P.name AS `player_name`,",
+          SQLUtils.getDateFormatted("date"),
+          ", IT.name AS `block_type`, x, y, z, placed, DT.name as `dimension`",
+        "FROM (SELECT * FROM placements WHERE id <",
+          SQLUtils.offsetOrZeroLatest("placements", idOffset),
+          "ORDER BY `id` DESC LIMIT ?) as PL",
+        "INNER JOIN players as P ON P.id=player_id",
+        "INNER JOIN registry as IT ON IT.id=type",
+        "INNER JOIN registry as DT ON DT.id=dimension_id"
+      ), limit)
       .mapTo(Placement.class)
       .list()
     );

@@ -27,7 +27,7 @@ dependencies {
 
 	implementation(include('org.jdbi:jdbi3-sqlite:3.12.2'))
 	implementation(include('org.xerial:sqlite-jdbc:3.32.3.2'))
-	include 'mysql:mysql-connector-java:8.0.19'
+	implementation(include('mysql:mysql-connector-java:8.0.19'))
 
 	implementation(include('com.graphql-java:graphql-java:16.1'))
 	include 'com.graphql-java:java-dataloader:2.2.3'
@@ -40,6 +40,8 @@ dependencies {
 	compile('org.slf4j:slf4j-simple:1.7.30')
 	compile('org.slf4j:slf4j-api:1.8.0-beta4')
 	compile('org.slf4j:slf4j-simple:1.8.0-beta4')
+
+	implementation(shadow('io.vavr:vavr:0.10.3'))
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"

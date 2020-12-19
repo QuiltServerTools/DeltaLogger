@@ -20,7 +20,8 @@ public class ApiServer {
         .addStaticFiles(staticDirectory)
         .addSinglePageRoot("/", staticDirectory + "/index.html");
 
-      if (System.getProperty("develop").equals("true")) {
+      String devProp = System.getProperty("develop");
+      if (devProp != null && devProp.equals("true")) {
         config.enableCorsForAllOrigins();
       }
     }).start(8080);
