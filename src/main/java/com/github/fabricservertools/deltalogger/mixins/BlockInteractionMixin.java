@@ -8,6 +8,8 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.LockableContainerBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.MutableText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
@@ -29,6 +31,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import io.vavr.control.Option;
 
 @Mixin(AbstractBlock.AbstractBlockState.class)
 public class BlockInteractionMixin {
@@ -55,7 +59,6 @@ public class BlockInteractionMixin {
 
     Block targetBlock = state.getBlock();
     BlockEntity be = world.getBlockEntity(pos);
-    DatabaseManager dm = DatabaseManager.getSingleton();
     Identifier dimension = world.getRegistryKey().getValue();
 
     if (be != null && be instanceof LockableContainerBlockEntity) {
@@ -66,23 +69,25 @@ public class BlockInteractionMixin {
         opt = Optional.of(((NbtUuid)be).getNbtUuid());
       }
       opt.ifPresent(uuid -> {
-        DAO.transaction.getTransactionsFromUUID(uuid, 10).stream()
-          .map(t -> {
-            return t.getText();
-          })
+        MutableText transactionMessage = DAO.transaction
+          .getTransactionsFromUUID(uuid, 10).stream()
+          .map(t -> t.getText())
           .reduce((t1, t2) -> Chat.concat("\n", t1, t2))
-          .ifPresent(msg -> {
-            Chat.send(player, Chat.concat("\n", Chat.text("Transaction history"), msg));
-          });
+          .map(txt -> Chat.concat("\n", Chat.text("Transaction History"), txt))
+          .orElse(Chat.text("No transactions found in container"));
+
+        Chat.send(player, transactionMessage);
       });
     }
 
-    DAO.block.getPlacementsAt(dimension, pos, 10).stream()
+    MutableText placementMessage = DAO.block
+      .getLatestPlacementsAt(dimension, pos, 0, 10).stream()
       .map(p -> p.getText())
       .reduce((p1, p2) -> Chat.concat("\n", p1, p2))
-      .ifPresent(msg -> {
-        Chat.send(player, Chat.concat("\n", Chat.text("Placement history"), msg));
-      });
+      .map(txt -> Chat.concat("\n", Chat.text("Placement history"), txt))
+      .orElse(Chat.text("No placements found at " + pos.toString()));
+
+    Chat.send(player, placementMessage);
 
     ret.setReturnValue(ActionResult.SUCCESS);
   }

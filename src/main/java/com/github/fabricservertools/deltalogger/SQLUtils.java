@@ -95,10 +95,10 @@ public class SQLUtils {
     return timeFormat.format(dateTimeInTz);
   }
 
-  public static String offsetOrZeroLatest(String table, int offset) {
+  public static String offsetOrZeroLatest(String table, String column, int offset) {
     return String.join(" ",
       "(CASE",
-      "WHEN " + offset +" = 0 THEN (SELECT MAX(`id`) FROM " + table + ")",
+      "WHEN " + offset +" = 0 THEN (SELECT MAX(" + column + ") + 1 FROM " + table + ")",
       "ELSE " + offset,
       "END)"
     );

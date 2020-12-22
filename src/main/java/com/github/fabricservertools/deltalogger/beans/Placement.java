@@ -116,13 +116,13 @@ public class Placement {
 
   public MutableText getText() {
     return joinText(
-      format(time),
+      format(time, Formatting.GRAY),
       format(playerName, Formatting.ITALIC),
       format(
         placed ? "placed" : "removed",
         placed ? Formatting.GREEN : Formatting.DARK_RED
       ),
-      format(blockType)
+      format(blockType.replaceFirst("^minecraft:", ""), Formatting.YELLOW)
     );
   }
 }

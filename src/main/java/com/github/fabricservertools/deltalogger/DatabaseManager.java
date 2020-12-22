@@ -25,6 +25,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.PreparedBatch;
+import org.jdbi.v3.core.statement.SqlLogger;
+import org.jdbi.v3.core.statement.StatementContext;
 import org.jdbi.v3.sqlite3.SQLitePlugin;
 
 /**
@@ -53,6 +55,11 @@ public class DatabaseManager implements Runnable {
   }
 
   private Jdbi jdbi;
+  private static final boolean isDevelop;
+  static {
+    String dev = System.getProperty("develop");
+    isDevelop = dev != null && dev.equals("true");
+  }
   public static DatabaseType dbType;
   
   private PriorityBlockingQueue<QueueOperation> pq = new PriorityBlockingQueue<>(10, Comparator.comparingInt(QueueOperation::getPriority));
@@ -83,7 +90,16 @@ public class DatabaseManager implements Runnable {
         dbType = DatabaseType.MYSQL;
         initJdbiMySQL(getMySQLDataSource());
       }
+
       createTables();
+      if (isDevelop) {
+        jdbi.setSqlLogger(new SqlLogger() {
+          public void logAfterExecution(StatementContext context) {
+            LOG.info(context.getRenderedSql());
+            LOG.info(context.getBinding().toString());
+          }
+        });
+      }
       
       LOG.info("DeltaLogger started with " + dbType + " database");
     } catch (IOException e) {

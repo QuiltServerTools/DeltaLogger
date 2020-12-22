@@ -1,9 +1,6 @@
 package com.github.fabricservertools.deltalogger;
 
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 
 import net.minecraft.entity.player.PlayerEntity;

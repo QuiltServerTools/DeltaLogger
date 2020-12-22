@@ -18,7 +18,16 @@ import net.minecraft.util.math.BlockPos;
 
 public class BlockDAO {
   private Jdbi jdbi;
-  private final String SELECT_PLACEMENT;
+  private final String SELECT_PLACEMENT = String.join(" ",
+    "SELECT PL.id, P.name AS `player_name`,",
+    SQLUtils.getDateFormatted("date"),
+    ", IT.name AS `block_type`, x, y, z, placed, DT.name as `dimension`"
+  );
+  private final String JOIN_PLACEMENT =  String.join(" ",
+    "INNER JOIN players as P ON P.id=player_id",
+    "INNER JOIN registry as IT ON IT.id=type",
+    "INNER JOIN registry as DT ON DT.id=dimension_id"
+  );
 
   public BlockDAO(Jdbi jdbi) {
     this.jdbi = jdbi;
@@ -33,14 +42,6 @@ public class BlockDAO {
         rs.getString("dimension")
       );
     });
-
-    SELECT_PLACEMENT = String.join(" ",
-      "SELECT PL.id, P.name AS `player_name`,", SQLUtils.getDateFormatted("date"), ", IT.name AS `block_type`, x, y, z, placed, DT.name as `dimension`",
-      "FROM placements as PL",
-      "INNER JOIN players as P ON P.id=player_id",
-      "INNER JOIN registry as IT ON IT.id=type",
-      "INNER JOIN registry as DT ON DT.id=dimension_id"
-    );
   }
 
   /**
@@ -52,33 +53,41 @@ public class BlockDAO {
   public List<Placement> getLatestPlacements(int idOffset, int limit) {
     return jdbi.withHandle(handle -> handle
       .select(String.join(" ",
-        "SELECT PL.id, P.name AS `player_name`,",
-          SQLUtils.getDateFormatted("date"),
-          ", IT.name AS `block_type`, x, y, z, placed, DT.name as `dimension`",
+        SELECT_PLACEMENT,
         "FROM (SELECT * FROM placements WHERE id <",
-          SQLUtils.offsetOrZeroLatest("placements", idOffset),
+          SQLUtils.offsetOrZeroLatest("placements", "id", idOffset), // sql perf optim.
           "ORDER BY `id` DESC LIMIT ?) as PL",
-        "INNER JOIN players as P ON P.id=player_id",
-        "INNER JOIN registry as IT ON IT.id=type",
-        "INNER JOIN registry as DT ON DT.id=dimension_id"
+        JOIN_PLACEMENT
       ), limit)
       .mapTo(Placement.class)
       .list()
     );
   }
 
-  public List<Placement> getPlacementsAt(Identifier dimension, BlockPos pos, int limit) {
+  /**
+   * Get latest placements in dim at coords
+   * @param idOffset must be the id of the row to offset from, if offset is 0 then get latest
+   * @param limit the number of rows to return
+   * @return
+   */
+  public List<Placement> getLatestPlacementsAt(Identifier dimension, BlockPos pos, int idOffset, int limit) {
     try {
       return jdbi.withHandle(handle -> handle
-        .select(
+        .createQuery(
           String.join(" ",
             SELECT_PLACEMENT,
-            "WHERE x = ? AND y = ? AND z = ? AND DT.name = ?",
-            "ORDER BY date DESC LIMIT ?"
-          ),
-          pos.getX(), pos.getY(), pos.getZ(),
-          dimension.toString(), limit
+            "FROM (",
+              "SELECT * FROM placements",
+              "WHERE placements.id < ", SQLUtils.offsetOrZeroLatest("placements", "placements.id", idOffset),
+              "AND x = :x AND y = :y AND z = :z AND dimension_id = (SELECT id FROM registry WHERE `name` = :dim)",
+              "ORDER BY `id` DESC LIMIT :lim",
+            ") as PL",
+            JOIN_PLACEMENT
+          )
         )
+        .bind("x", pos.getX()).bind("y", pos.getY()).bind("z", pos.getZ())
+        .bind("dim", dimension.toString())
+        .bind("lim", limit)
         .mapTo(Placement.class).list()
       );
     } catch (Exception e) {

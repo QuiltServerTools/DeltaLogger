@@ -17,6 +17,7 @@ import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.LiteralText;
+import net.minecraft.text.MutableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -65,26 +66,21 @@ public class InspectCommand {
     }
 
     private static int inspect(CommandContext<ServerCommandSource> scs, ServerWorld dim) throws CommandSyntaxException {
-        DatabaseManager dm = DatabaseManager.getSingleton();
         BlockPos pos = BlockPosArgumentType.getBlockPos(scs, "pos");
         World world = scs.getSource().getWorld();
 
         // Use player current dim otherwise if null arg
         Identifier dimension = dim == null ? world.getRegistryKey().getValue() : dim.getRegistryKey().getValue();
 
-        DAO.block.getPlacementsAt(dimension, pos, 10)
-            .stream()
+        MutableText placementMessage = DAO.block
+            .getLatestPlacementsAt(dimension, pos, 0, 10).stream()
             .map(p -> p.getText())
             .reduce((p1, p2) -> Chat.concat("\n", p1, p2))
-            .ifPresent(msg -> {
-                try {
-                    // FIXME: fix getting block from server console
-                    // FIXME: empty result has no message
-                    Chat.send(scs.getSource().getPlayer(), Chat.concat("\n", Chat.text("Placement history"), msg));
-                } catch (CommandSyntaxException e) {
-                    e.printStackTrace();
-                }
-            });
+            .map(txt -> Chat.concat("\n", Chat.text("Placement history"), txt))
+            .orElse(Chat.text("No placements found at " + pos.toString()));
+        
+        // FIXME: fix getting block from server console
+        Chat.send(scs.getSource().getPlayer(), placementMessage);
         return 1;
       }
 }

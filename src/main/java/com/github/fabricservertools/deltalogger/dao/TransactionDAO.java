@@ -18,7 +18,18 @@ import net.minecraft.util.math.BlockPos;
 
 public class TransactionDAO {
   private Jdbi jdbi;
-  private final String SELECT_TRANSACTIONS;
+  private final String SELECT_TRANSACTIONS = String.join(" ",
+    "SELECT CT.id, C.uuid,",
+    SQLUtils.getDateFormatted("CT.date", "date"),
+    ", R.name as `item_type`, CT.item_count, P.name as `player_name`"
+  );
+  private final String JOIN_TRANSACTIONS = String.join(" ",
+    "INNER JOIN registry as R ON CT.item_type = R.id",
+    "INNER JOIN containers as C ON CT.container_id = C.id",
+    "LEFT JOIN registry as DT ON DT.id = C.dimension_id",
+    "INNER JOIN players as P ON CT.player_id = P.id"
+  );
+
 
   public TransactionDAO(Jdbi jdbi) {
     this.jdbi = jdbi;
@@ -30,14 +41,6 @@ public class TransactionDAO {
       rs.getInt("item_count"),
       UUID.fromString(rs.getString("uuid"))
     ));
-
-    SELECT_TRANSACTIONS = String.join(" ",
-      "SELECT CT.id, C.uuid,", SQLUtils.getDateFormatted("CT.date", "date"), ", R.name as `item_type`, CT.item_count, P.name as `player_name`",
-      "FROM container_transactions as CT",
-      "INNER JOIN registry as R ON CT.item_type = R.id",
-      "INNER JOIN players as P ON CT.player_id = P.id",
-      "INNER JOIN containers as C ON CT.container_id = C.id"
-    );
   }
 
   public List<Transaction> getTransactions() {
@@ -61,7 +64,8 @@ public class TransactionDAO {
         .select(
           String.join(" ",
             SELECT_TRANSACTIONS,
-            "INNER JOIN registry as DT ON DT.id = C.dimension_id",
+            "FROM container_transactions as CT",
+            JOIN_TRANSACTIONS,
             "WHERE C.x=? AND C.y=? AND C.z=? AND DT.name = ?",
             "ORDER BY CT.date DESC LIMIT ?"
           ),
@@ -81,6 +85,8 @@ public class TransactionDAO {
         .select(
           String.join(" ",
             SELECT_TRANSACTIONS,
+            "FROM container_transactions as CT",
+            JOIN_TRANSACTIONS,
             "WHERE C.uuid=?",
             "ORDER BY CT.date DESC LIMIT ?"
           ),

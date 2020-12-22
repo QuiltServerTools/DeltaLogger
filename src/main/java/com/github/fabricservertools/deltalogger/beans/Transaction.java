@@ -78,14 +78,14 @@ public class Transaction {
 
   public MutableText getText() {
     return joinText(
-      format(time),
+      format(time, Formatting.GRAY),
       format(playerName, Formatting.ITALIC),
       format(
         count < 0 ? "took" : "put",
         count < 0 ? Formatting.DARK_RED : Formatting.GREEN
       ),
       format(Integer.valueOf(Math.abs(count))),
-      format(itemType)
+      format(itemType.replaceFirst("^minecraft:", ""), Formatting.YELLOW)
     );
   }
 }
