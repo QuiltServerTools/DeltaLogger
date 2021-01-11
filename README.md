@@ -1,3 +1,6 @@
+# DISCLAIMER
+
+This project is still under heavy development and is not recommended for use yet.
 # DeltaLogger
 
 Block and chest/container inventory tracking tool for fabric that can be configured to use MySQL or SQLite.

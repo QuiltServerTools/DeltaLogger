@@ -39,7 +39,7 @@ public class AuthDAO {
     ).orElseGet(() -> {
       String generated = b64Encode(genSalt());
       jdbi.withHandle(handle -> handle
-          .createUpdate("INSERT IGNORE INTO kv_store (`key`, `value`) VALUES ('jwt_secret',?) ")
+          .createUpdate("INSERT INTO kv_store (`key`, `value`) VALUES ('jwt_secret',?) ")
           .bind(0, generated)
           .execute());
       return generated;
