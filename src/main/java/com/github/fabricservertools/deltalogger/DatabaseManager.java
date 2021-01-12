@@ -309,7 +309,7 @@ public class DatabaseManager implements Runnable {
         if (queued.isEmpty()) continue;
         processOps(queued);
       } catch (InterruptedException e) {
-        LOG.info("Stopping WatchTower");
+        LOG.info("Stopping DeltaLogger");
         e.printStackTrace();
       }
     }

@@ -34,7 +34,7 @@ username=mc
 useSSL=false
 requireSSL=false
 ```
-By default, SQLite is enabled. This means that your logs will be saved to a database found in `world/dl.db`. If you want to use MySQL, fill out the additional properties with the relevant information to access your database.
+By default, SQLite is enabled. This means that your logs will be saved to a database found in `world/deltalogger.sqlite`. If you want to use MySQL, fill out the additional properties with the relevant information to access your database.
 
 This mod also requires the fabric api mod, which you can find [here](https://www.curseforge.com/minecraft/mc-mods/fabric-api).
 

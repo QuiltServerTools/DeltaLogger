@@ -6,7 +6,7 @@
   "name": "DeltaLogger",
   "description": "Change logger for Fabric mod servers",
   "authors": [
-    "unsupervised@tutanota.com"
+    "unsupervised@tutanota.com","yitzy299"
   ],
   "contact": {
     "homepage": "https://github.com/fabricservertools/deltalogger",
@@ -14,7 +14,7 @@
   },
 
   "license": "AGPL",
-  "icon": "assets/modid/icon.png",
+  "icon": "assets/deltalogger/icon.png",
 
   "environment": "*",
   "entrypoints": {

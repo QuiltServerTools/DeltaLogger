@@ -17,9 +17,7 @@ public final class Commands {
         dispatcher.getRoot().addChild(deltaNode);
 
         InspectCommand.register(deltaNode);
-        /*
-         * SearchCommand.register(deltaNode);
-         */
+        SearchCommand.register(deltaNode);
         SQLCommand.register(deltaNode);
         registerResetPass(deltaNode);
     }

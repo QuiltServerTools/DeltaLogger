@@ -8,17 +8,19 @@ import java.util.UUID;
 import com.github.fabricservertools.deltalogger.QueueOperation;
 import com.github.fabricservertools.deltalogger.SQLUtils;
 import com.github.fabricservertools.deltalogger.beans.Placement;
+import com.github.fabricservertools.deltalogger.util.PlayerUtils;
 
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.PreparedBatch;
 
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 
 public class BlockDAO {
   private Jdbi jdbi;
-  private final String SELECT_PLACEMENT = String.join(" ",
+  public static final String SELECT_PLACEMENT = String.join(" ",
     "SELECT PL.id, P.name AS `player_name`,",
     SQLUtils.getDateFormatted("date"),
     ", IT.name AS `block_type`, x, y, z, placed, DT.name as `dimension`"
@@ -50,6 +52,32 @@ public class BlockDAO {
    * @param limit the number of rows to return
    * @return
    */
+  public List<Placement> search(Identifier dimension, int idOffset, int limit, String builtWhere) {
+    try {
+      return jdbi.withHandle(handle -> handle
+        .createQuery(
+          String.join(" ",
+            SELECT_PLACEMENT,
+            "FROM (",
+              "SELECT * FROM placements",
+              "WHERE placements.id < ", SQLUtils.offsetOrZeroLatest("placements", "placements.id", idOffset),
+              builtWhere,
+              "ORDER BY `id` DESC LIMIT :lim",
+            ") as PL",
+            JOIN_PLACEMENT
+          )
+        )
+        .bind("lim", limit)
+        .mapTo(Placement.class).list()
+      );
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return new ArrayList<>();
+  }
+  public List<Placement> customQuery(String sql) {
+    return jdbi.withHandle(handle -> handle.select(sql, 100)).mapTo(Placement.class).list();
+  }
   public List<Placement> getLatestPlacements(int idOffset, int limit) {
     return jdbi.withHandle(handle -> handle
       .select(String.join(" ",
@@ -95,7 +123,6 @@ public class BlockDAO {
     }
     return new ArrayList<>();
   }
-
   public static QueueOperation insertPlacement(
     UUID player_id,
     Identifier blockid,
