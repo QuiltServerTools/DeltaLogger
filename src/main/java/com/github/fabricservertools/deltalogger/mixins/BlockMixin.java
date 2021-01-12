@@ -1,7 +1,7 @@
 package com.github.fabricservertools.deltalogger.mixins;
 
 import com.github.fabricservertools.deltalogger.DatabaseManager;
-import com.github.fabricservertools.deltalogger.ModInit;
+import com.github.fabricservertools.deltalogger.DeltaLogger;
 import com.github.fabricservertools.deltalogger.dao.BlockDAO;
 
 import org.spongepowered.asm.mixin.Mixin;
@@ -43,7 +43,7 @@ public abstract class BlockMixin implements ItemConvertible {
         java.time.Instant.now()
       ));
     } catch (Exception e) {
-      ModInit.LOG.warn(String.join("\n",
+      DeltaLogger.LOG.warn(String.join("\n",
         "Problem detected id:" + (id == null ? "null" : id.toString()) + " dimension:" + (dimension == null ? "null" : dimension.toString()),
         "player: " + (player == null ? "null" : player.toString()),
         e.toString()
