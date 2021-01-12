@@ -27,12 +27,13 @@ import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.PreparedBatch;
 import org.jdbi.v3.core.statement.SqlLogger;
 import org.jdbi.v3.core.statement.StatementContext;
+import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 import org.jdbi.v3.sqlite3.SQLitePlugin;
 
 /**
- * Handles inserting QueueOperations into the database. All QOs are inserted into a
- * queue and pulled in order of priority. This is to ensure that foreign table
- * references are processed in the correct order, otherwise foreign key
+ * Handles inserting QueueOperations into the database. All QOs are inserted
+ * into a queue and pulled in order of priority. This is to ensure that foreign
+ * table references are processed in the correct order, otherwise foreign key
  * constraints would fail. Foreign key constraints have been removed from the
  * SQL schema because shared host providers use outdated MySQL versions that
  * lack foreign key constraints.
@@ -41,13 +42,14 @@ public class DatabaseManager implements Runnable {
   private static DatabaseManager manager;
 
   public enum DatabaseType {
-    SQLITE("SQLite"),
-    MYSQL("MySQL");
+    SQLITE("SQLite"), MYSQL("MySQL");
 
     private final String s;
+
     DatabaseType(String s) {
       this.s = s;
     }
+
     @Override
     public String toString() {
       return s;
@@ -61,8 +63,17 @@ public class DatabaseManager implements Runnable {
     isDevelop = dev != null && dev.equals("true");
   }
   public static DatabaseType dbType;
-  
-  private PriorityBlockingQueue<QueueOperation> pq = new PriorityBlockingQueue<>(10, Comparator.comparingInt(QueueOperation::getPriority));
+
+  public boolean isMysql() {
+    return dbType == DatabaseType.MYSQL;
+  }
+
+  public boolean isSqlite() {
+    return dbType == DatabaseType.SQLITE;
+  }
+
+  private PriorityBlockingQueue<QueueOperation> pq = new PriorityBlockingQueue<>(10,
+      Comparator.comparingInt(QueueOperation::getPriority));
   private final AtomicBoolean running = new AtomicBoolean(false);
   public static final Logger LOG = LogManager.getLogger();
 
@@ -72,7 +83,8 @@ public class DatabaseManager implements Runnable {
   }
 
   public static DatabaseManager create(File worldSavePath) {
-    if (manager != null) throw new Error("Only one DB manager should exist at a time!");
+    if (manager != null)
+      throw new Error("Only one DB manager should exist at a time!");
     manager = new DatabaseManager(worldSavePath);
     return manager;
   }
@@ -91,7 +103,7 @@ public class DatabaseManager implements Runnable {
         initJdbiMySQL(getMySQLDataSource());
       }
 
-      createTables();
+      checkValidSchema();
       if (isDevelop) {
         jdbi.setSqlLogger(new SqlLogger() {
           public void logAfterExecution(StatementContext context) {
@@ -100,7 +112,7 @@ public class DatabaseManager implements Runnable {
           }
         });
       }
-      
+
       LOG.info("DeltaLogger started with " + dbType + " database");
     } catch (IOException e) {
       e.printStackTrace();
@@ -110,12 +122,11 @@ public class DatabaseManager implements Runnable {
 
   private Jdbi initJdbiSQLite(File worldSavePath) {
     try {
-      File databaseFile = worldSavePath != null
-        ? new File(worldSavePath, "deltalogger.sqlite")
-        : new File("./world/deltalogger.sqlite");
-  
+      File databaseFile = worldSavePath != null ? new File(worldSavePath, "deltalogger.sqlite")
+          : new File("./world/deltalogger.sqlite");
+
       jdbi = Jdbi.create("jdbc:sqlite:" + databaseFile.getCanonicalPath().replace('\\', '/'))
-        .installPlugin(new SQLitePlugin());
+          .installPlugin(new SQLitePlugin());
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -137,12 +148,8 @@ public class DatabaseManager implements Runnable {
   private static HikariDataSource getMySQLDataSource() {
     HikariConfig config = new HikariConfig();
     Properties props = ModInit.CONFIG;
-    config.setJdbcUrl(String.join("",
-      "jdbc:mysql://",
-      props.getProperty("host"), ":",
-      props.getProperty("port"), "/",
-      props.getProperty("database")
-    ));
+    config.setJdbcUrl(String.join("", "jdbc:mysql://", props.getProperty("host"), ":", props.getProperty("port"), "/",
+        props.getProperty("database")));
     config.setUsername(props.getProperty("username"));
     config.setPassword(props.getProperty("password"));
 
@@ -172,18 +179,76 @@ public class DatabaseManager implements Runnable {
     return new HikariDataSource(config);
   }
 
-  public void createTables() throws IOException {
-    String tableSql = preproccessSQL(
+  public void runScript(String path) throws IOException {
+    String sql = preproccessSQL(
       Resources.toString(
-        DatabaseManager.class.getResource("/data/watchtower/schema.sql"), 
+        DatabaseManager.class.getResource(path), 
         StandardCharsets.UTF_8
       )
     );
     jdbi.useHandle(handle -> {
-      handle.createScript(tableSql).execute();
-      // handle.execute("CREATE FUNCTION BIN_TO_UUID(b BINARY(16), f BOOLEAN) RETURNS CHAR(36) DETERMINISTIC BEGIN DECLARE hexStr CHAR(32); SET hexStr = HEX(b); RETURN LOWER(CONCAT(IF(f,SUBSTR(hexStr, 9, 8),SUBSTR(hexStr, 1, 8)), '-', IF(f,SUBSTR(hexStr, 5, 4),SUBSTR(hexStr, 9, 4)), '-', IF(f,SUBSTR(hexStr, 1, 4),SUBSTR(hexStr, 13, 4)), '-', SUBSTR(hexStr, 17, 4), '-', SUBSTR(hexStr, 21))); END;");
-      // handle.execute("CREATE FUNCTION UUID_TO_BIN(uuid CHAR(36), f BOOLEAN) RETURNS BINARY(16) DETERMINISTIC BEGIN RETURN UNHEX(CONCAT(IF(f,SUBSTRING(uuid, 15, 4),SUBSTRING(uuid, 1, 8)),SUBSTRING(uuid, 10, 4),IF(f,SUBSTRING(uuid, 1, 8),SUBSTRING(uuid, 15, 4)),SUBSTRING(uuid, 20, 4),SUBSTRING(uuid, 25))); END;");
+      handle.createScript(sql).execute();
     });
+  }
+
+  public void checkValidSchema() throws IOException {
+    LOG.info("Checking for valid schema..");
+    runScript("/data/watchtower/kv_store_table.sql");
+
+    String sver;
+    try {
+      sver = jdbi.withHandle(handle -> handle
+        .createQuery("SELECT `value` FROM kv_store WHERE `key` = 'schema_version'")
+        .mapTo(String.class)
+        .findOne()
+      ).orElse("0");
+    } catch (UnableToExecuteStatementException e) {
+      sver = "0";
+    }
+
+    int version;
+    try {
+      version = Integer.parseInt(sver);
+    } catch (Exception e) {
+      throw new Error("Invalid schema version");
+    }
+
+    if (version == 0) {
+      if (isMysql()) {
+        String migrateSql = Resources.toString(
+            DatabaseManager.class.getResource("/data/watchtower/migration/wt_to_bl.sql"), StandardCharsets.UTF_8);
+        LOG.info(String.join("\n", "",
+          "Migrating WatchTower database to DeltaLogger database.",
+          "This may take a few minutes to a few hours depending on the size of your database.",
+          "This will start in 60 seconds. IF YOU WISH TO CANCEL THEN EXIT NOW."
+        ));
+        try {
+          Thread.sleep(60 * 1000);
+        } catch (InterruptedException e) {
+          throw new Error("Cancelling pending migration...");
+        }
+        LOG.info("Starting database migration now, do not exit!");
+        
+        jdbi.withHandle(handle -> handle
+          .createScript(migrateSql)
+          .execute()
+        );
+
+        jdbi.withHandle(handle -> handle
+          .createUpdate(String.join(" ",
+            "INSERT INTO kv_store (`key`,`value`) VALUES ('schema_version', :version)",
+            SQLUtils.onDuplicateKeyUpdate("schema_version"), "`value`=:version"
+          ))
+          .bind("version", "1")
+          .execute()
+        );
+
+        LOG.info("Database migration completed.");
+      }
+      // TODO migrate blocklogger sqlite
+    }
+
+    runScript("/data/watchtower/schema.sql");
   }
 
   public void queueOp(QueueOperation op) { pq.add(op); }
@@ -255,7 +320,7 @@ public class DatabaseManager implements Runnable {
     ArrayList<QueueOperation> queued = new ArrayList<>(50);
     pq.drainTo(queued);
     if (queued.isEmpty()) return;
-    LOG.info("WatchTower: Processing leftover database operations...");
+    LOG.info("DeltaLogger: Processing leftover database operations...");
     processOps(queued);
   }
 

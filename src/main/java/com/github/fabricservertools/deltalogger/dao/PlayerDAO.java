@@ -27,19 +27,19 @@ public class PlayerDAO {
     });
   }
   public Optional<Player> getPlayerById(int id) {
-    return Optional.ofNullable(jdbi.withHandle(handle -> handle
+    return jdbi.withHandle(handle -> handle
       .createQuery("SELECT * FROM players WHERE id = ?")
       .bind(0, id)
       .mapTo(Player.class)
-      .one()));
+      .findOne());
   }
 
   public Optional<Player> getPlayerByUUID(UUID uuid) {
-    return Optional.ofNullable(jdbi.withHandle(handle -> handle
+    return jdbi.withHandle(handle -> handle
       .createQuery("SELECT * FROM players WHERE uuid = ?")
       .bind(0, uuid)
       .mapTo(Player.class)
-      .one()));
+      .findOne());
   }
 
   public List<Player> getPlayers(int offset, int limit) {

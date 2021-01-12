@@ -19,6 +19,8 @@ public class ApiServer {
       config
         .addStaticFiles(staticDirectory)
         .addSinglePageRoot("/", staticDirectory + "/index.html");
+      
+      config.showJavalinBanner = false;
 
       String devProp = System.getProperty("develop");
       if (devProp != null && devProp.equals("true")) {

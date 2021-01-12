@@ -26,7 +26,13 @@ public abstract class LivingEntityMixin extends Entity {
     super(type, world);
   }
 
-  @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/damage/DamageSource;getAttacker()Lnet/minecraft/entity/Entity;"), method = "onDeath")
+  @Inject(
+    at = @At(
+      value = "INVOKE",
+      target = "Lnet/minecraft/entity/damage/DamageSource;getAttacker()Lnet/minecraft/entity/Entity;"
+    ),
+    method = "onDeath"
+  )
   public void onDeath(DamageSource source, CallbackInfo info) {
     LivingEntity me = (LivingEntity)(Object)this;
     Entity attacker = source.getAttacker();

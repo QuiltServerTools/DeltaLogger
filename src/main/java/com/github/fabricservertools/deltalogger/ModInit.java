@@ -24,94 +24,111 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.WorldSavePath;
 
 public class ModInit implements ModInitializer {
-	private static DatabaseManager dm;
-	public static final Logger LOG = LogManager.getLogger();
-	public static Properties CONFIG;
-	public static Thread dmThread;
+  private static DatabaseManager dm;
+  public static final Logger LOG = LogManager.getLogger();
+  public static Properties CONFIG;
+  public static Thread dmThread;
 
-	public static Properties loadConfig(Path configPath) {
-		Properties props = new Properties();
-		try {
-			props.load(new FileInputStream(configPath.toString()));
-		} catch (FileNotFoundException e) {
-			props.setProperty("use_sqlite", "true");
+  public static Properties loadConfig(Path configPath) {
+    Properties props = new Properties();
+    try {
+      props.load(new FileInputStream(configPath.toString()));
+    } catch (FileNotFoundException e) {
+      props.setProperty("use_sqlite", "true");
 
-			props.setProperty("host", "");
-			props.setProperty("port", "3306");
-			props.setProperty("username", "");
-			props.setProperty("password", "");
-			props.setProperty("database", "");
-			props.setProperty("useSSL", "true");
-			props.setProperty("requireSSL", "false");
-			props.setProperty("maxLifetime", "290000");
+      props.setProperty("host", "");
+      props.setProperty("port", "3306");
+      props.setProperty("username", "");
+      props.setProperty("password", "");
+      props.setProperty("database", "");
+      props.setProperty("useSSL", "true");
+      props.setProperty("requireSSL", "false");
+      props.setProperty("maxLifetime", "290000");
 
-			try {
-				props.store(new FileWriter(configPath.toString()), "Config for DeltaLogger");
-			} catch (IOException ioe) {
-				ioe.printStackTrace();
-			}
+      try {
+        props.store(new FileWriter(configPath.toString()), "Config for DeltaLogger");
+      } catch (IOException ioe) {
+        ioe.printStackTrace();
+      }
 
-			LOG.info("Optional configuration for DeltaLogger created in `config` directory. Using SQLite by default.");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+      LOG.info("Optional configuration for DeltaLogger created in `config` directory. Using SQLite by default.");
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
 
-		CONFIG = props;
-		return CONFIG;
-	}
+    CONFIG = props;
+    return CONFIG;
+  }
 
-	@Override
-	public void onInitialize() {
-		loadConfig(Paths.get(FabricLoader.getInstance().getConfigDir().toString(), "deltalogger.properties"));
+  public void onModInit() {
+    loadConfig(Paths.get(FabricLoader.getInstance().getConfigDir().toString(), "deltalogger.properties"));
+  }
 
-		ServerLifecycleEvents.SERVER_STARTED.register((server) -> {
-			dm = DatabaseManager.create(server.getSavePath(WorldSavePath.ROOT).toFile());
-			ApiServer.start();
+  /**
+   * Called from MinecraftDedicatedServer::setupServer
+   * @param server Server instnace
+   */
+  public static void onServerInit(MinecraftServer server) {
+    dm = DatabaseManager.create(server.getSavePath(WorldSavePath.ROOT).toFile());
+    ApiServer.start();
 
-			HashSet<Identifier> dimensionIds = new HashSet<>();
-			server.getWorlds().forEach(world -> {
-				Identifier dimid = world.getRegistryKey().getValue();
-				dimensionIds.add(dimid);
-			});
+    HashSet<Identifier> dimensionIds = new HashSet<>();
+    server.getWorlds().forEach(world -> {
+      Identifier dimid = world.getRegistryKey().getValue();
+      dimensionIds.add(dimid);
+    });
 
-			List<Set<Identifier>> idSets = new ArrayList<Set<Identifier>>() {{
-				add(Registry.BLOCK.getIds());
-				add(Registry.ITEM.getIds());
-				add(Registry.ENTITY_TYPE.getIds());
-				add(dimensionIds);
-			}};
-	
-			Set<Identifier> ids = idSets.stream().reduce((acc, s) -> Sets.union(acc, s)).orElse(new HashSet<Identifier>());
+    List<Set<Identifier>> idSets = new ArrayList<Set<Identifier>>() {{
+      add(Registry.BLOCK.getIds());
+      add(Registry.ITEM.getIds());
+      add(Registry.ENTITY_TYPE.getIds());
+      add(dimensionIds);
+    }};
 
-			ids.forEach(id -> dm.queueOp(RegistryDAO.insert(id)));
+    Set<Identifier> ids = idSets.stream().reduce((acc, s) -> Sets.union(acc, s)).orElse(new HashSet<Identifier>());
 
-			ModInit.dmThread = new Thread(dm);
-			ModInit.dmThread.start();
-		});
+    ids.forEach(id -> dm.queueOp(RegistryDAO.insert(id)));
 
-		CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
-			Commands.register(dispatcher);
-		});
+    ModInit.dmThread = new Thread(dm);
+    ModInit.dmThread.start();
+  }
 
-		ServerLifecycleEvents.SERVER_STOPPED.register((server) -> {
-			dm.stop();
-			for (int i = 1; i <= 2 * 30 && ModInit.dmThread.isAlive(); ++i) {
-				try {
-					// FIXME hangs on /stop command
-					Thread.sleep(500);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-				if (i == 60) {
-					LOG.warn("DeltaLogger: Taking too long to finish up queue!");
-					ModInit.dmThread.interrupt();
-				}
-			}
-		});
-	}
+  public void afterWorldLoad(MinecraftServer server) {
+  }
+
+  public void onStop(MinecraftServer server) {
+    dm.stop();
+    for (int i = 1; i <= 2 * 30 && ModInit.dmThread.isAlive(); ++i) {
+      try {
+        // FIXME hangs on /stop command
+        Thread.sleep(500);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+      if (i == 60) {
+        LOG.warn("DeltaLogger: Taking too long to finish up queue!");
+        ModInit.dmThread.interrupt();
+      }
+    }
+  }
+  
+
+  @Override
+  public void onInitialize() {
+    onModInit();
+
+    // ServerLifecycleEvents.SERVER_STARTED.register(this::afterWorldLoad);
+
+    CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
+      Commands.register(dispatcher);
+    });
+
+    ServerLifecycleEvents.SERVER_STOPPED.register(this::onStop);
+  }
 }
