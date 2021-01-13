@@ -67,9 +67,9 @@ public class SearchCommand {
             BlockStateArgument block = (BlockStateArgument)propertyMap.get("block");
             //runner.fillParameter("block", Registry.BLOCK.getId(block.getBlockState().getBlock()).toString() + "%");
             sqlPlace += "AND type = (SELECT id FROM registry WHERE `name` = \""+Registry.BLOCK.getId(block.getBlockState().getBlock()).toString() + "\") ";
-            sqlContainer += "AND \"item_type\" = (SELECT id FROM registry WHERE `name` = \""+Registry.BLOCK.getId(block.getBlockState().getBlock()).toString() + "\") ";
+            sqlContainer += "AND CT.item_type = (SELECT id FROM registry WHERE `name` = \""+Registry.BLOCK.getId(block.getBlockState().getBlock()).toString() + "\")";
         }
-        if (propertyMap.containsKey("range")) {
+        if (propertyMap.containsKey("range")) { 
             int range = (Integer)propertyMap.get("range");
             range *= range;
             BlockPos playerPos = sourcePlayer.getBlockPos();

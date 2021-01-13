@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Properties;
@@ -21,8 +22,6 @@ import com.google.common.io.Resources;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.PreparedBatch;
 import org.jdbi.v3.core.statement.SqlLogger;
@@ -75,7 +74,6 @@ public class DatabaseManager implements Runnable {
   private PriorityBlockingQueue<QueueOperation> pq = new PriorityBlockingQueue<>(10,
       Comparator.comparingInt(QueueOperation::getPriority));
   private final AtomicBoolean running = new AtomicBoolean(false);
-  public static final Logger LOG = LogManager.getLogger();
 
   private DatabaseManager(File worldSavePath) {
     connect(worldSavePath);
@@ -107,13 +105,13 @@ public class DatabaseManager implements Runnable {
       if (isDevelop) {
         jdbi.setSqlLogger(new SqlLogger() {
           public void logAfterExecution(StatementContext context) {
-            LOG.info(context.getRenderedSql());
-            LOG.info(context.getBinding().toString());
+            DeltaLogger.LOG.info(context.getRenderedSql());
+            DeltaLogger.LOG.info(context.getBinding().toString());
           }
         });
       }
 
-      LOG.info("DeltaLogger started with " + dbType + " database");
+      DeltaLogger.LOG.info("DeltaLogger started with " + dbType + " database");
     } catch (IOException e) {
       e.printStackTrace();
       // System.exit(0);
@@ -167,7 +165,7 @@ public class DatabaseManager implements Runnable {
       maxLifetime = Integer.parseInt(props.getProperty("maxLifetime", "290000"));
     } catch (Exception e) {
       maxLifetime = 290000;
-      LOG.warn("Invalid maxLifetime value. Using default " + maxLifetime);
+      DeltaLogger.LOG.warn("Invalid maxLifetime value. Using default " + maxLifetime);
     }
 
     config.setMaxLifetime(maxLifetime);
@@ -179,21 +177,58 @@ public class DatabaseManager implements Runnable {
     return new HikariDataSource(config);
   }
 
-  public void runScript(String path) throws IOException {
+  /**
+   * Run an SQL script
+   * @param path string asset path
+   * @throws IOException
+   * @return success boolean (all script commands match 0)
+   */
+  private boolean runScript(String path) throws IOException {
     String sql = preproccessSQL(
       Resources.toString(
         DatabaseManager.class.getResource(path), 
         StandardCharsets.UTF_8
       )
     );
-    jdbi.useHandle(handle -> {
-      handle.createScript(sql).execute();
-    });
+    int[] results = jdbi.withHandle(handle -> handle
+      .createScript(sql).execute()
+    );
+
+    return Arrays.stream(results).allMatch(i -> i == 0);
   }
 
+  /**
+   * Set schema version in kv_store table
+   * @param ver integer version
+   * @return success boolean
+   */
+  private boolean setDBSchemaVer(int ver) {
+    int res = jdbi.withHandle(handle -> handle
+      .createUpdate(String.join(" ",
+        "INSERT INTO kv_store (`key`,`value`) VALUES ('schema_version', :version)",
+        SQLUtils.onDuplicateKeyUpdate("schema_version"), "`value`=:version"
+      ))
+      .bind("version", Integer.toString(ver))
+      .execute()
+    );
+    return res == 1;
+  }
+
+  private void failOnFalse(boolean value, String errorMessage) {
+    if (!value) throw new Error(errorMessage);
+  }
+
+  /**
+   * Check for a valid schema. If outdated then run an update. If new then create
+   * fresh tables.
+   * @throws IOException
+   */
   public void checkValidSchema() throws IOException {
-    LOG.info("Checking for valid schema..");
-    runScript("/data/watchtower/kv_store_table.sql");
+    DeltaLogger.LOG.info("Checking for valid schema..");
+    failOnFalse(
+      runScript("/data/watchtower/kv_store_table.sql"),
+      "Problem creating kv table"
+    );
 
     String sver;
     try {
@@ -206,6 +241,15 @@ public class DatabaseManager implements Runnable {
       sver = "0";
     }
 
+    // Check if there are any tables at all
+    try {
+      jdbi.withHandle(handle -> handle
+        .execute("SELECT * FROM placements LIMIT 1")
+      );
+    } catch (UnableToExecuteStatementException e) {
+      sver = "-1";
+    }
+
     int version;
     try {
       version = Integer.parseInt(sver);
@@ -213,11 +257,17 @@ public class DatabaseManager implements Runnable {
       throw new Error("Invalid schema version");
     }
 
-    if (version == 0) {
+    if (version == -1) {
+      DeltaLogger.LOG.info("Creating first time SQL tables");
+      boolean success = 
+        runScript("/data/watchtower/schema.sql")
+        && setDBSchemaVer(1);
+    } else if (version == 0) {
       if (isMysql()) {
+        // if no schema ver and was MySQL then it has to be a WT DB
         String migrateSql = Resources.toString(
             DatabaseManager.class.getResource("/data/watchtower/migration/wt_to_bl.sql"), StandardCharsets.UTF_8);
-        LOG.info(String.join("\n", "",
+        DeltaLogger.LOG.info(String.join("\n", "",
           "Migrating WatchTower database to DeltaLogger database.",
           "This may take a few minutes to a few hours depending on the size of your database.",
           "This will start in 60 seconds. IF YOU WISH TO CANCEL THEN EXIT NOW."
@@ -227,30 +277,25 @@ public class DatabaseManager implements Runnable {
         } catch (InterruptedException e) {
           throw new Error("Cancelling pending migration...");
         }
-        LOG.info("Starting database migration now, do not exit!");
+        DeltaLogger.LOG.info("Starting database migration now, do not exit!");
         
         jdbi.withHandle(handle -> handle
           .createScript(migrateSql)
           .execute()
         );
 
-        jdbi.withHandle(handle -> handle
-          .createUpdate(String.join(" ",
-            "INSERT INTO kv_store (`key`,`value`) VALUES ('schema_version', :version)",
-            SQLUtils.onDuplicateKeyUpdate("schema_version"), "`value`=:version"
-          ))
-          .bind("version", "1")
-          .execute()
-        );
+        boolean success = setDBSchemaVer(1);
 
-        LOG.info("Database migration completed.");
+        DeltaLogger.LOG.info("Database migration completed.");
       }
       // TODO migrate blocklogger sqlite
     }
-
-    runScript("/data/watchtower/schema.sql");
   }
 
+  /**
+   * Add a QueueOperation to the DatabaseManager priority queue for processing.
+   * @param op
+   */
   public void queueOp(QueueOperation op) { pq.add(op); }
 
   public void processOps(List<QueueOperation> ops) {
@@ -285,7 +330,7 @@ public class DatabaseManager implements Runnable {
               batch.close();
             }
           } catch (Exception e) {
-            LOG.warn("Problem executing batches in handler");
+            DeltaLogger.LOG.warn("Problem executing batches in handler");
             e.printStackTrace();
           }
           i++;
@@ -293,7 +338,7 @@ public class DatabaseManager implements Runnable {
         }
       });
     } catch (Exception e) {
-      LOG.warn("Problem opening handle or something");
+      DeltaLogger.LOG.warn("Problem opening handle or something");
       e.printStackTrace();
     }
   }
@@ -309,18 +354,21 @@ public class DatabaseManager implements Runnable {
         if (queued.isEmpty()) continue;
         processOps(queued);
       } catch (InterruptedException e) {
-        LOG.info("Stopping DeltaLogger");
+        DeltaLogger.LOG.info("Stopping DeltaLogger");
         e.printStackTrace();
       }
     }
     tryToFinish();
   }
 
+  /**
+   * Try to process any leftover operations in the queue.
+   */
   public void tryToFinish() {
     ArrayList<QueueOperation> queued = new ArrayList<>(50);
     pq.drainTo(queued);
     if (queued.isEmpty()) return;
-    LOG.info("DeltaLogger: Processing leftover database operations...");
+    DeltaLogger.LOG.info("DeltaLogger: Processing leftover database operations...");
     processOps(queued);
   }
 

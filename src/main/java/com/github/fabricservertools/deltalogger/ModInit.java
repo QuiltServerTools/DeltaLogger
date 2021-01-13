@@ -17,9 +17,6 @@ import com.github.fabricservertools.deltalogger.dao.RegistryDAO;
 import com.github.fabricservertools.deltalogger.gql.ApiServer;
 import com.google.common.collect.Sets;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
@@ -31,7 +28,6 @@ import net.minecraft.util.WorldSavePath;
 
 public class ModInit implements ModInitializer {
   private static DatabaseManager dm;
-  public static final Logger LOG = LogManager.getLogger();
   public static Properties CONFIG;
   public static Thread dmThread;
 
@@ -57,7 +53,7 @@ public class ModInit implements ModInitializer {
         ioe.printStackTrace();
       }
 
-      LOG.info("Optional configuration for DeltaLogger created in `config` directory. Using SQLite by default.");
+      DeltaLogger.LOG.info("Optional configuration for DeltaLogger created in `config` directory. Using SQLite by default.");
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -112,7 +108,7 @@ public class ModInit implements ModInitializer {
         e.printStackTrace();
       }
       if (i == 60) {
-        LOG.warn("DeltaLogger: Taking too long to finish up queue!");
+        DeltaLogger.LOG.warn("Taking too long to finish up queue!");
         ModInit.dmThread.interrupt();
       }
     }

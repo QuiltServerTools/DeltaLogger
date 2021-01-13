@@ -1,7 +1,7 @@
 package com.github.fabricservertools.deltalogger.mixins;
 
 import com.github.fabricservertools.deltalogger.DatabaseManager;
-import com.github.fabricservertools.deltalogger.ModInit;
+import com.github.fabricservertools.deltalogger.DeltaLogger;
 import com.github.fabricservertools.deltalogger.dao.BlockDAO;
 
 import org.spongepowered.asm.mixin.Mixin;
@@ -59,7 +59,7 @@ public abstract class BlockItemMixin extends Item {
         java.time.Instant.now()
       ));
     } catch (Exception e) {
-      ModInit.LOG.warn("Problem in WatchTower placement");
+      DeltaLogger.LOG.warn("Problem in placement");
       e.printStackTrace();
     }
   }
