@@ -37,7 +37,8 @@ public class CriteriumParser implements SuggestionProvider<ServerCommandSource> 
     }
 
     @Override
-    public CompletableFuture<Suggestions> getSuggestions(CommandContext<ServerCommandSource> context, SuggestionsBuilder builder) throws CommandSyntaxException {
+    public CompletableFuture<Suggestions> getSuggestions(CommandContext<ServerCommandSource> context,
+            SuggestionsBuilder builder) throws CommandSyntaxException {
         String input = builder.getInput();
         int lastSpaceIndex = input.lastIndexOf(' ');
         char[] inputArr = input.toCharArray();
@@ -77,7 +78,7 @@ public class CriteriumParser implements SuggestionProvider<ServerCommandSource> 
         return builder.buildFuture();
     }
 
-    private SuggestionsBuilder suggestCriteria (SuggestionsBuilder builder) {
+    private SuggestionsBuilder suggestCriteria(SuggestionsBuilder builder) {
         String input = builder.getRemaining().toLowerCase();
         for (String criterium : criteria) {
             if (criterium.startsWith(input)) {
@@ -87,16 +88,17 @@ public class CriteriumParser implements SuggestionProvider<ServerCommandSource> 
         return builder;
     }
 
-    public HashMap<String, Object> rawProperties (String s) throws CommandSyntaxException {
+    public HashMap<String, Object> rawProperties(String s) throws CommandSyntaxException {
         StringReader reader = new StringReader(s);
         HashMap<String, Object> result = new HashMap<>();
         while (reader.canRead()) {
-                String propertyName = reader.readStringUntil(':').trim();
-                Suggestor suggestor = this.criteriumSuggestors.get(propertyName);
-                if (suggestor == null) {
-                    throw new SimpleCommandExceptionType(new LiteralMessage("Unknown property value: " + propertyName)).create();
-                }
-                result.put(propertyName, suggestor.parse(reader));
+            String propertyName = reader.readStringUntil(':').trim();
+            Suggestor suggestor = this.criteriumSuggestors.get(propertyName);
+            if (suggestor == null) {
+                throw new SimpleCommandExceptionType(new LiteralMessage("Unknown property value: " + propertyName))
+                        .create();
+            }
+            result.put(propertyName, suggestor.parse(reader));
         }
         return result;
     }
@@ -106,16 +108,17 @@ public class CriteriumParser implements SuggestionProvider<ServerCommandSource> 
         private SuggestionProvider<ServerCommandSource> suggestionProvider;
         private ArgumentType argumentType;
 
-        public Suggestor (SuggestionProvider<ServerCommandSource> suggestionProvider) {
+        public Suggestor(SuggestionProvider<ServerCommandSource> suggestionProvider) {
             this.suggestionProvider = suggestionProvider;
             this.useSuggestionProvider = true;
         }
 
-        public Suggestor (ArgumentType argumentType) {
+        public Suggestor(ArgumentType argumentType) {
             this.argumentType = argumentType;
         }
 
-        public CompletableFuture<Suggestions> listSuggestions(CommandContext<ServerCommandSource> context, SuggestionsBuilder builder) {
+        public CompletableFuture<Suggestions> listSuggestions(CommandContext<ServerCommandSource> context,
+                SuggestionsBuilder builder) {
             if (this.useSuggestionProvider) {
                 try {
                     return this.suggestionProvider.getSuggestions(context, builder);
@@ -130,7 +133,8 @@ public class CriteriumParser implements SuggestionProvider<ServerCommandSource> 
         public int getRemaining(String s) {
             if (this.useSuggestionProvider) {
                 int spaceIndex = s.lastIndexOf(' ');
-                if (spaceIndex == -1) return -1;
+                if (spaceIndex == -1)
+                    return -1;
                 return s.length() - s.lastIndexOf(' ');
             }
             try {

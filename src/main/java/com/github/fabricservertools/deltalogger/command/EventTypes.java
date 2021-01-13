@@ -4,5 +4,5 @@ public enum EventTypes {
     PLACED,
     BROKEN,
     ADDED,
-    REMOVED
+    TAKEN
 }

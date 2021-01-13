@@ -15,37 +15,37 @@ import com.github.fabricservertools.deltalogger.dao.DAO;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 public class SQLCommand {
-    public static void register(LiteralCommandNode root) {
-        LiteralCommandNode<ServerCommandSource> inspectNode = CommandManager.literal("sql")
-                .requires(source -> source.hasPermissionLevel(4))
-                .then(CommandManager.literal("block")
-                        .then(CommandManager.argument("query", MessageArgumentType.message())
-                                .executes(context -> queryBlock(context.getSource(),
-                                        MessageArgumentType.getMessage(context, "query")))))
-                .then(CommandManager.literal("transaction")
-                        .then(CommandManager.argument("query", MessageArgumentType.message())
-                                .executes(scs -> queryTransaction(scs.getSource(),
-                                        MessageArgumentType.getMessage(scs, "query")))))
-                .build();
+        public static void register(LiteralCommandNode root) {
+                LiteralCommandNode<ServerCommandSource> inspectNode = CommandManager.literal("sql")
+                                .requires(source -> source.hasPermissionLevel(4))
+                                .then(CommandManager.literal("block").then(CommandManager
+                                                .argument("query", MessageArgumentType.message())
+                                                .executes(context -> queryBlock(context.getSource(),
+                                                                MessageArgumentType.getMessage(context, "query")))))
+                                .then(CommandManager.literal("transaction").then(CommandManager
+                                                .argument("query", MessageArgumentType.message())
+                                                .executes(scs -> queryTransaction(scs.getSource(),
+                                                                MessageArgumentType.getMessage(scs, "query")))))
+                                .build();
 
-        root.addChild(inspectNode);
-    }
+                root.addChild(inspectNode);
+        }
 
-    private static int queryBlock(ServerCommandSource scs, Text sql) throws CommandSyntaxException {
-        MutableText message = DAO.transaction.customQuery(sql.asString()).stream().map(p -> p.getText())
-                .reduce((p1, p2) -> Chat.concat("\n", p1, p2))
-                .map(txt -> Chat.concat("\n", Chat.text("Results for custom block query"), txt))
-                .orElse(Chat.text("No results found with the terms specified"));
-        scs.getPlayer().sendSystemMessage(message, Util.NIL_UUID);
-        return 1;
-    }
+        private static int queryBlock(ServerCommandSource scs, Text sql) throws CommandSyntaxException {
+                MutableText message = DAO.transaction.customQuery(sql.asString()).stream().map(p -> p.getText())
+                                .reduce((p1, p2) -> Chat.concat("\n", p1, p2))
+                                .map(txt -> Chat.concat("\n", Chat.text("Results for custom block query"), txt))
+                                .orElse(Chat.text("No results found with the terms specified"));
+                scs.getPlayer().sendSystemMessage(message, Util.NIL_UUID);
+                return 1;
+        }
 
-    private static int queryTransaction(ServerCommandSource scs, Text sql) throws CommandSyntaxException {
-        MutableText message = DAO.transaction.customQuery(sql.asString()).stream().map(p -> p.getText())
-                .reduce((p1, p2) -> Chat.concat("\n", p1, p2))
-                .map(txt -> Chat.concat("\n", Chat.text("Results for custom transaction query"), txt))
-                .orElse(Chat.text("No results found with the terms specified"));
-        scs.getPlayer().sendSystemMessage(message, Util.NIL_UUID);
-        return 1;
-    }
+        private static int queryTransaction(ServerCommandSource scs, Text sql) throws CommandSyntaxException {
+                MutableText message = DAO.transaction.customQuery(sql.asString()).stream().map(p -> p.getText())
+                                .reduce((p1, p2) -> Chat.concat("\n", p1, p2))
+                                .map(txt -> Chat.concat("\n", Chat.text("Results for custom transaction query"), txt))
+                                .orElse(Chat.text("No results found with the terms specified"));
+                scs.getPlayer().sendSystemMessage(message, Util.NIL_UUID);
+                return 1;
+        }
 }

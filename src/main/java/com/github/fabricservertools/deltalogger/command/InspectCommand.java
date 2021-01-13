@@ -20,7 +20,6 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-
 public class InspectCommand {
     boolean defaultDim;
     private static HashMap<PlayerEntity, Boolean> toolMap = new HashMap<>();
@@ -31,15 +30,13 @@ public class InspectCommand {
 
     public static void register(LiteralCommandNode root) {
         LiteralCommandNode<ServerCommandSource> inspectNode = CommandManager
-                .literal("inspect").executes(context -> toggleTool(context))
-                    .then(CommandManager.argument("pos", BlockPosArgumentType.blockPos())
-                        .executes(context -> inspect(context, null))
-                            .then(CommandManager.argument("dimension", DimensionArgumentType.dimension())
-                                .executes(context -> inspect(
-                                    context,
-                                    DimensionArgumentType.getDimensionArgument(context, "dimension")))
-                                ))
-        .build();
+                .literal("inspect").executes(context -> toggleTool(context)).then(
+                        CommandManager.argument("pos", BlockPosArgumentType.blockPos())
+                                .executes(context -> inspect(context, null))
+                                .then(CommandManager.argument("dimension", DimensionArgumentType.dimension())
+                                        .executes(context -> inspect(context,
+                                                DimensionArgumentType.getDimensionArgument(context, "dimension")))))
+                .build();
 
         root.addChild(inspectNode);
     }
@@ -47,15 +44,15 @@ public class InspectCommand {
     private static int toggleTool(CommandContext<ServerCommandSource> ctx) {
         PlayerEntity p;
         try {
-          p = ctx.getSource().getPlayer();
-          boolean mode = !toolMap.getOrDefault(p, false);
-          toolMap.put(p, mode);
-          p.sendMessage(new LiteralText("DeltaLogger inspector mode " + (mode ? "on" : "off")), true);
+            p = ctx.getSource().getPlayer();
+            boolean mode = !toolMap.getOrDefault(p, false);
+            toolMap.put(p, mode);
+            p.sendMessage(new LiteralText("DeltaLogger inspector mode " + (mode ? "on" : "off")), true);
         } catch (CommandSyntaxException e) {
-          e.printStackTrace();
+            e.printStackTrace();
         }
         return 1;
-      }
+    }
 
     public static boolean hasToolEnabled(PlayerEntity p) {
         return toolMap.getOrDefault(p, false);
@@ -68,15 +65,13 @@ public class InspectCommand {
         // Use player current dim otherwise if null arg
         Identifier dimension = dim == null ? world.getRegistryKey().getValue() : dim.getRegistryKey().getValue();
 
-        MutableText placementMessage = DAO.block
-            .getLatestPlacementsAt(dimension, pos, 0, 10).stream()
-            .map(p -> p.getText())
-            .reduce((p1, p2) -> Chat.concat("\n", p1, p2))
-            .map(txt -> Chat.concat("\n", Chat.text("Placement history"), txt))
-            .orElse(Chat.text("No placements found at " + pos.toString()));
-        
+        MutableText placementMessage = DAO.block.getLatestPlacementsAt(dimension, pos, 0, 10).stream()
+                .map(p -> p.getText()).reduce((p1, p2) -> Chat.concat("\n", p1, p2))
+                .map(txt -> Chat.concat("\n", Chat.text("Placement history"), txt))
+                .orElse(Chat.text("No placements found at " + pos.toString()));
+
         // FIXME: fix getting block from server console
         Chat.send(scs.getSource().getPlayer(), placementMessage);
         return 1;
-      }
+    }
 }

@@ -25,7 +25,6 @@ import static net.minecraft.server.command.CommandManager.literal;
 
 public class SearchCommand {
     boolean defaultDim;
-    private static ChatPrint chat = new ChatPrint();
     private static HashMap<PlayerEntity, Boolean> toolMap = new HashMap<>();
 
     public static void register(LiteralCommandNode root) {
@@ -79,20 +78,16 @@ public class SearchCommand {
             if (!action.contains("everything")) {
 
                 if (action.contains("placed")) {
-                    sqlPlace += "AND placed = ";
-                    sqlPlace += "1 ";
+                    sqlPlace += "AND placed = 1 ";
                     send(scs, sqlPlace);
                 } else if (action.contains("broken")) {
-                    sqlPlace += "AND placed = ";
-                    sqlPlace += "0 ";
+                    sqlPlace += "AND placed = 0 ";
                     send(scs, sqlPlace);
                 } else if (action.contains("added")) {
-                    sqlContainer += "AND placed = ";
-                    sqlContainer += "AND placed = ";
+                    sqlContainer += "AND item_count > 0 ";
                     sendTransactions(scs, sqlContainer);
                 } else if (action.contains("removed")) {
-                    sqlContainer += "AND placed = ";
-                    sqlContainer += "AND placed = ";
+                    sqlContainer += "AND item_count < 0 ";
                     sendTransactions(scs, sqlContainer);
                 }
             }
