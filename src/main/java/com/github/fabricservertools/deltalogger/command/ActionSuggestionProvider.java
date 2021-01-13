@@ -15,12 +15,12 @@ public class ActionSuggestionProvider implements SuggestionProvider<ServerComman
         String current = builder.getRemaining().toLowerCase();
 
         builder.suggest("everything");
-
-        /*for (LoggedEventType eventType : LoggedEventType.values()) {
-            if (eventType.name().contains(current)) {
-                builder.suggest(eventType.name());
+        
+        for (EventTypes actions : EventTypes.values()) {
+            if (actions.name().contains(current)) {
+                builder.suggest(actions.name().toLowerCase());
             }
-        }*/
+        }
         return builder.buildFuture();
     }
 }

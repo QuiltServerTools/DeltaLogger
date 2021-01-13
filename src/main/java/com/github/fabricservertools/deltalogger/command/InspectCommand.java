@@ -3,9 +3,7 @@ package com.github.fabricservertools.deltalogger.command;
 import java.util.HashMap;
 
 import com.github.fabricservertools.deltalogger.Chat;
-import com.github.fabricservertools.deltalogger.DatabaseManager;
 import com.github.fabricservertools.deltalogger.dao.DAO;
-import com.github.fabricservertools.deltalogger.util.ChatPrint;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.LiteralCommandNode;
@@ -18,7 +16,6 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -26,7 +23,6 @@ import net.minecraft.world.World;
 
 public class InspectCommand {
     boolean defaultDim;
-    private static ChatPrint chat = new ChatPrint();
     private static HashMap<PlayerEntity, Boolean> toolMap = new HashMap<>();
 
     public InspectCommand(boolean defaultDim) {
