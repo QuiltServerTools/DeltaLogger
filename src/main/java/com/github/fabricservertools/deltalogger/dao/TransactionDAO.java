@@ -46,7 +46,7 @@ public class TransactionDAO {
   public List<Transaction> getTransactionsAt(Identifier dimension, BlockPos pos, int limit) {
     try {
       return jdbi.withHandle(handle -> handle.select(
-          String.join(" ", SELECT_TRANSACTIONS, "FROM container_transactions as CT", JOIN_TRANSACTIONS,
+          String.join(" ", "SELECT CT.id, C.uuid, DATETIME(CT.date) as `date`, CT.item_count, P.name as `player_name`", "FROM container_transactions as CT", JOIN_TRANSACTIONS,
               "WHERE C.x=? AND C.y=? AND C.z=? AND DT.name = ?", "ORDER BY CT.date DESC LIMIT ?"),
           pos.getX(), pos.getY(), pos.getZ(), dimension.toString(), limit).mapTo(Transaction.class).list());
     } catch (Exception e) {

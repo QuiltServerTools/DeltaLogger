@@ -60,14 +60,14 @@ public class SearchCommand {
         if (propertyMap.containsKey("target")) {
             GameProfileArgumentType.GameProfileArgument targets = (GameProfileArgumentType.GameProfileArgument)propertyMap.get("targets");
             //runner.fillParameter("targets", targets.getNames(scs).stream().map(gp -> gp.getId().toString()).toArray());
-            sqlPlace += " AND player_id = (SELECT  id FROM players WHERE uuid = "+ targets.getNames(scs).stream().map(gp -> gp.getId().toString()).toArray() + ")";
-            sqlContainer += " AND player_id = (SELECT  id FROM players WHERE uuid = "+ targets.getNames(scs).stream().map(gp -> gp.getId().toString()).toArray()+")";
+            sqlPlace += "AND player_id = (SELECT  id FROM players WHERE uuid = "+ targets.getNames(scs).stream().map(gp -> gp.getId().toString()).toArray() + ") ";
+            sqlContainer += "AND player_id = (SELECT  id FROM players WHERE uuid = "+ targets.getNames(scs).stream().map(gp -> gp.getId().toString()).toArray()+") ";
         }
         if (propertyMap.containsKey("block")) {
             BlockStateArgument block = (BlockStateArgument)propertyMap.get("block");
             //runner.fillParameter("block", Registry.BLOCK.getId(block.getBlockState().getBlock()).toString() + "%");
-            sqlPlace += " AND block = (SELECT id FROM registry WHERE `name` = "+Registry.BLOCK.getId(block.getBlockState().getBlock()).toString() + ")";
-            sqlContainer += " AND item = (SELECT id FROM registry WHERE `name` = "+Registry.BLOCK.getId(block.getBlockState().getBlock()).toString() + ")";
+            sqlPlace += "AND type = (SELECT id FROM registry WHERE `name` = \""+Registry.BLOCK.getId(block.getBlockState().getBlock()).toString() + "\") ";
+            sqlContainer += "AND \"item_type\" = (SELECT id FROM registry WHERE `name` = \""+Registry.BLOCK.getId(block.getBlockState().getBlock()).toString() + "\") ";
         }
         if (propertyMap.containsKey("range")) {
             int range = (Integer)propertyMap.get("range");
@@ -83,21 +83,21 @@ public class SearchCommand {
             if(!action.contains("everything")) {
 
                 if(action.contains("placed")) {
-                    sqlPlace += " AND placed = ";
-                    sqlPlace += "1";
+                    sqlPlace += "AND placed = ";
+                    sqlPlace += "1 ";
                     send(scs, sqlPlace);
                 } else if (action.contains("broken")) {
-                    sqlPlace += " AND placed = ";
-                    sqlPlace += "0";
+                    sqlPlace += "AND placed = ";
+                    sqlPlace += "0 ";
                     send(scs, sqlPlace);
                 } else if (action.contains("added")) {
-                    sqlContainer += " AND placed = ";
-                    sqlContainer += " AND placed = ";
+                    sqlContainer += "AND placed = ";
+                    sqlContainer += "AND placed = ";
                     sendTransactions(scs, sqlContainer);
                 }
                 else if (action.contains("removed")) {
-                    sqlContainer += " AND placed = ";
-                    sqlContainer += " AND placed = ";
+                    sqlContainer += "AND placed = ";
+                    sqlContainer += "AND placed = ";
                     sendTransactions(scs, sqlContainer);
                 }
             }
