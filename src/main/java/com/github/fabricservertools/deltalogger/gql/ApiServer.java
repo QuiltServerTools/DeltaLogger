@@ -29,7 +29,6 @@ public class ApiServer {
     }).start(8080);
 
     app
-      .get("/hello", ctx -> ctx.result("Hello World"))
       .post("/auth", AuthHandlers.provideJwtHandler)
       .before("/auth/change-pass", AuthHandlers.validateHandler)
       .post("/auth/change-pass", AuthHandlers.changePassHandler)

@@ -259,9 +259,11 @@ public class DatabaseManager implements Runnable {
 
     if (version == -1) {
       DeltaLogger.LOG.info("Creating first time SQL tables");
-      boolean success = 
+      failOnFalse(
         runScript("/data/watchtower/schema.sql")
-        && setDBSchemaVer(1);
+        && setDBSchemaVer(1),
+        "Failed creating SQL tables"
+      );
     } else if (version == 0) {
       if (isMysql()) {
         // if no schema ver and was MySQL then it has to be a WT DB
@@ -284,7 +286,11 @@ public class DatabaseManager implements Runnable {
           .execute()
         );
 
-        boolean success = setDBSchemaVer(1);
+        failOnFalse(
+          runScript("/data/watchtower/schema.sql")
+          && setDBSchemaVer(1),
+          "Failed creating SQL tables"
+        );
 
         DeltaLogger.LOG.info("Database migration completed.");
       }
@@ -368,7 +374,7 @@ public class DatabaseManager implements Runnable {
     ArrayList<QueueOperation> queued = new ArrayList<>(50);
     pq.drainTo(queued);
     if (queued.isEmpty()) return;
-    DeltaLogger.LOG.info("DeltaLogger: Processing leftover database operations...");
+    DeltaLogger.LOG.info("Processing leftover database operations...");
     processOps(queued);
   }
 

@@ -31,7 +31,7 @@ public class Validators {
   private Validation<String, Integer> validateLimit(int limit, int maxLimit) {
     return limit < 0
       ? Validation.invalid("Limit cannot be less than 0")
-      : limit >= maxLimit
+      : limit > maxLimit
       ? Validation.invalid("Limit cannot the greater than " + maxLimit)
       : Validation.valid(limit);
   }
