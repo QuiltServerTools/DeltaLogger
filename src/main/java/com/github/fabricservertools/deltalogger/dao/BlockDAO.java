@@ -91,6 +91,31 @@ public class BlockDAO {
       .list()
     );
   }
+  public List<Placement> rollbackQuery(Identifier dimension, BlockPos pos, int idOffset, int limit) {
+    try {
+      return jdbi.withHandle(handle -> handle
+        .createQuery(
+          String.join(" ",
+            SELECT_PLACEMENT,
+            "FROM (",
+              "SELECT * FROM placements",
+              "WHERE placements.id < ", SQLUtils.offsetOrZeroLatest("placements", "placements.id", idOffset),
+              "AND x = :x AND y = :y AND z = :z AND dimension_id = (SELECT id FROM registry WHERE `name` = :dim)",
+              "ORDER BY `id` DESC LIMIT :lim",
+            ") as PL",
+            JOIN_PLACEMENT
+          )
+        )
+        .bind("x", pos.getX()).bind("y", pos.getY()).bind("z", pos.getZ())
+        .bind("dim", dimension.toString())
+        .bind("lim", limit)
+        .mapTo(Placement.class).list()
+      );
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return new ArrayList<>();
+  }
 
   /**
    * Get latest placements in dim at coords

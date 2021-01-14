@@ -19,6 +19,7 @@ public final class Commands {
         InspectCommand.register(deltaNode);
         SearchCommand.register(deltaNode);
         SQLCommand.register(deltaNode);
+        RollbackCommand.register(deltaNode);
         registerResetPass(deltaNode);
     }
 
