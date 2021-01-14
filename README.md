@@ -41,12 +41,27 @@ This mod also requires the fabric api mod, which you can find [here](https://www
 ## In Game Commands
 
 - `/dl inspect` turns diamond swords into an inspect tool. Whack a block or container to see recent interactions with the target.
-- `/dl inspect <pos>` will show database records for the block position provided.
-- `/dl search <args>` Builds a database query with the parameters specified (Not working)
+- `/dl inspect <pos>` Shows database records for the block position provided.
+- `/dl search <args>` Builds a database query with the parameters specified
+- `/dl sql (block|transaction) <query>` Runs a query on the database with the SQL specified
 
 ## Support
 
 Support can be obtained on the discord found [here](https://discord.gg/UxHnDWr)
+
 ## License
 
 Licensed under AGPL with additional linking permission. See LICENSE file.
+
+## Build
+
+Windows:
+`gradlew.bat build`
+Linux/macOS
+`./gradlew build`
+
+The mod jars are then found in `build/libs`
+
+## Contribute
+
+Feel free to fork and open a pull request with features you add. We do suggest asking on the discord about a feature before spending loads on time on it!
