@@ -6,6 +6,7 @@ import { UserInfo, useUserContext } from './UserContext'
 import Dashboard from './pages/Dashboard'
 import Players from './pages/Players'
 import Login from './pages/Login'
+import Logout from './pages/Logout'
 
 import ChangePass from './pages/ChangePass'
 import CenterFormLayout from './pages/CenterFormLayout'
@@ -38,7 +39,7 @@ function Routes() {
   React.useEffect(() => {
     if (token) {
       const jwt = jwtDecode<UserInfo>(token)
-      setUserInfo(jwt);
+      setUserInfo(jwt)
     }
   }, [token])
 
@@ -47,6 +48,7 @@ function Routes() {
       <ProtectedRoute component={NavLayout} path="/">
         <Dashboard path="/" />
         <Players path="/players" />
+        <Logout path="/logout" />
       </ProtectedRoute>
       <CenterFormLayout path="/login">
         <ProtectedRoute component={ChangePass} path="/changepass" />

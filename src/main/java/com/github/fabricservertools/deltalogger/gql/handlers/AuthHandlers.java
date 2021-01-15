@@ -40,7 +40,7 @@ public class AuthHandlers {
       resp.put("token", oToken.get());
       ctx.json(resp);
     } else {
-      throw new BadRequestResponse();
+      throw new UnauthorizedResponse();
     }
   };
 

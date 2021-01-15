@@ -1,4 +1,4 @@
-import * as React from 'react'
+import React from 'react'
 import {
   Button,
   FormControl,
@@ -6,12 +6,16 @@ import {
   Input,
   Stack,
   Heading,
+  Code,
+  Alert,
+  AlertIcon,
+  AlertTitle,
 } from '@chakra-ui/react'
 import jwtDecode from 'jwt-decode'
 import { navigate } from '@reach/router'
 
 import constants from '../constants'
-import { fetchJson } from '../util'
+import { CredentialError, fetchJson } from '../util'
 import { useUserContext, UserInfo } from '../UserContext'
 
 type Props = {
@@ -27,13 +31,26 @@ async function fetchAuthToken(username: string, password: string) {
 }
 
 function Login(props: Props) {
-  const [username, setUsername] = React.useState<string>("");
-  const [password, setPassword] = React.useState<string>("");
-  const { setUserInfo } = useUserContext();
+  const [username, setUsername] = React.useState<string>('')
+  const [password, setPassword] = React.useState<string>('')
+  const [error, setError] = React.useState<string>()
+  const { setUserInfo } = useUserContext()
+
   const submitLogin = async (evt: React.FormEvent<HTMLFormElement>) => {
     evt.preventDefault()
-    const token = await fetchAuthToken(username, password)
-    localStorage.setItem("token", token)
+    let token
+    try {
+      token = await fetchAuthToken(username, password)
+    } catch (err) {
+      console.log('ERR', err, err instanceof CredentialError, err.name)
+      if (err.name === 'CredentialError') {
+      console.log('ERR', err)
+
+        setError(err.message)
+      }
+      return
+    }
+    localStorage.setItem('token', token)
     const jwt = jwtDecode<UserInfo>(token);
     setUserInfo(jwt)
     if (jwt.temporary) {
@@ -46,7 +63,13 @@ function Login(props: Props) {
 
   return (
     <React.Fragment>
-      <Heading size="lg" mb="1em">{constants.APP_NAME}</Heading>
+      <Heading size="lg" mb="4">{constants.APP_NAME}</Heading>
+      {error ? (
+        <Alert status="error" mb="4">
+          <AlertIcon />
+          <AlertTitle mr={2}>{error}</AlertTitle>
+        </Alert>
+      ) : null}
       <form onSubmit={submitLogin}>
         <Stack spacing={3}>
           <FormControl>

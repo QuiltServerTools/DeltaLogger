@@ -3,30 +3,42 @@ import {
   Box,
   Grid,
   GridItem,
+  Icon,
   ListItem,
   Link,
   UnorderedList,
+  Flex,
+  HStack,
 } from '@chakra-ui/react'
 import { Link as ReachLink } from '@reach/router'
 import styled from 'styled-components'
+import { HiLogout } from 'react-icons/hi'
+import { FaDiscord, FaGithubAlt } from 'react-icons/fa'
 
 import DeltaLogo from '../assets/delta_logo_simple.svg'
 import ErrorBoundary from '../components/ErrorBoundary'
+import { IconType } from 'react-icons'
 
-interface NavigationItemProps {
+interface NavigationItemProps extends React.ComponentProps<typeof Link> {
   title: string;
   to: string;
+  icon?: React.ReactNode;
 }
 
-function NavigationItem(props: NavigationItemProps) {
+function NavigationItem({ to, title, isExternal, icon, ...rest }: NavigationItemProps) {
   return (
     <ListItem>
       <Link
-        as={ReachLink}
-        to={props.to}
+        as={!isExternal ? ReachLink : undefined}
+        isExternal={isExternal}
+        href={isExternal ? to : undefined}
+        to={to}
         fontSize="xl"
+        textAlign="center"
+        {...rest}
       >
-        { props.title }
+        {icon ? icon : null }
+        { title }
       </Link>
     </ListItem>
   )
@@ -34,21 +46,50 @@ function NavigationItem(props: NavigationItemProps) {
 
 function Navigation() {
   return (
-    <React.Fragment>
+    <Flex flexDir="column" h="100%">
       <Box mb="2em">
         <DeltaLogo width={50} height={50} />
       </Box>
-      <nav>
-        <UnorderedList
-          styleType="none"
-          ml={0}
-          spacing={3}
-        >
-          <NavigationItem title="Dashboard" to="/" />
-          <NavigationItem title="Players" to="/players" />
-        </UnorderedList>
-      </nav>
-    </React.Fragment>
+      <Flex flexDir="column" flex={1}>
+        <Box as="nav" flex={1}>
+          <UnorderedList
+            styleType="none"
+            ml={0}
+            spacing={3}
+          >
+            <NavigationItem title="Dashboard" to="/" />
+            <NavigationItem title="Players" to="/players" />
+          </UnorderedList>
+        </Box>
+        <Box>
+          <UnorderedList
+            styleType="none"
+            ml={0}
+            spacing={3}
+            color="gray.600"
+          >
+            <NavigationItem
+              title="Github" to="https://github.com/fabricservertools/DeltaLogger"
+              isExternal
+              fontSize="md"
+              icon={<Icon as={FaDiscord} mb="3px" mr="1" />}
+            />
+            <NavigationItem
+              title="Discord" to="https://discord.gg/UEAZsRdxe2"
+              isExternal
+              fontSize="md"
+              icon={<Icon as={FaGithubAlt} mb="3px" mr="1" />}
+            />
+            <NavigationItem
+              title="Logout" to="/logout"
+              fontSize="md"
+              icon={<Icon as={HiLogout} mb="3px" mr="1" />}
+            />
+          </UnorderedList>
+        </Box>
+      </Flex>
+
+    </Flex>
   )
 }
 
