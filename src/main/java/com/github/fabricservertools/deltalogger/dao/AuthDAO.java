@@ -6,6 +6,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.util.Base64;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -21,6 +22,8 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.github.fabricservertools.deltalogger.SQLUtils;
 
 import org.jdbi.v3.core.Jdbi;
+
+import io.vavr.control.Either;
 
 public class AuthDAO {
   private Jdbi jdbi;
@@ -95,10 +98,24 @@ public class AuthDAO {
     return Optional.ofNullable(djwt);
   }
 
-  public String issueTemporaryPass(UUID user, boolean isLevel4Op) {
+  public Either<String, String> issueTemporaryPass(UUID user, boolean isLevel4Op) {
     byte[] salt = genSalt();
     String tempPass = UUID.randomUUID().toString().replaceAll("-", "").substring(0, 10);
     String hashedPass;
+
+    // Check if there is more than one onboarding user with same name and fail if so
+    List<Integer> ls = jdbi.withHandle(handle -> handle
+      .select(
+        "SELECT 1 FROM players WHERE UPPER(name) = (SELECT UPPER(name) FROM players WHERE uuid=?)",
+        user.toString()
+      )
+      .mapTo(Integer.class)
+      .list()
+    );
+    if (ls.size() > 1) {
+      return Either.left("Could not issue temporary password: your username is duplicated in the system. Did you login with offline mode?");
+    }
+
     try {
       hashedPass = b64Encode(hashPass(tempPass, salt));
       jdbi.withHandle(handle -> {
@@ -120,7 +137,7 @@ public class AuthDAO {
       e.printStackTrace();
     }
 
-    return tempPass;
+    return Either.right(tempPass);
   }
 
   public Optional<Map<String, Object>> getUserFromUserName(String username) {
