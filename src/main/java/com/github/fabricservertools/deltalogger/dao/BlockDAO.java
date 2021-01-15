@@ -78,6 +78,13 @@ public class BlockDAO {
   public List<Placement> customQuery(String sql) {
     return jdbi.withHandle(handle -> handle.select(sql, 100)).mapTo(Placement.class).list();
   }
+
+  /**
+   * Get latest placements anywhere
+   * @param idOffset must be the id of the row to offset from, if offset is 0 then get latest
+   * @param limit the number of rows to return
+   * @return
+   */
   public List<Placement> getLatestPlacements(int idOffset, int limit) {
     return jdbi.withHandle(handle -> handle
       .select(String.join(" ",

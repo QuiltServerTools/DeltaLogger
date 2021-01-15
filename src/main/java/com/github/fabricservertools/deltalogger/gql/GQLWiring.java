@@ -83,8 +83,17 @@ public class GQLWiring {
             )
             .getOrElseGet(GQLWiring::errResult)
           )
-          .dataFetcher("transactions", dfe -> DAO.transaction
-            .getTransactions())
+          .dataFetcher("transactions", dfe -> validators
+            .validatePagination(
+              getArgOrElse(dfe, "offset", 0),
+              getArgOrElse(dfe, "limit", 10), // FIXME change to applicative validation?
+              100
+            )
+            .map(tup ->
+              dataResult(DAO.transaction.getLatestTransactions(tup._1, tup._2))
+            )
+            .getOrElseGet(GQLWiring::errResult)
+          )
         )
         .build();
   }

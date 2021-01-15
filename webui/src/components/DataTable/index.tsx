@@ -18,18 +18,29 @@ interface DataTableProps<D extends object> {
   data: D[];
   columns: Array<Column<D>>;
   loading: boolean;
-  rowHeight: number;
-  loadMoreItems: InfiniteLoader['props']['loadMoreItems'];
-  isItemLoaded: InfiniteLoader['props']['isItemLoaded'];
+  rowHeight?: number;
+  /**
+   * Whether to load more items when scroll reaches the end of the list
+   */
+  infinityLoading?: boolean;
+  /**
+   * react-window-infinite-loader' prop
+   */
+  loadMoreItems?: InfiniteLoader['props']['loadMoreItems'];
+  /**
+   * react-window-infinite-loader' prop
+   */
+  isItemLoaded?: InfiniteLoader['props']['isItemLoaded'];
 }
 
 function DataTable<D extends object>({
   loading,
   data = [],
   columns = [],
-  loadMoreItems,
-  isItemLoaded,
-  rowHeight,
+  infinityLoading = true,
+  loadMoreItems = async () => null,
+  isItemLoaded = () => true,
+  rowHeight = 30,
 }: DataTableProps<D>) {
   const defaultColumn = React.useMemo(() => ({
     minWidth: 30,
@@ -81,7 +92,7 @@ function DataTable<D extends object>({
     </Box>
   )
 
-  const itemCount = rows.length + 100
+  const itemCount = infinityLoading ? rows.length + 100 : rows.length
 
   return (
     <Box

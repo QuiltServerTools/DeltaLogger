@@ -7,7 +7,7 @@ type Query {
   playerById(id: Int): Player
   playerByUUID(uuid: ID): Player
   placements(offset: Int, limit: Int): [Placement]!
-  transactions: [Transaction]!
+  transactions(offset: Int, limit: Int): [Transaction]!
 }
 
 type Player {
