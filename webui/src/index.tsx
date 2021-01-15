@@ -4,7 +4,7 @@ import { ChakraProvider } from '@chakra-ui/react'
 import { Router, Redirect, useLocation } from '@reach/router'
 import { Helmet } from 'react-helmet'
 import jwtDecode from 'jwt-decode'
-import { ApolloClient, ApolloProvider, createHttpLink, InMemoryCache } from '@apollo/client';
+import { ApolloClient, ApolloProvider, createHttpLink, InMemoryCache } from '@apollo/client'
 import { setContext } from '@apollo/client/link/context'
 
 import { UserContextProvider, UserInfo, useUserContext } from './UserContext'
@@ -17,6 +17,7 @@ import ChangePass from './pages/ChangePass'
 import CenterFormLayout from './pages/CenterFormLayout'
 import NavLayout from './pages/NavLayout'
 import { isDevEnv } from './util'
+import cacheSettings from './cacheSettings'
 
 const httpLink = createHttpLink({
   uri: (isDevEnv() ? 'http://localhost:8080' :  '') + '/graphql',
@@ -36,7 +37,7 @@ const authLink = setContext((_, { headers }) => {
 
 const client = new ApolloClient({
   link: authLink.concat(httpLink),
-  cache: new InMemoryCache()
+  cache: new InMemoryCache(cacheSettings)
 });
 
 interface ProtectedRouteProps {

@@ -8,9 +8,9 @@ type Props = {
   path: string;
 }
 
-const GET_PLACEMENTS = () => gql`
-{
-  placements {
+const GET_PLACEMENTS = gql`
+query PaginatedPlacements($offset: Int = 0, $limit: Int = 50) {
+  placements(offset: $offset, limit: $limit) {
     id
     playerName
     blockType
@@ -28,6 +28,7 @@ const PLACEMENT_COLUMNS = [
   {
     Header: 'id',
     accessor: 'id',
+    width: 100,
   },
   {
     Header: 'time',
@@ -64,12 +65,33 @@ const PLACEMENT_COLUMNS = [
 ]
 
 function PlacementsTable() {
-  const { loading, error, data } = useQuery(GET_PLACEMENTS())
+  const { loading, error, data, fetchMore } = useQuery(GET_PLACEMENTS, {
+    variables: { offset: 0, limit: 100 },
+  })
+
+  const loadMoreItems = React.useCallback((startIndex, stopIndex) => {
+    return fetchMore({
+      variables: {
+        offset: data?.placements[startIndex - 1].id,
+        limit: stopIndex - startIndex + 1,
+      }
+    })
+  }, [data])
+
+  const isItemLoaded = React.useCallback((index) => {
+    return Boolean(data?.placements[index])
+  }, [data])
+
+  if (error) console.error(error.message)
+
   return (
     <DataTable
       loading={loading}
       columns={PLACEMENT_COLUMNS}
       data={data?.placements}
+      rowHeight={30}
+      loadMoreItems={loadMoreItems}
+      isItemLoaded={isItemLoaded}
     />
   )
 }
@@ -104,22 +126,22 @@ const PLAYERS_COLUMNS = [
   },
 ]
 
-function PlayersTable() {
-  const { loading, error, data } = useQuery(GET_PLAYERS())
-  return (
-    <DataTable
-      loading={loading}
-      columns={PLAYERS_COLUMNS}
-      data={data?.players}
-    />
-  )
-}
+// function PlayersTable() {
+//   const { loading, error, data } = useQuery(GET_PLAYERS())
+//   return (
+//     <DataTable
+//       loading={loading}
+//       columns={PLAYERS_COLUMNS}
+//       data={data?.players}
+//     />
+//   )
+// }
 
 function Dashboard(props: Props) {
   return (
     <React.Fragment>
       <PlacementsTable />
-      <PlayersTable />
+      {/* <PlayersTable /> */}
     </React.Fragment>
   )
 }
