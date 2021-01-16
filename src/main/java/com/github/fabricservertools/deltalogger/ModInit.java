@@ -1,8 +1,6 @@
 package com.github.fabricservertools.deltalogger;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -16,6 +14,8 @@ import com.github.fabricservertools.deltalogger.command.Commands;
 import com.github.fabricservertools.deltalogger.dao.RegistryDAO;
 import com.github.fabricservertools.deltalogger.gql.ApiServer;
 import com.google.common.collect.Sets;
+import com.google.common.io.MoreFiles;
+import com.google.common.io.Resources;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -33,27 +33,24 @@ public class ModInit implements ModInitializer {
 
   public static Properties loadConfig(Path configPath) {
     Properties props = new Properties();
+
+    if (!configPath.toFile().exists()) {
+      // Create default config
+      try {
+        Resources
+          .asByteSource(
+            ModInit.class
+            .getResource("/data/watchtower/default_config.properties")
+          )
+          .copyTo(MoreFiles.asByteSink(configPath));
+        DeltaLogger.LOG.info("Optional configuration for DeltaLogger created in `config` directory. Using SQLite by default.");
+      } catch (IOException e1) {
+        e1.printStackTrace();
+      }
+    }
+
     try {
       props.load(new FileInputStream(configPath.toString()));
-    } catch (FileNotFoundException e) {
-      props.setProperty("use_sqlite", "true");
-
-      props.setProperty("host", "");
-      props.setProperty("port", "3306");
-      props.setProperty("username", "");
-      props.setProperty("password", "");
-      props.setProperty("database", "");
-      props.setProperty("useSSL", "true");
-      props.setProperty("requireSSL", "false");
-      props.setProperty("maxLifetime", "290000");
-
-      try {
-        props.store(new FileWriter(configPath.toString()), "Config for DeltaLogger");
-      } catch (IOException ioe) {
-        ioe.printStackTrace();
-      }
-
-      DeltaLogger.LOG.info("Optional configuration for DeltaLogger created in `config` directory. Using SQLite by default.");
     } catch (IOException e) {
       e.printStackTrace();
     }

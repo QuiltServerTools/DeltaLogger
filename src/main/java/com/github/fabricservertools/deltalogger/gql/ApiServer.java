@@ -1,5 +1,6 @@
 package com.github.fabricservertools.deltalogger.gql;
 
+import com.github.fabricservertools.deltalogger.ModInit;
 import com.github.fabricservertools.deltalogger.gql.handlers.AuthHandlers;
 import com.github.fabricservertools.deltalogger.gql.handlers.GraphqlHandler;
 
@@ -9,7 +10,13 @@ import io.javalin.Javalin;
 public class ApiServer {
   public static void start() {
     String staticDirectory = "/data/watchtower/http";
-
+    int port;
+    try {
+      System.out.println("PORT WAS " +ModInit.CONFIG.getProperty("webapp_port"));
+      port = Integer.parseInt(ModInit.CONFIG.getProperty("webapp_port", "8080"));
+    } catch (Error e) {
+      throw new Error("webapp_port config not a valid number");
+    }
     Javalin app = Javalin.create(config -> {
       // if (System.getProperty("develop").equals("true")) {
       //   System.out.println("SERVING EXTERNAL STATIC");
@@ -26,7 +33,7 @@ public class ApiServer {
       if (devProp != null && devProp.equals("true")) {
         config.enableCorsForAllOrigins();
       }
-    }).start(8080);
+    }).start(port);
 
     app
       .post("/auth", AuthHandlers.provideJwtHandler)
