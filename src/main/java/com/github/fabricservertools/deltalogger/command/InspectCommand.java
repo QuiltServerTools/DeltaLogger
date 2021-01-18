@@ -47,7 +47,7 @@ public class InspectCommand {
             p = ctx.getSource().getPlayer();
             boolean mode = !toolMap.getOrDefault(p, false);
             toolMap.put(p, mode);
-            p.sendMessage(new LiteralText("DeltaLogger inspector mode " + (mode ? "on" : "off")), true);
+            p.sendMessage(new LiteralText("DeltaLogger Inspector Mode Turned " + (mode ? "on" : "off")), true);
         } catch (CommandSyntaxException e) {
             e.printStackTrace();
         }
