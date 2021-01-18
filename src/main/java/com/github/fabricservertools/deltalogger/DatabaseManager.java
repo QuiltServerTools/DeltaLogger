@@ -26,6 +26,7 @@ import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.PreparedBatch;
 import org.jdbi.v3.core.statement.SqlLogger;
 import org.jdbi.v3.core.statement.StatementContext;
+import org.jdbi.v3.core.statement.UnableToCreateStatementException;
 import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 import org.jdbi.v3.sqlite3.SQLitePlugin;
 
@@ -206,7 +207,7 @@ public class DatabaseManager implements Runnable {
     int res = jdbi.withHandle(handle -> handle
       .createUpdate(String.join(" ",
         "INSERT INTO kv_store (`key`,`value`) VALUES ('schema_version', :version)",
-        SQLUtils.onDuplicateKeyUpdate("schema_version"), "`value`=:version"
+        SQLUtils.onDuplicateKeyUpdate("`key`"), "`value`=:version"
       ))
       .bind("version", Integer.toString(ver))
       .execute()
@@ -246,7 +247,7 @@ public class DatabaseManager implements Runnable {
       jdbi.withHandle(handle -> handle
         .execute("SELECT * FROM placements LIMIT 1")
       );
-    } catch (UnableToExecuteStatementException e) {
+    } catch (UnableToExecuteStatementException | UnableToCreateStatementException e) {
       sver = "-1";
     }
 
