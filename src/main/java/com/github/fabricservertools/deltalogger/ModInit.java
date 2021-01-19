@@ -70,7 +70,9 @@ public class ModInit implements ModInitializer {
   public static void onServerInit(MinecraftServer server) {
     dm = DatabaseManager.create(server.getSavePath(WorldSavePath.ROOT).toFile());
     ApiServer.start();
+  }
 
+  public void afterWorldLoad(MinecraftServer server) {
     HashSet<Identifier> dimensionIds = new HashSet<>();
     server.getWorlds().forEach(world -> {
       Identifier dimid = world.getRegistryKey().getValue();
@@ -90,9 +92,6 @@ public class ModInit implements ModInitializer {
 
     ModInit.dmThread = new Thread(dm);
     ModInit.dmThread.start();
-  }
-
-  public void afterWorldLoad(MinecraftServer server) {
   }
 
   public void onStop(MinecraftServer server) {
@@ -116,7 +115,7 @@ public class ModInit implements ModInitializer {
   public void onInitialize() {
     onModInit();
 
-    // ServerLifecycleEvents.SERVER_STARTED.register(this::afterWorldLoad);
+    ServerLifecycleEvents.SERVER_STARTED.register(this::afterWorldLoad);
 
     CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
       Commands.register(dispatcher);
