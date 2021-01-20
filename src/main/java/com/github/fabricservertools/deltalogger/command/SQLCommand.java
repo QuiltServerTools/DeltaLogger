@@ -5,7 +5,6 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.minecraft.command.argument.MessageArgumentType;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Util;
@@ -15,7 +14,7 @@ import com.github.fabricservertools.deltalogger.dao.DAO;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 public class SQLCommand {
-        public static void register(LiteralCommandNode root) {
+        public static void register(LiteralCommandNode<ServerCommandSource> root) {
                 LiteralCommandNode<ServerCommandSource> inspectNode = CommandManager.literal("sql")
                                 .requires(source -> source.hasPermissionLevel(4))
                                 .then(CommandManager.literal("block").then(CommandManager

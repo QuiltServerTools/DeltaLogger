@@ -1,7 +1,6 @@
 package com.github.fabricservertools.deltalogger.command;
 
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.tree.LiteralCommandNode;
 
 import net.minecraft.command.argument.TimeArgumentType;
 import net.minecraft.server.command.CommandManager;

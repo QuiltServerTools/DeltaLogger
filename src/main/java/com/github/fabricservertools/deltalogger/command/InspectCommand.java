@@ -28,7 +28,7 @@ public class InspectCommand {
         this.defaultDim = defaultDim;
     }
 
-    public static void register(LiteralCommandNode root) {
+    public static void register(LiteralCommandNode<ServerCommandSource> root) {
         LiteralCommandNode<ServerCommandSource> inspectNode = CommandManager
                 .literal("inspect").executes(context -> toggleTool(context)).then(
                         CommandManager.argument("pos", BlockPosArgumentType.blockPos())
