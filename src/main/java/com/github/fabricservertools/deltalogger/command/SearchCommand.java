@@ -31,9 +31,10 @@ public class SearchCommand {
 
         root.addChild(searchNode);
     }
+
     /*
-    *   Prepares the reading by collecting the custom search statement
-    */
+     * Prepares the reading by collecting the custom search statement
+     */
     private static int search(CommandContext<ServerCommandSource> context, String criteria)
             throws CommandSyntaxException {
         HashMap<String, Object> propertyMap;
@@ -41,10 +42,11 @@ public class SearchCommand {
         readAdvanced(context.getSource(), propertyMap);
         return 1;
     }
+
     /*
-    *   Monstrosity of a method for building the WHERE section of a query
-    *   Should probably split into smaller methods at some point
-    */
+     * Monstrosity of a method for building the WHERE section of a query Should
+     * probably split into smaller methods at some point
+     */
     public static void readAdvanced(ServerCommandSource scs, HashMap<String, Object> propertyMap)
             throws CommandSyntaxException {
         ServerPlayerEntity sourcePlayer = scs.getPlayer();
@@ -72,15 +74,14 @@ public class SearchCommand {
             sqlPlace += rangeStatementBuilder(playerPos, range);
         }
         Identifier dimension;
-        if(propertyMap.containsKey("dimension")) {
+        if (propertyMap.containsKey("dimension")) {
             dimension = (Identifier) (propertyMap.get("dimension"));
-        }
-        else {
+        } else {
             dimension = sourcePlayer.getEntityWorld().getRegistryKey().getValue();
         }
         // Add to query searching in only one dimension
-        sqlPlace += "AND dimension_id = (SELECT id FROM registry WHERE `name` = \""+dimension+"\") ";
-        sqlContainer += "AND dimension_id = (SELECT id FROM registry WHERE `name` = \""+dimension+"\") ";
+        sqlPlace += "AND dimension_id = (SELECT id FROM registry WHERE `name` = \"" + dimension + "\") ";
+        sqlContainer += "AND dimension_id = (SELECT id FROM registry WHERE `name` = \"" + dimension + "\") ";
 
         // Check for an action and only query the relevant tables
         if (propertyMap.containsKey("action")) {
@@ -109,8 +110,9 @@ public class SearchCommand {
     }
 
     /*
-    *   Takes the custom WHERE statement and queries the database for transactions, prints results to chat
-    */
+     * Takes the custom WHERE statement and queries the database for transactions,
+     * prints results to chat
+     */
     private static void sendTransactions(ServerCommandSource scs, String sqlContainer) throws CommandSyntaxException {
         MutableText transactionMessage = DAO.transaction
                 .search(scs.getPlayer().getEntityWorld().getRegistryKey().getValue(), 10, sqlContainer).stream()
@@ -121,21 +123,25 @@ public class SearchCommand {
     }
 
     /*
-    *   Takes the custom WHERE statement and queries the database for placements, prints results to chat
-    */
+     * Takes the custom WHERE statement and queries the database for placements,
+     * prints results to chat
+     */
     private static void sendPlacements(ServerCommandSource scs, String sqlPlace) throws CommandSyntaxException {
-        MutableText placementMessage = DAO.block
-                .search(0, 10, sqlPlace).stream()
-                .map(p -> p.getText()).reduce((p1, p2) -> Chat.concat("\n", p1, p2))
+        MutableText placementMessage = DAO.block.search(0, 10, sqlPlace).stream().map(p -> p.getText())
+                .reduce((p1, p2) -> Chat.concat("\n", p1, p2))
                 .map(txt -> Chat.concat("\n", Chat.text("Placement history"), txt))
                 .orElse(Chat.text("No placements found with the terms specified"));
         scs.getPlayer().sendSystemMessage(placementMessage, Util.NIL_UUID);
     }
 
     /*
-    *   Does the maths for calculating ranges, returns the prepared String
-    */
+     * Does the maths for calculating ranges, returns the prepared String
+     */
     private static String rangeStatementBuilder(BlockPos pos, int range) {
-        return "";
+        int x = pos.getX();
+        int y = pos.getY();
+        int z = pos.getZ();
+        return "AND x BETWEEN " + (x - range) + " AND " + (x + range) + " AND y BETWEEN " + (y - range) + " AND "
+                + (y + range) + " AND z BETWEEN " + (z - range) + " AND " + (z + range) + " ";
     }
 }
