@@ -8,13 +8,11 @@ import java.util.UUID;
 import com.github.fabricservertools.deltalogger.QueueOperation;
 import com.github.fabricservertools.deltalogger.SQLUtils;
 import com.github.fabricservertools.deltalogger.beans.Placement;
-import com.github.fabricservertools.deltalogger.util.PlayerUtils;
 
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.PreparedBatch;
 
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 
@@ -52,7 +50,7 @@ public class BlockDAO {
    * @param limit the number of rows to return
    * @return
    */
-  public List<Placement> search(Identifier dimension, int idOffset, int limit, String builtWhere) {
+  public List<Placement> search(int idOffset, int limit, String builtWhere) {
     try {
       return jdbi.withHandle(handle -> handle
         .createQuery(

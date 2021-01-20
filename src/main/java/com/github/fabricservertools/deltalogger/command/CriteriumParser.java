@@ -11,6 +11,7 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.command.argument.BlockStateArgumentType;
+import net.minecraft.command.argument.DimensionArgumentType;
 import net.minecraft.command.argument.GameProfileArgumentType;
 import net.minecraft.server.command.ServerCommandSource;
 
@@ -33,6 +34,7 @@ public class CriteriumParser implements SuggestionProvider<ServerCommandSource> 
         criteriumSuggestors.put("targets", new Suggestor(GameProfileArgumentType.gameProfile()));
         criteriumSuggestors.put("range", new Suggestor(IntegerArgumentType.integer()));
         criteriumSuggestors.put("block", new Suggestor(BlockStateArgumentType.blockState()));
+        criteriumSuggestors.put("dimension", new Suggestor(DimensionArgumentType.dimension()));
         this.criteria = criteriumSuggestors.keySet();
     }
 
