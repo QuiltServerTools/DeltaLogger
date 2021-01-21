@@ -35,6 +35,7 @@ public class CriteriumParser implements SuggestionProvider<ServerCommandSource> 
         criteriumSuggestors.put("range", new Suggestor(IntegerArgumentType.integer()));
         criteriumSuggestors.put("block", new Suggestor(BlockStateArgumentType.blockState()));
         criteriumSuggestors.put("dimension", new Suggestor(DimensionArgumentType.dimension()));
+        criteriumSuggestors.put("limit", new Suggestor(IntegerArgumentType.integer()));
         this.criteria = criteriumSuggestors.keySet();
     }
 
