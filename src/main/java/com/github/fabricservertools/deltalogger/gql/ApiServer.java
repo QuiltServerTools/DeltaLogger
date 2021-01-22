@@ -12,7 +12,6 @@ public class ApiServer {
     String staticDirectory = "/data/watchtower/http";
     int port;
     try {
-      System.out.println("PORT WAS " +ModInit.CONFIG.getProperty("webapp_port"));
       port = Integer.parseInt(ModInit.CONFIG.getProperty("webapp_port", "8080"));
     } catch (Error e) {
       throw new Error("webapp_port config not a valid number");

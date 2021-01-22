@@ -49,12 +49,13 @@ public abstract class BlockItemMixin extends Item {
       //   bs.getBlock() == Blocks.D &&
       //   world.getServer().getPlayerManager().isOperator(player.getGameProfile())
       // ) return;
-  
+
       DatabaseManager.getSingleton().queueOp(BlockDAO.insertPlacement(
         player.getUuid(),
         id,
         true,
         pos,
+        bs,
         dimension,
         java.time.Instant.now()
       ));

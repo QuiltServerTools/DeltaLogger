@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -241,6 +242,17 @@ public class DatabaseManager implements Runnable {
     } catch (UnableToExecuteStatementException e) {
       sver = "0";
     }
+
+    // TODO: check mysql ver
+    // if (isMysql()) {
+    //   Optional<String> maybeVer = jdbi.withHandle(handle -> handle
+    //     .createQuery("SELECT VERSION() as `version`")
+    //     .mapTo(String.class)
+    //     .findOne());
+
+    //   if (!maybeVer.isPresent()) throw new Error("Unable to retrieve MySQL version");
+    //   maybeVer.get()
+    // }
 
     // Check if there are any tables at all
     try {

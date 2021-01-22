@@ -38,9 +38,11 @@ public class BlockInteractionMixin {
    * tool
    */
   @Inject(method = "onUse", at = @At(value = "HEAD"), cancellable = true)
-  private void tryInspectBlock(World world, PlayerEntity player, Hand hand, BlockHitResult hit,
-      CallbackInfoReturnable<ActionResult> ret) {
-    Block block = ((BlockState) (Object) this).getBlock();
+  private void tryInspectBlock(
+    World world, PlayerEntity player, Hand hand, BlockHitResult hit,
+    CallbackInfoReturnable<ActionResult> ret
+  ) {
+    Block block = ((BlockState)(Object)this).getBlock();
     BlockPos pos = hit.getBlockPos();
     BlockState state = world.getBlockState(pos);
     if (!InspectCommand.hasToolEnabled(player)) {

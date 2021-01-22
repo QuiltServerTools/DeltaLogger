@@ -1,3 +1,4 @@
+/* RENAMING */
 ALTER TABLE players CHANGE lastonline last_online_time DATETIME;
 ALTER TABLE placements CHANGE playerid player_id INTEGER UNSIGNED;
 ALTER TABLE placements CHANGE dimensionid dimension_id SMALLINT UNSIGNED;
@@ -15,6 +16,8 @@ ALTER TABLE killed_entities CHANGE killerid killer_id INTEGER UNSIGNED;
 ALTER TABLE killed_entities ADD COLUMN dimension_id SMALLINT AFTER killer_id;
 /* ALTER TABLE mob_grief CHANGE entitytype entity_type SMALLINT UNSIGNED; */
 ALTER TABLE mob_grief ADD COLUMN dimension_id SMALLINT AFTER `target`;
+
+/* DROP OLD INDICES */
 ALTER TABLE placements DROP INDEX `date`;
 ALTER TABLE placements DROP INDEX `type`;
 ALTER TABLE placements DROP INDEX `playerid`;
@@ -41,3 +44,8 @@ ALTER TABLE mob_grief DROP INDEX `entity_type`;
 ALTER TABLE players DROP INDEX `name`;
 ALTER TABLE players DROP INDEX `uuid`;
 ALTER TABLE registry DROP INDEX `name`;
+
+/* CHANGE COLUMNS */
+ALTER TABLE placements ADD `state` TEXT; 
+ALTER TABLE container_transactions DROP COLUMN item_data; 
+ALTER TABLE container_transactions ADD item_data TEXT; 

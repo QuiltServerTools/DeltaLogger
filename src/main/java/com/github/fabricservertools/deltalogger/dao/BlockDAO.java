@@ -13,6 +13,9 @@ import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.PreparedBatch;
 
+import net.minecraft.block.BlockState;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtHelper;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 
@@ -133,6 +136,7 @@ public class BlockDAO {
     Identifier blockid,
     boolean placed,
     BlockPos pos,
+    BlockState state,
     Identifier dimension_id,
     Instant date
   ) {
@@ -141,8 +145,8 @@ public class BlockDAO {
   
       public PreparedBatch prepareBatch(Handle handle) {
         return handle.prepareBatch(String.join(" ",
-          "INSERT INTO placements (date, placed, x, y, z, player_id, type, dimension_id)",
-          "SELECT :date, :placed, :x, :y, :z,",
+          "INSERT INTO placements (date, placed, x, y, z, `state`, player_id, type, dimension_id)",
+          "SELECT :date, :placed, :x, :y, :z, :state,",
             "(SELECT id FROM players WHERE uuid=:playeruuid),",
             "(SELECT id FROM registry WHERE name=:blockid),",
             "(SELECT id FROM registry WHERE name=:dimension_id)"
@@ -150,6 +154,11 @@ public class BlockDAO {
       }
   
       public PreparedBatch addBindings(PreparedBatch batch) {
+        CompoundTag allTag = NbtHelper.fromBlockState(state);
+        String stateProps = allTag.contains("Properties", 10)
+          ? allTag.getCompound("Properties").asString()
+          : null;
+
         return batch
           .bind("date", SQLUtils.instantToUTCString(date))
           .bind("placed", placed)
@@ -157,6 +166,7 @@ public class BlockDAO {
           .bind("playeruuid", player_id.toString())
           .bind("blockid", blockid.toString())
           .bind("dimension_id", dimension_id.toString())
+          .bind("state", stateProps)
           .add();
       }
     };
