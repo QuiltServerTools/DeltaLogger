@@ -5,6 +5,7 @@ import jwtDecode from 'jwt-decode'
 import { UserInfo, useUserContext } from './UserContext'
 import Dashboard from './pages/Dashboard'
 import Players from './pages/Players'
+import KilledEntities from './pages/KilledEntities'
 import Login from './pages/Login'
 import Logout from './pages/Logout'
 
@@ -48,6 +49,7 @@ function Routes() {
       <ProtectedRoute component={NavLayout} path="/">
         <Dashboard path="/" />
         <Players path="/players" />
+        <KilledEntities path="/killed-entities" />
         <Logout path="/logout" />
       </ProtectedRoute>
       <CenterFormLayout path="/login">

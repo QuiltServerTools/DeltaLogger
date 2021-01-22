@@ -93,6 +93,17 @@ public class GQLWiring {
             )
             .getOrElseGet(GQLWiring::errResult)
           )
+          .dataFetcher("killedEntities", dfe -> Validators
+            .validatePagination(
+              getArgOrElse(dfe, "offset", 0),
+              getArgOrElse(dfe, "limit", 10), // FIXME change to applicative validation?
+              100
+            )
+            .map(tup ->
+              dataResult(DAO.entity.getLatestKilledEntities(tup._1, tup._2))
+            )
+            .getOrElseGet(GQLWiring::errResult)
+          )
         )
         .build();
   }

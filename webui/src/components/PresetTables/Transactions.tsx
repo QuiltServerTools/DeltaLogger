@@ -4,6 +4,7 @@ import { Text } from '@chakra-ui/react'
 import { gql, useQuery } from '@apollo/client'
 
 import DataTable from '../DataTable'
+import { trimMC } from '../../util'
 
 const GET_TRANSACTIONS = gql`
 query PaginatedTransactions($offset: Int = 0, $limit: Int = 100) {
@@ -34,7 +35,7 @@ const TRANSACTION_COLUMNS = [
   },
   {
     Header: 'item type',
-    accessor: 'itemType'
+    accessor: (d: any) => trimMC(d.itemType),
   },
   {
     Header: 'count',
@@ -49,6 +50,7 @@ const TRANSACTION_COLUMNS = [
 function TransactionsTable() {
   const { loading, error, data, fetchMore } = useQuery(GET_TRANSACTIONS, {
     variables: { offset: 0, limit: 100 },
+    pollInterval: 5000,
   })
 
   const loadMoreItems = React.useCallback((startIndex, stopIndex) => {

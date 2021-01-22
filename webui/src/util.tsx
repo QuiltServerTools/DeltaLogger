@@ -28,3 +28,7 @@ export async function fetchJson(_url: string, requestInit: RequestInit, useToken
   if (r.status === 401) throw new CredentialError('Invalid credentials')
   return await r.json()
 }
+
+export function trimMC(s: string) {
+  return s.replace(/^minecraft:/, '')
+}

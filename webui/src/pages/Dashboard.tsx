@@ -1,4 +1,4 @@
-import * as React from 'react'
+import React from 'react'
 import { Box, Flex, Heading } from '@chakra-ui/react'
 import PlacementsTable from '../components/PresetTables/Placements'
 import TransactionsTable from '../components/PresetTables/Transactions'

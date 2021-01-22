@@ -8,6 +8,7 @@ type Query {
   playerByUUID(uuid: ID): Player
   placements(offset: Int, limit: Int): [Placement]!
   transactions(offset: Int, limit: Int): [Transaction]!
+  killedEntities(offset: Int, limit: Int): [KilledEntity]!
 }
 
 type Player {
@@ -36,4 +37,16 @@ type Transaction {
   itemType: ID
   count: Int
   containerUUID: ID
+}
+
+type KilledEntity {
+  id: Int
+  name: String
+  source: String
+  killer: String
+  dimension: ID
+  time: String
+  x: Int
+  y: Int
+  z: Int
 }

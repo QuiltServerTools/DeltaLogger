@@ -1,10 +1,12 @@
 package com.github.fabricservertools.deltalogger.dao;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 import com.github.fabricservertools.deltalogger.QueueOperation;
 import com.github.fabricservertools.deltalogger.SQLUtils;
+import com.github.fabricservertools.deltalogger.beans.KilledEntity;
 
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.Jdbi;
@@ -17,6 +19,34 @@ public class EntityDAO {
   private Jdbi jdbi;
   public EntityDAO(Jdbi jdbi) {
     this.jdbi = jdbi;
+    jdbi.registerRowMapper(KilledEntity.class, (rs, ctx) -> {
+      return new KilledEntity(
+        rs.getInt("id"),
+        rs.getString("name"),
+        rs.getString("source"),
+        rs.getString("killer"),
+        rs.getString("dimension"),
+        rs.getString("date"),
+        rs.getInt("x"),
+        rs.getInt("y"),
+        rs.getInt("z")
+      );
+    });
+  }
+
+  public List<KilledEntity> getLatestKilledEntities(int idOffset, int limit) {
+    return jdbi.withHandle(handle -> handle
+      .select(String.join(" ",
+        "SELECT KE.id, KE.name, source, PL.name as killer, DR.name as dimension, date, x, y, z",
+        "FROM (SELECT * FROM killed_entities WHERE id <",
+          SQLUtils.offsetOrZeroLatest("killed_entities", "id", idOffset),
+        "ORDER BY `id` DESC LIMIT ?) as KE",
+        "LEFT JOIN players as PL ON KE.killer_id = PL.id",
+        "LEFT JOIN registry as DR ON KE.dimension_id = DR.id"
+      ), limit)
+      .mapTo(KilledEntity.class)
+      .list()
+    );
   }
 
   public static QueueOperation insertMobGrief(

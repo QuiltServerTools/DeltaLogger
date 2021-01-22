@@ -6,23 +6,23 @@ import { gql, useQuery } from '@apollo/client'
 import DataTable from '../DataTable'
 import { trimMC } from '../../util'
 
-const GET_PLACEMENTS = gql`
-query PaginatedPlacements($offset: Int = 0, $limit: Int = 100) {
-  placements(offset: $offset, limit: $limit) {
+const GET_KILLED_ENTITIES = gql`
+query PaginatedKE($offset: Int = 0, $limit: Int = 100) {
+  killedEntities(offset: $offset, limit: $limit) {
     id
-    playerName
-    blockType
-    placed
+    name
+    time
+    source
+    killer
+    dimension
     x
     y
     z
-    time
-    dimension
   }
 }
 `
 
-const PLACEMENT_COLUMNS = [
+const KILLED_ENTITIES_COLUMNS = [
   {
     Header: 'id',
     accessor: 'id',
@@ -33,20 +33,12 @@ const PLACEMENT_COLUMNS = [
     accessor: 'time',
   },
   {
-    Header: 'player',
-    accessor: 'playerName',
+    Header: 'killer',
+    accessor: 'killer',
   },
   {
-    Header: 'placed',
-    accessor: (d: any) => d.placed ? (
-      <Text color="green.400" fontWeight="700">placed</Text>
-    ) : (
-      <Text color="red.400" fontWeight="700">removed</Text>
-    ),
-  },
-  {
-    Header: 'block type',
-    accessor: (d: any) => trimMC(d.blockType),
+    Header: 'cause',
+    accessor: 'source',
   },
   {
     Header: '(x,y,z)',
@@ -58,12 +50,12 @@ const PLACEMENT_COLUMNS = [
   },
   {
     Header: 'dimension',
-    accessor: (d: any) => trimMC(d.dimension),
+    accessor: (d: any) => d.dimension ? trimMC(d.dimension) : '',
   },
 ]
 
-function PlacementsTable() {
-  const { loading, error, data, fetchMore } = useQuery(GET_PLACEMENTS, {
+function KilledEntitiesTable() {
+  const { loading, error, data, fetchMore } = useQuery(GET_KILLED_ENTITIES, {
     variables: { offset: 0, limit: 100 },
     pollInterval: 5000,
   })
@@ -71,21 +63,21 @@ function PlacementsTable() {
   const loadMoreItems = React.useCallback((startIndex, stopIndex) => {
     return fetchMore({
       variables: {
-        offset: data?.placements[startIndex - 1].id,
+        offset: data?.killedEntities[startIndex - 1].id,
         limit: stopIndex - startIndex + 1,
       }
     })
   }, [data])
 
   const isItemLoaded = React.useCallback((index) => {
-    return Boolean(data?.placements[index])
+    return Boolean(data?.killedEntities[index])
   }, [data])
 
   return (
     <DataTable
       loading={loading}
-      columns={PLACEMENT_COLUMNS}
-      data={data?.placements}
+      columns={KILLED_ENTITIES_COLUMNS}
+      data={data?.killedEntities}
       rowHeight={30}
       loadMoreItems={loadMoreItems}
       isItemLoaded={isItemLoaded}
@@ -93,4 +85,4 @@ function PlacementsTable() {
   )
 }
 
-export default PlacementsTable
+export default KilledEntitiesTable
