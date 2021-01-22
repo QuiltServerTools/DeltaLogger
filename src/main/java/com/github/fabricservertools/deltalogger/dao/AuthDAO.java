@@ -20,11 +20,13 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.github.fabricservertools.deltalogger.SQLUtils;
+import com.github.fabricservertools.deltalogger.gql.Validators;
 
 import org.jdbi.v3.core.Jdbi;
 
+import io.vavr.collection.Seq;
 import io.vavr.control.Either;
-
+import io.vavr.control.Validation;
 public class AuthDAO {
   private Jdbi jdbi;
   private SecureRandom sr;
@@ -188,10 +190,21 @@ public class AuthDAO {
       });
   }
 
-  public Optional<String> changePass(String user, String newPassword, boolean temporary) {
+  public Either<String, String> changePass(String user, String newPassword, boolean temporary) {
     byte[] salt = genSalt();
     String b64salt = b64Encode(salt);
     String b64pass = b64Encode(hashPass(newPassword, salt));
+
+    Validation<Seq<String>, String> valid = Validators.validatePassword(newPassword);
+
+    if (valid.isInvalid()) {
+      return Either.left(valid.getError()
+        .intersperse("\n")
+        .foldLeft(new StringBuilder(), StringBuilder::append)
+        .toString()
+      );
+    }
+
     boolean success = jdbi.withHandle(handle -> handle
       .createUpdate(String.join(" ",
         "UPDATE perms",
@@ -205,9 +218,11 @@ public class AuthDAO {
       .execute()
     ) == 1;
     if (success) {
-      return generateJWT(user, newPassword);
+      Optional<String> ojwt = generateJWT(user, newPassword);
+      if (!ojwt.isPresent()) return Either.left("Failed to generate jwt.");
+      return Either.right(ojwt.get());
     }
-    return Optional.empty();
+    return Either.left("Failed to change password.");
   }
 
 }

@@ -9,6 +9,7 @@ import com.github.fabricservertools.deltalogger.dao.DAO;
 import io.javalin.http.BadRequestResponse;
 import io.javalin.http.Handler;
 import io.javalin.http.UnauthorizedResponse;
+import io.vavr.control.Either;
 
 public class AuthHandlers {
   public static final Handler validateHandler = ctx -> {
@@ -50,17 +51,20 @@ public class AuthHandlers {
   public static final Handler changePassHandler = ctx -> {
     ChangePassBody body = ctx.bodyValidator(ChangePassBody.class).get();
     DecodedJWT jwt = (DecodedJWT) ctx.attribute("token");
-    Optional<String> oToken = DAO.auth.changePass(
+    Either<String, String> oToken = DAO.auth.changePass(
       jwt.getClaim("user_name").asString(),
       body.password,
       false
     );
-    if (oToken.isPresent()) {
+    if (oToken.isRight()) {
       HashMap<String, String> resp = new HashMap<>();
       resp.put("token", oToken.get());
       ctx.status(200).json(resp);
     } else {
-      throw new BadRequestResponse();
+      HashMap<String, String> resp = new HashMap<>();
+      resp.put("error", oToken.getLeft());
+      ctx.status(400).json(resp);
+      // throw new BadRequestResponse();
     }
   };
 }

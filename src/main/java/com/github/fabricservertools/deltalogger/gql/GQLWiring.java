@@ -14,7 +14,6 @@ import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.idl.RuntimeWiring;
 
 public class GQLWiring {
-  private static final Validators validators = new Validators();
   public static class ValidationError implements GraphQLError {
     private String message;
 
@@ -57,7 +56,7 @@ public class GQLWiring {
   public static RuntimeWiring getWiring() {
     return RuntimeWiring.newRuntimeWiring()
         .type("Query", builder -> builder
-          .dataFetcher("players", dfe -> validators
+          .dataFetcher("players", dfe -> Validators
             .validatePagination(
               getArgOrElse(dfe, "offset", 0),
               getArgOrElse(dfe, "limit", 10),
@@ -72,7 +71,7 @@ public class GQLWiring {
             .getPlayerById(dfe.getArgument("id")))
           .dataFetcher("playerByUUID", dfe -> DAO.player
             .getPlayerByUUID(UUID.fromString(dfe.getArgument("uuid"))))
-          .dataFetcher("placements", dfe -> validators
+          .dataFetcher("placements", dfe -> Validators
             .validatePagination(
               getArgOrElse(dfe, "offset", 0),
               getArgOrElse(dfe, "limit", 10), // FIXME change to applicative validation?
@@ -83,7 +82,7 @@ public class GQLWiring {
             )
             .getOrElseGet(GQLWiring::errResult)
           )
-          .dataFetcher("transactions", dfe -> validators
+          .dataFetcher("transactions", dfe -> Validators
             .validatePagination(
               getArgOrElse(dfe, "offset", 0),
               getArgOrElse(dfe, "limit", 10), // FIXME change to applicative validation?
