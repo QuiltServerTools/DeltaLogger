@@ -53,24 +53,26 @@ function TransactionsTable() {
     pollInterval: 5000,
   })
 
+  const rowData = data?.transactions
+
   const loadMoreItems = React.useCallback((startIndex, stopIndex) => {
     return fetchMore({
       variables: {
-        offset: data?.transactions[startIndex - 1].id,
+        offset: rowData[startIndex - 1].id,
         limit: stopIndex - startIndex + 1,
       }
     })
   }, [data])
 
   const isItemLoaded = React.useCallback((index) => {
-    return Boolean(data?.transactions[index])
+    return Boolean(rowData[index])
   }, [data])
 
   return (
     <DataTable
       loading={loading}
       columns={TRANSACTION_COLUMNS}
-      data={data?.transactions}
+      data={rowData}
       rowHeight={30}
       loadMoreItems={loadMoreItems}
       isItemLoaded={isItemLoaded}

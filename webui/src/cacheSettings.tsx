@@ -11,17 +11,22 @@ function concatLists(existing: any[] = [], incoming: any[]) {
 };
 
 const smartConcat: FieldMergeFunction<any, any> = (existing: any = [], incoming: any[], { args, readField }) => {
-  const [inc0, incLast] = [incoming[0], incoming[incoming.length - 1]].map(d => readField('id', d))
   if (existing.length === 0) return incoming
-  const [ex0, exLast] = [existing[0], existing[existing.length - 1]].map(d => readField('id', d))
-
-  if (inc0 > ex0) {
-    const sliceIdx = incoming.findIndex(d => readField('id', d) <= ex0)
-    if (sliceIdx === -1) return [...incoming, ...existing]
-    return incoming.slice(0, sliceIdx).concat(existing)
+  const newList = []
+  
+  // interleave merging in desc order, like a merge sort
+  for (let i = 0, j = 0; i < existing.length; ++i) {
+    const exId = readField('id', existing[i])
+    for (let incId = readField('id', incoming[j]); incId >= exId; ++j, incId = readField('id', incoming[j])) {
+      if (incId !== exId) {
+        newList.push(incoming[j])
+      }
+    }
+    newList.push(existing[i])
   }
+  
 
-  return [...existing, ...incoming];
+  return newList
 }
 
 const cacheSettings: InMemoryCacheConfig = {

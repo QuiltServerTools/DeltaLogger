@@ -66,11 +66,14 @@ function DataTable<D extends object>({
 
   const RenderRow = React.useCallback(({ index, style }) => {
     const row = rows[index];
-    if (!row) return (
-      <Tr>
-        <Td>Loading...</Td>
-      </Tr>
-    )
+    if (!row) {
+      debugger;
+      return (
+        <Tr>
+          <Td>Loading...</Td>
+        </Tr>
+      )
+    }
     prepareRow(row)
     const sheight = `${rowHeight}px`;
     return (
@@ -92,7 +95,9 @@ function DataTable<D extends object>({
     </Box>
   )
 
-  const itemCount = infinityLoading ? rows.length + 100 : rows.length
+  const itemCount = infinityLoading && rows.length > 100
+    ? rows.length + 100
+    : rows.length
 
   return (
     <Box
