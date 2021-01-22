@@ -49,3 +49,25 @@ ALTER TABLE registry DROP INDEX `name`;
 ALTER TABLE placements ADD `state` TEXT; 
 ALTER TABLE container_transactions DROP COLUMN item_data; 
 ALTER TABLE container_transactions ADD item_data TEXT; 
+
+/* FOREIGN KEYS */
+ALTER TABLE placements ADD CONSTRAINT fk_placements_player_id FOREIGN KEY (`player_id`) REFERENCES players(`id`);
+ALTER TABLE placements ADD CONSTRAINT fk_placements_dimension_id FOREIGN KEY (`dimension_id`) REFERENCES registry(`id`);
+
+ALTER TABLE containers ADD CONSTRAINT fk_containers_first_player_id FOREIGN KEY (`first_player_id`) REFERENCES players(`id`);
+ALTER TABLE containers ADD CONSTRAINT fk_containers_last_player_id FOREIGN KEY (`last_player_id`) REFERENCES players(`id`);
+ALTER TABLE containers ADD CONSTRAINT fk_containers_item_type FOREIGN KEY (`item_type`) REFERENCES registry(`id`);
+ALTER TABLE containers ADD CONSTRAINT fk_containers_dimension_id FOREIGN KEY (`dimension_id`) REFERENCES registry(`id`);
+
+ALTER TABLE container_transactions ADD CONSTRAINT fk_container_tx_player_id FOREIGN KEY (`player_id`) REFERENCES players(`id`);
+ALTER TABLE container_transactions ADD CONSTRAINT fk_container_tx_container_id FOREIGN KEY (`container_id`) REFERENCES containers(`id`);
+ALTER TABLE container_transactions ADD CONSTRAINT fk_container_tx_item_type FOREIGN KEY (`item_type`) REFERENCES registry(`id`);
+
+ALTER TABLE killed_entities ADD CONSTRAINT fk_killed_entities_killer_id FOREIGN KEY (`killer_id`) REFERENCES players(`id`);
+ALTER TABLE killed_entities MODIFY COLUMN dimension_id SMALLINT UNSIGNED;
+ALTER TABLE killed_entities ADD CONSTRAINT fk_killed_entities_dimension_id FOREIGN KEY (`dimension_id`) REFERENCES registry(`id`);
+
+ALTER TABLE mob_grief ADD CONSTRAINT fk_mob_grief_target FOREIGN KEY (`target`) REFERENCES players(`id`);
+ALTER TABLE mob_grief ADD CONSTRAINT fk_mob_grief_entity_type FOREIGN KEY (`entity_type`) REFERENCES registry(`id`);
+ALTER TABLE mob_grief MODIFY COLUMN dimension_id SMALLINT UNSIGNED;
+ALTER TABLE mob_grief ADD CONSTRAINT fk_mob_grief_dimension_id FOREIGN KEY (`dimension_id`) REFERENCES registry(`id`);
