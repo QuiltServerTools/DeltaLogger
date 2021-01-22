@@ -53,14 +53,16 @@ public class EntityDAO {
     UUID target,
     Instant date,
     Identifier entityType,
-    BlockPos pos
+    BlockPos pos,
+    Identifier dimensionId
   ) {
     return new QueueOperation() {
   
       public PreparedBatch prepareBatch(Handle handle) {
         return handle.prepareBatch(String.join("",
-          "INSERT INTO mob_grief (date, entity_type, target, x, y, z) ",
-          "SELECT :date, registry.id, players.id, :x, :y, :z ",
+          "INSERT INTO mob_grief (date, entity_type, target, x, y, z, dimension_id) ",
+          "SELECT :date, registry.id, players.id, :x, :y, :z,",
+            "(SELECT id FROM registry WHERE registry.name=:dimension)",
           "FROM players, registry ",
           "WHERE players.uuid=:target AND registry.name=:entityType "
         ));
@@ -71,6 +73,7 @@ public class EntityDAO {
           .bind("target", target.toString())
           .bind("entityType", entityType.toString())
           .bind("x", pos.getX()).bind("z", pos.getZ()).bind("y", pos.getY())
+          .bind("dimension", dimensionId.toString())
           .add();
       }
   
