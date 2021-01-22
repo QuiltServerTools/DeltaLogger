@@ -55,17 +55,18 @@ public class EntityDAO {
     String sourceName,
     UUID killer_id,
     Instant date,
-    BlockPos pos
+    BlockPos pos,
+    Identifier dimId
   ) {
     return new QueueOperation() {
       public int getPriority() { return 2; }
   
       public PreparedBatch prepareBatch(Handle handle) {
         return handle.prepareBatch(String.join("",
-          "INSERT INTO killed_entities (name, source, killer_id, date, x, y, z) ",
+          "INSERT INTO killed_entities (name, source, killer_id, date, x, y, z, dimension_id) ",
           "VALUES (:name, :source, ",
             "(CASE WHEN :killer_id IS NULL THEN NULL ELSE (SELECT id FROM players WHERE uuid=:killer_id) END), ",
-            ":date, :x, :y, :z)"
+            ":date, :x, :y, :z, (SELECT `id` FROM registry WHERE `name`=:dimension))"
         ));
       }
       public PreparedBatch addBindings(PreparedBatch batch) {
@@ -75,6 +76,7 @@ public class EntityDAO {
           .bind("killer_id", killer_id != null ? killer_id.toString() : null)
           .bind("date", SQLUtils.instantToUTCString(date))
           .bind("x", pos.getX()).bind("z", pos.getZ()).bind("y", pos.getY())
+          .bind("dimension", dimId.toString())
           .add();
       }
     };

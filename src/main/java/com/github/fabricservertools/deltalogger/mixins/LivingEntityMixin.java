@@ -48,7 +48,8 @@ public abstract class LivingEntityMixin extends Entity {
       source.getName(),
       killer_id,
       java.time.Instant.now(),
-      me.getBlockPos()
+      me.getBlockPos(),
+      attacker.getEntityWorld().getRegistryKey().getValue()
     ));
   }
 }

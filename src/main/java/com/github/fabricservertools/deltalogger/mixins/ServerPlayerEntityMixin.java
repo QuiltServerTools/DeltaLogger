@@ -42,9 +42,11 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity {
         UUID uuid = ((NbtUuid)be).getNbtUuid();
         ((NbtUuid)this.currentScreenHandler).setNbtUuid(uuid);
 
+        Identifier dimId = ((PlayerEntity)(Object)this).getEntityWorld().getRegistryKey().getValue();
+
         Identifier blockId = Registry.BLOCK.getId(be.getCachedState().getBlock());
         DatabaseManager.getSingleton().queueOp(ContainerDAO.insert(
-          uuid, blockId, be.getPos(), this.getUuid(), java.time.Instant.now(), null
+          uuid, blockId, be.getPos(), this.getUuid(), java.time.Instant.now(), dimId
         ));
         ItemUtils.registerContentListener(this.currentScreenHandler);
       }
