@@ -60,6 +60,7 @@ function Navigation() {
             <NavigationItem title="Dashboard" to="/" />
             <NavigationItem title="Players" to="/players" />
             <NavigationItem title="Killed Entities" to="/killed-entities" />
+            <NavigationItem title="Mob Grief" to="/mob-grief" />
           </UnorderedList>
         </Box>
         <Box>

@@ -7,6 +7,7 @@ import java.util.UUID;
 import com.github.fabricservertools.deltalogger.QueueOperation;
 import com.github.fabricservertools.deltalogger.SQLUtils;
 import com.github.fabricservertools.deltalogger.beans.KilledEntity;
+import com.github.fabricservertools.deltalogger.beans.MobGrief;
 
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.Jdbi;
@@ -32,6 +33,33 @@ public class EntityDAO {
         rs.getInt("z")
       );
     });
+
+    jdbi.registerRowMapper(MobGrief.class, (rs, ctx) -> new MobGrief(
+      rs.getInt("id"),
+      rs.getString("date"),
+      rs.getString("entity"),
+      rs.getString("target"),
+      rs.getString("dimension"),
+      rs.getInt("x"),
+      rs.getInt("y"),
+      rs.getInt("z")
+    ));
+  }
+
+  public List<MobGrief> getLatestMobGrief(int idOffset, int limit) {
+    return jdbi.withHandle(handle -> handle
+      .select(String.join(" ",
+        "SELECT MG.id, date, ER.name as entity, PL.name as target, DR.name as dimension, x, y, z",
+        "FROM (SELECT * FROM mob_grief WHERE id <",
+          SQLUtils.offsetOrZeroLatest("mob_grief", "id", idOffset),
+        "ORDER BY `id` DESC LIMIT ?) as MG",
+        "LEFT JOIN players as PL ON MG.target = PL.id",
+        "INNER JOIN registry as ER ON MG.entity_type = ER.id",
+        "LEFT JOIN registry as DR ON MG.dimension_id = DR.id"
+      ), limit)
+      .mapTo(MobGrief.class)
+      .list()
+    );
   }
 
   public List<KilledEntity> getLatestKilledEntities(int idOffset, int limit) {

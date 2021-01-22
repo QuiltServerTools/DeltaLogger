@@ -10,9 +10,8 @@ function KilledEntities(props: Props) {
   return (
     <Flex flexDir="column" h="100%">
       <VStack mb="4" align="left">
-
-      <Heading size="md">Killed Entities</Heading>
-      <Text>Logged name-tagged-entity deaths</Text>
+        <Heading size="md">Killed Entities</Heading>
+        <Text>Logged name-tagged-entity deaths</Text>
       </VStack>
       <Box flex="1">
         <KilledEntitiesTable />

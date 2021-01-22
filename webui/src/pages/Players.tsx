@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Heading, Text } from '@chakra-ui/react'
+import { Box, Flex, Heading, Text } from '@chakra-ui/react'
 import { gql, useQuery } from '@apollo/client'
 
 import DataTable from '../components/DataTable'
@@ -71,9 +71,12 @@ type Props = {
 
 function PlayersPage(props: Props) {
   return (
-    <React.Fragment>
-      <PlayersTable />
-    </React.Fragment>
+    <Flex flexDir="column" h="100%">
+      <Heading size="md" mb="4">Players</Heading>
+      <Box flex="1">
+        <PlayersTable />
+      </Box>
+    </Flex>
   )
 }
 

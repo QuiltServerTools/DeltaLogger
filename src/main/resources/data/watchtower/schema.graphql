@@ -9,6 +9,7 @@ type Query {
   placements(offset: Int, limit: Int): [Placement]!
   transactions(offset: Int, limit: Int): [Transaction]!
   killedEntities(offset: Int, limit: Int): [KilledEntity]!
+  mobGrief(offset: Int, limit: Int): [MobGrief]!
 }
 
 type Player {
@@ -46,6 +47,17 @@ type KilledEntity {
   killer: String
   dimension: ID
   time: String
+  x: Int
+  y: Int
+  z: Int
+}
+
+type MobGrief {
+  id: Int
+  time: String
+  entityType: String
+  target: String
+  dimension: ID
   x: Int
   y: Int
   z: Int

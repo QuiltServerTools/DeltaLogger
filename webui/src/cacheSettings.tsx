@@ -35,6 +35,7 @@ const cacheSettings: InMemoryCacheConfig = {
         players: { keyArgs: [], merge: concatLists },
         transactions: { keyArgs: [], merge: smartConcat },
         killedEntities: { keyArgs: [], merge: smartConcat },
+        mobGrief: { keyArgs: [], merge: smartConcat },
       },
     },
   },

@@ -12,6 +12,7 @@ import Logout from './pages/Logout'
 import ChangePass from './pages/ChangePass'
 import CenterFormLayout from './pages/CenterFormLayout'
 import NavLayout from './pages/NavLayout'
+import MobGrief from './pages/MobGrief'
 
 interface ProtectedRouteProps {
   component: React.JSXElementConstructor<any>;
@@ -50,6 +51,7 @@ function Routes() {
         <Dashboard path="/" />
         <Players path="/players" />
         <KilledEntities path="/killed-entities" />
+        <MobGrief path="/mob-grief" />
         <Logout path="/logout" />
       </ProtectedRoute>
       <CenterFormLayout path="/login">
