@@ -17,7 +17,7 @@ jobs:
           15    # Latest version FIXME gradle broken in jvm >=14
         ]
         # and run on both Linux, Windows, and Mac
-        os: [ubuntu-20.04, windows-latest, macos-11.0]
+        os: [ubuntu-20.04, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - name: checkout repository
