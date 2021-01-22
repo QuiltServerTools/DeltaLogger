@@ -16,8 +16,9 @@ const smartConcat: FieldMergeFunction<any, any> = (existing: any = [], incoming:
   
   // interleave merging in desc order, like a merge sort
   for (let i = 0, j = 0; i < existing.length; ++i) {
-    const exId = readField('id', existing[i])
-    for (let incId = readField('id', incoming[j]); incId >= exId; ++j, incId = readField('id', incoming[j])) {
+    const exId = readField<number>('id', existing[i])
+    // @ts-ignore
+    for (let incId = readField<number>('id', incoming[j]); incId >= exId; ++j, incId = readField('id', incoming[j])) {
       if (incId !== exId) {
         newList.push(incoming[j])
       }

@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "parcel dev src/index.html",
     "build": "parcel build src/index.html",
+    "release": "rm -f dist/* && rm -f ../src/main/resources/data/watchtower/http/* && yarn build && cp -R dist/ ../src/main/resources/data/watchtower/http",
     "typecheck": "ts --noEmit"
   },
   "dependencies": {

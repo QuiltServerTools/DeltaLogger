@@ -12,6 +12,7 @@ query PaginatedPlacements($offset: Int = 0, $limit: Int = 100) {
     id
     playerName
     blockType
+    state
     placed
     x
     y
@@ -59,6 +60,10 @@ const PLACEMENT_COLUMNS = [
   {
     Header: 'dimension',
     accessor: (d: any) => trimMC(d.dimension),
+  },
+  {
+    Header: 'block state',
+    accessor: 'state',
   },
 ]
 

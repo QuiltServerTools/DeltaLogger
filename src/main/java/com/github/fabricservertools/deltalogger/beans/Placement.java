@@ -18,8 +18,9 @@ public class Placement {
   private int z;
   private boolean placed;
   private String dimension;
+  private String state;
 
-  public Placement(int id, String playerName, String time, String blockType, int x, int y, int z, boolean placed, String dimension) {
+  public Placement(int id, String playerName, String time, String blockType, String state, int x, int y, int z, boolean placed, String dimension) {
     this.id = id;
     this.playerName = playerName;
     this.time = time;
@@ -29,6 +30,15 @@ public class Placement {
     this.z = z;
     this.placed = placed;
     this.dimension = dimension;
+    this.state = state;
+  }
+
+  public String getState() {
+    return this.state;
+  }
+
+  public void setState(String state) {
+    this.state = state;
   }
 
   public int getId() {

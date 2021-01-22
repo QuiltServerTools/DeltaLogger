@@ -24,7 +24,7 @@ public class BlockDAO {
   public static final String SELECT_PLACEMENT = String.join(" ",
     "SELECT PL.id, P.name AS `player_name`,",
     SQLUtils.getDateFormatted("date"),
-    ", IT.name AS `block_type`, x, y, z, placed, DT.name as `dimension`"
+    ", IT.name AS `block_type`, state, x, y, z, placed, DT.name as `dimension`"
   );
   private final String JOIN_PLACEMENT =  String.join(" ",
     "INNER JOIN players as P ON P.id=player_id",
@@ -40,6 +40,7 @@ public class BlockDAO {
         rs.getString("player_name"),
         rs.getString("date"),
         rs.getString("block_type"),
+        rs.getString("state"),
         rs.getInt("x"), rs.getInt("y"), rs.getInt("z"),
         rs.getBoolean("placed"),
         rs.getString("dimension")
