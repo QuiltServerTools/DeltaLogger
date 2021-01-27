@@ -44,8 +44,8 @@ public class SearchCommand {
     }
 
     /*
-     * Monstrosity of a method for building the WHERE section of a query Should
-     * probably split into smaller methods at some point
+     * Monstrosity of a method for building the WHERE section of a query 
+     * Should probably split into smaller methods at some point
      */
     public static void readAdvanced(ServerCommandSource scs, HashMap<String, Object> propertyMap)
             throws CommandSyntaxException {
@@ -68,10 +68,11 @@ public class SearchCommand {
             sqlContainer += "AND CT.item_type = (SELECT id FROM registry WHERE `name` = \""
                     + Registry.BLOCK.getId(block.getBlockState().getBlock()).toString() + "\") ";
         }
+
+        //range
         if (propertyMap.containsKey("range")) {
             int range = (Integer) propertyMap.get("range");
             BlockPos playerPos = sourcePlayer.getBlockPos();
-            // runner.fillParameter("range", x, x, y, y, z, z, range);
             sqlPlace += rangeStatementBuilder(playerPos, range);
         }
         Identifier dimension;
@@ -80,6 +81,7 @@ public class SearchCommand {
         } else {
             dimension = sourcePlayer.getEntityWorld().getRegistryKey().getValue();
         }
+
         // Add to query searching in only one dimension
         sqlPlace += "AND dimension_id = (SELECT id FROM registry WHERE `name` = \"" + dimension + "\") ";
         sqlContainer += "AND dimension_id = (SELECT id FROM registry WHERE `name` = \"" + dimension + "\") ";
@@ -102,7 +104,7 @@ public class SearchCommand {
                     sqlPlace += "AND placed = 0 ";
                     sendPlacements(scs, sqlPlace, limit);
                 } else if (action.contains("added")) {
-                    sqlContainer += "AND item_count > 0 ";
+                    //sqlContainer += "AND item_count > 0 ";
                     sendTransactions(scs, sqlContainer, limit);
                 } else if (action.contains("removed")) {
                     sqlContainer += "AND item_count < 0 ";
@@ -121,12 +123,12 @@ public class SearchCommand {
      * prints results to chat
      */
     private static void sendTransactions(ServerCommandSource scs, String sqlContainer, int limit) throws CommandSyntaxException {
-        MutableText transactionMessage = DAO.transaction
-                .search(scs.getPlayer().getEntityWorld().getRegistryKey().getValue(), limit, sqlContainer).stream()
-                .map(p -> p.getText()).reduce((p1, p2) -> Chat.concat("\n", p1, p2))
-                .map(txt -> Chat.concat("\n", Chat.text("Transaction history"), txt))
-                .orElse(Chat.text("No transactions found with the terms specified"));
-        scs.getPlayer().sendSystemMessage(transactionMessage, Util.NIL_UUID);
+        MutableText transactionMessage = DAO.transaction.search(10, sqlContainer).stream()
+            .map(t -> t.getText()).reduce((t1, t2) -> Chat.concat("\n", t1, t2))
+            .map(txt -> Chat.concat("\n", Chat.text("Transaction History"), txt))
+            .orElse(Chat.text("No transactions found with the terms specified"));
+
+        Chat.send(scs.getPlayer(), transactionMessage);
     }
 
     /*
@@ -134,7 +136,7 @@ public class SearchCommand {
      * prints results to chat
      */
     private static void sendPlacements(ServerCommandSource scs, String sqlPlace, int limit) throws CommandSyntaxException {
-        MutableText placementMessage = DAO.block.search(0, limit, sqlPlace).stream().map(p -> p.getText())
+        MutableText placementMessage = DAO.block.search(0, limit, sqlPlace).stream().map(p -> p.getTextWithPos())
                 .reduce((p1, p2) -> Chat.concat("\n", p1, p2))
                 .map(txt -> Chat.concat("\n", Chat.text("Placement history"), txt))
                 .orElse(Chat.text("No placements found with the terms specified"));

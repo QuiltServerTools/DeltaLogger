@@ -2,6 +2,7 @@ package com.github.fabricservertools.deltalogger.beans;
 
 import static com.github.fabricservertools.deltalogger.Chat.*;
 
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
 import net.minecraft.util.Formatting;
 
@@ -20,7 +21,8 @@ public class Placement {
   private String dimension;
   private String state;
 
-  public Placement(int id, String playerName, String time, String blockType, String state, int x, int y, int z, boolean placed, String dimension) {
+  public Placement(int id, String playerName, String time, String blockType, String state, int x, int y, int z, boolean placed,
+      String dimension) {
     this.id = id;
     this.playerName = playerName;
     this.time = time;
@@ -119,20 +121,20 @@ public class Placement {
 
   @Override
   public String toString() {
-    return String.join(" ",
-      time.toString(), playerName, placed ? "placed" : "removed", blockType
-    );
+    return String.join(" ", time.toString(), playerName, placed ? "placed" : "removed", blockType);
   }
 
   public MutableText getText() {
-    return joinText(
-      format(time, Formatting.GRAY),
-      format(playerName, Formatting.ITALIC),
-      format(
-        placed ? "placed" : "removed",
-        placed ? Formatting.GREEN : Formatting.DARK_RED
-      ),
-      format(blockType.replaceFirst("^minecraft:", ""), Formatting.YELLOW)
-    );
+    return joinText(format(time, Formatting.GRAY), format(playerName, Formatting.ITALIC),
+        format(placed ? "placed" : "removed", placed ? Formatting.GREEN : Formatting.DARK_RED),
+        format(blockType.replaceFirst("^minecraft:", ""), Formatting.YELLOW));
+  }
+
+  public MutableText getTextWithPos() {
+    return joinText(format(time, Formatting.GRAY),
+        format(new LiteralText(String.valueOf(x) + " " + String.valueOf(y) + " " + String.valueOf(z)), Formatting.AQUA),
+        format(playerName, Formatting.ITALIC),
+        format(placed ? "placed" : "removed", placed ? Formatting.GREEN : Formatting.DARK_RED),
+        format(blockType.replaceFirst("^minecraft:", ""), Formatting.YELLOW));
   }
 }

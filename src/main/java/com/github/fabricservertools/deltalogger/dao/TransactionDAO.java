@@ -82,11 +82,14 @@ public class TransactionDAO {
     return new ArrayList<>();
   }
 
-  public List<Transaction> search(Identifier dimension, int limit, String builtWhere) {
+  public List<Transaction> search(int limit, String builtWhere) {
     try {
       return jdbi
           .withHandle(handle -> handle.select(String.join(" ",
-            SELECT_TRANSACTIONS,
+          String.join(" ",
+          "SELECT CT.id, C.x, C.y, C.z , C.uuid,", SQLUtils.getDateFormatted("CT.date", "date"),
+          ", R.name as `item_type`, CT.item_count, P.name as `player_name`"
+        ),
             "FROM container_transactions as CT",
             JOIN_TRANSACTIONS, builtWhere, "ORDER BY CT.date DESC LIMIT " + limit)
           ).mapTo(Transaction.class).list());
