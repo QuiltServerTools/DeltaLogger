@@ -1,65 +1,56 @@
 import * as React from 'react'
-import { Box, chakra } from '@chakra-ui/react'
+import { Box, chakra, Flex } from '@chakra-ui/react'
 import styled from 'styled-components'
 import { color, space, system } from 'styled-system'
 
-export function Table(props: React.ComponentProps<typeof chakra.table>) {
-  return (
-    <chakra.table
-      width="100%"
-      {...props}
-    />
-  )
+const attachName = (displayName: string, fn: any) => {
+  fn.displayName = displayName
+  return fn
 }
 
-export function Thead(props: React.ComponentProps<typeof chakra.thead>) {
-  return (
-    <chakra.thead
-      borderBottom="1px solid"
-      borderColor="gray.200"
-      {...props}
-    />
-  )
-}
+export const Table = attachName('Table', styled(Box).attrs(props => ({
+  role: 'table',
+}))`
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+`)
 
-export function Th(props: React.ComponentProps<typeof chakra.th>) {
-  return (
-    <chakra.th
-      textAlign="left"
-      px="4"
-      py="2"
-      fontWeight="700"
-      fontSize="0.75rem"
-      textTransform="uppercase"
-      color="gray.500"
-      {...props}
-    />
-  )
-}
+export const Thead = attachName('Thead', styled(Box).attrs(props => ({
+  role: 'rowgroup',
+  borderColor: 'gray.200',
+}))`
+  border-bottom: 1px solid;
+`)
 
-export function Tr(props: React.ComponentProps<typeof chakra.tr>) {
-  return (
-    <chakra.tr
-      {...props}
-    />
-  )
-}
+export const Th = attachName('Th', styled(Box).attrs(props => ({
+  role: 'columnheader',
+  textAlign: 'left',
+  px: '2',
+  py: '2',
+  fontWeight: '700',
+  fontSize: '0.75rem',
+  textTransform: 'uppercase',
+  color: 'gray.500',
+}))`
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+`)
 
-export function Td(props: React.ComponentProps<typeof chakra.td>) {
-  return (
-    <chakra.td
-      px="4"
-      py="2"
-      fontSize="0.85rem"
-      {...props}
-    />
-  )
-}
+export const Tr = attachName('Tr', styled(Box).attrs(props => ({
+  role: 'row',
+}))`
+`)
 
-export function Tbody(props: React.ComponentProps<typeof chakra.tbody>) {
-  return (
-    <chakra.tbody
-      {...props}
-    />
-  )
-}
+export const Td = attachName('Td', styled(Box).attrs(props => ({
+  role: 'cell',
+  px: '2',
+  fontSize: '0.85rem',
+}))`
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+`)
+
+export const Tbody = attachName('Tbody', styled(Box)``)

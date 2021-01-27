@@ -49,7 +49,8 @@ public class FireballEntityMixin extends AbstractFireballEntity {
       ((PlayerEntity)ghast.getTarget()).getUuid(),
       java.time.Instant.now(),
       Registry.ENTITY_TYPE.getId(EntityType.GHAST),
-      this.getBlockPos()
+      this.getBlockPos(),
+      ghast.getEntityWorld().getRegistryKey().getValue()
     ));
     
   }

@@ -39,6 +39,7 @@ public abstract class BlockMixin implements ItemConvertible {
         id,
         false,
         pos,
+        world.getBlockState(pos),
         dimension,
         java.time.Instant.now()
       ));

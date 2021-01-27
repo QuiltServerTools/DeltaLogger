@@ -4,6 +4,7 @@ import com.github.fabricservertools.deltalogger.dao.DAO;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 
+import io.vavr.control.Either;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -34,8 +35,13 @@ public final class Commands {
                     context.getSource().sendFeedback(new LiteralText("Command resetpass error: must be logged in as user to reset password."), false);
                     return 1;
                 }
-                String tempPass = DAO.auth.issueTemporaryPass(p.getUuid(), p.hasPermissionLevel(4));
-                p.sendMessage(new LiteralText("Your temporary password for DeltaLogger panel is " + tempPass), false);
+                Either<String, String> tempPass = DAO.auth.issueTemporaryPass(p.getUuid(), p.hasPermissionLevel(4));
+                
+                if (tempPass.isLeft()) {
+                    p.sendMessage(new LiteralText(tempPass.getLeft()), false);
+                } else {
+                    p.sendMessage(new LiteralText("Your temporary password for DeltaLogger panel is " + tempPass.get()), false);
+                }
                 return 1;
             })
             .build();

@@ -2,7 +2,6 @@ package com.github.fabricservertools.deltalogger.command;
 
 import com.github.fabricservertools.deltalogger.Chat;
 import com.github.fabricservertools.deltalogger.dao.DAO;
-import com.github.fabricservertools.deltalogger.util.ChatPrint;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -10,10 +9,10 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 
 import net.minecraft.command.argument.BlockStateArgument;
 import net.minecraft.command.argument.GameProfileArgumentType;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.MutableText;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
@@ -24,10 +23,7 @@ import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class SearchCommand {
-    boolean defaultDim;
-    private static HashMap<PlayerEntity, Boolean> toolMap = new HashMap<>();
-
-    public static void register(LiteralCommandNode root) {
+    public static void register(LiteralCommandNode<ServerCommandSource> root) {
         LiteralCommandNode<ServerCommandSource> searchNode = literal("search")
                 .then(argument("criteria", StringArgumentType.greedyString()).suggests(CriteriumParser.getInstance())
                         .executes(context -> search(context, StringArgumentType.getString(context, "criteria"))))
@@ -36,6 +32,9 @@ public class SearchCommand {
         root.addChild(searchNode);
     }
 
+    /*
+     * Prepares the reading by collecting the custom search statement
+     */
     private static int search(CommandContext<ServerCommandSource> context, String criteria)
             throws CommandSyntaxException {
         HashMap<String, Object> propertyMap;
@@ -44,9 +43,14 @@ public class SearchCommand {
         return 1;
     }
 
+    /*
+     * Monstrosity of a method for building the WHERE section of a query 
+     * Should probably split into smaller methods at some point
+     */
     public static void readAdvanced(ServerCommandSource scs, HashMap<String, Object> propertyMap)
             throws CommandSyntaxException {
         ServerPlayerEntity sourcePlayer = scs.getPlayer();
+        
         String sqlPlace = "";
         String sqlContainer = "";
         if (propertyMap.containsKey("target")) {
@@ -62,77 +66,91 @@ public class SearchCommand {
             sqlPlace += "AND type = (SELECT id FROM registry WHERE `name` = \""
                     + Registry.BLOCK.getId(block.getBlockState().getBlock()).toString() + "\") ";
             sqlContainer += "AND CT.item_type = (SELECT id FROM registry WHERE `name` = \""
-                    + Registry.BLOCK.getId(block.getBlockState().getBlock()).toString() + "\")";
+                    + Registry.BLOCK.getId(block.getBlockState().getBlock()).toString() + "\") ";
         }
+
+        //range
         if (propertyMap.containsKey("range")) {
             int range = (Integer) propertyMap.get("range");
-            range *= range;
             BlockPos playerPos = sourcePlayer.getBlockPos();
-            int x = playerPos.getX();
-            int y = playerPos.getY();
-            int z = playerPos.getZ();
-            // runner.fillParameter("range", x, x, y, y, z, z, range);
+            sqlPlace += rangeStatementBuilder(playerPos, range);
         }
+        Identifier dimension;
+        if (propertyMap.containsKey("dimension")) {
+            dimension = (Identifier) (propertyMap.get("dimension"));
+        } else {
+            dimension = sourcePlayer.getEntityWorld().getRegistryKey().getValue();
+        }
+
+        // Add to query searching in only one dimension
+        sqlPlace += "AND dimension_id = (SELECT id FROM registry WHERE `name` = \"" + dimension + "\") ";
+        sqlContainer += "AND dimension_id = (SELECT id FROM registry WHERE `name` = \"" + dimension + "\") ";
+
+        // Get optional limit value
+        int limit = 10;
+        if(propertyMap.containsKey("limit")) {
+            limit = (int) propertyMap.get("limit");
+        }
+
+        // Check for an action and only query the relevant tables
         if (propertyMap.containsKey("action")) {
             String action = (String) propertyMap.get("action");
             if (!action.contains("everything")) {
 
                 if (action.contains("placed")) {
                     sqlPlace += "AND placed = 1 ";
-                    send(scs, sqlPlace);
+                    sendPlacements(scs, sqlPlace, limit);
                 } else if (action.contains("broken")) {
                     sqlPlace += "AND placed = 0 ";
-                    send(scs, sqlPlace);
+                    sendPlacements(scs, sqlPlace, limit);
                 } else if (action.contains("added")) {
-                    sqlContainer += "AND item_count > 0 ";
-                    sendTransactions(scs, sqlContainer);
+                    //sqlContainer += "AND item_count > 0 ";
+                    sendTransactions(scs, sqlContainer, limit);
                 } else if (action.contains("removed")) {
                     sqlContainer += "AND item_count < 0 ";
-                    sendTransactions(scs, sqlContainer);
+                    sendTransactions(scs, sqlContainer, limit);
                 }
             }
         } else {
-            sendTransactions(scs, sqlContainer);
-            send(scs, sqlPlace);
+            sendTransactions(scs, sqlContainer, limit);
+            sendPlacements(scs, sqlPlace, limit);
 
         }
     }
 
-    private static void sendTransactions(ServerCommandSource scs, String sqlContainer) throws CommandSyntaxException {
-        MutableText transactionMessage = DAO.transaction
-                .search(scs.getPlayer().getEntityWorld().getRegistryKey().getValue(), 10, sqlContainer).stream()
-                .map(p -> p.getText()).reduce((p1, p2) -> Chat.concat("\n", p1, p2))
-                .map(txt -> Chat.concat("\n", Chat.text("Transaction history"), txt))
-                .orElse(Chat.text("No results found with the terms specified"));
-        scs.getPlayer().sendSystemMessage(transactionMessage, Util.NIL_UUID);
+    /*
+     * Takes the custom WHERE statement and queries the database for transactions,
+     * prints results to chat
+     */
+    private static void sendTransactions(ServerCommandSource scs, String sqlContainer, int limit) throws CommandSyntaxException {
+        MutableText transactionMessage = DAO.transaction.search(10, sqlContainer).stream()
+            .map(t -> t.getText()).reduce((t1, t2) -> Chat.concat("\n", t1, t2))
+            .map(txt -> Chat.concat("\n", Chat.text("Transaction History"), txt))
+            .orElse(Chat.text("No transactions found with the terms specified"));
+
+        Chat.send(scs.getPlayer(), transactionMessage);
     }
 
-    private static void send(ServerCommandSource scs, String sqlPlace) throws CommandSyntaxException {
-        MutableText placementMessage = DAO.block
-                .search(scs.getPlayer().getEntityWorld().getRegistryKey().getValue(), 0, 10, sqlPlace).stream()
-                .map(p -> p.getText()).reduce((p1, p2) -> Chat.concat("\n", p1, p2))
+    /*
+     * Takes the custom WHERE statement and queries the database for placements,
+     * prints results to chat
+     */
+    private static void sendPlacements(ServerCommandSource scs, String sqlPlace, int limit) throws CommandSyntaxException {
+        MutableText placementMessage = DAO.block.search(0, limit, sqlPlace).stream().map(p -> p.getTextWithPos())
+                .reduce((p1, p2) -> Chat.concat("\n", p1, p2))
                 .map(txt -> Chat.concat("\n", Chat.text("Placement history"), txt))
-                .orElse(Chat.text("No results found with the terms specified"));
+                .orElse(Chat.text("No placements found with the terms specified"));
         scs.getPlayer().sendSystemMessage(placementMessage, Util.NIL_UUID);
     }
+
+    /*
+     * Does the maths for calculating ranges, returns the prepared String
+     */
+    private static String rangeStatementBuilder(BlockPos pos, int range) {
+        int x = pos.getX();
+        int y = pos.getY();
+        int z = pos.getZ();
+        return "AND x BETWEEN " + (x - range) + " AND " + (x + range) + " AND y BETWEEN " + (y - range) + " AND "
+                + (y + range) + " AND z BETWEEN " + (z - range) + " AND " + (z + range) + " ";
+    }
 }
-// private static int search(CommandContext<ServerCommandSource> context,
-// @Nullable BlockState block, int range) throws CommandSyntaxException {
-// ServerCommandSource source = context.getSource();
-// ServerPlayerEntity player = source.getPlayer();
-//
-// LoggedEventType eventType;
-// String actionString = StringArgumentType.getString(context, "action");
-// if (actionString.equalsIgnoreCase("everything")) {
-// eventType = null;
-// } else {
-// eventType = LoggedEventType.valueOf(actionString.toLowerCase());
-// }
-//
-// String dimension = PlayerUtils.getPlayerDimension(player);
-// Collection<ServerPlayerEntity> targets =
-// EntityArgumentType.getOptionalPlayers(context, "targets");
-//
-// DbConn.readAdvanced(source, eventType, dimension, targets, block, range);
-// return 1;
-// }

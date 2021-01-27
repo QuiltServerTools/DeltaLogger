@@ -33,7 +33,8 @@ public class CreeperMixin extends HostileEntity {
         playerTarget.getUuid(),
         java.time.Instant.now(),
         Registry.ENTITY_TYPE.getId(EntityType.CREEPER),
-        this.getBlockPos()
+        this.getBlockPos(),
+        this.getEntityWorld().getRegistryKey().getValue()
       ));
     }
   }

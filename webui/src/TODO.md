@@ -1,0 +1,12 @@
+- player summary page
+- aggregation
+- heat map
+- deeplinking
+- permission management
+- context menu actions
+- table filtering
+- data trimming
+- tps/mspt log?
+- in browser filtering?
+- SQL execution?
+- item tracking stats?

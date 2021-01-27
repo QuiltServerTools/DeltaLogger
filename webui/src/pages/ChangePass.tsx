@@ -4,9 +4,11 @@ import {
   FormControl,
   FormLabel,
   Input,
-  Stack,
   Text,
   Heading,
+  Alert,
+  AlertIcon,
+  AlertTitle,
 } from '@chakra-ui/react'
 import jwtDecode from 'jwt-decode'
 import { navigate } from '@reach/router'
@@ -23,16 +25,25 @@ type Props = {
 
 function ChangePass(props: Props) {
   const [password, setPassword] = React.useState<string>("")
+  const [error, setError] = React.useState<string>("")
   const { setUserInfo } = useUserContext();
 
   const submitChangePass = async (evt: React.FormEvent<HTMLFormElement>) => {
     evt.preventDefault()
-    const { token } = await fetchJson('/auth/change-pass', {
+
+    const { token, error } = await fetchJson('/auth/change-pass', {
       method: 'POST',
       body: JSON.stringify({ password })
     }, true)
+  
+    
+    if (!token || error) {
+      setError(error)
+      return
+    }
+
     localStorage.setItem("token", token)
-    const jwt = jwtDecode<UserInfo>(token);
+    const jwt = jwtDecode<UserInfo>(token)
     setUserInfo(jwt)
     navigate('/')
   }
@@ -40,6 +51,12 @@ function ChangePass(props: Props) {
   return (
     <React.Fragment>
       <Heading size="lg" mb="1em">Change Password</Heading>
+      {error ? (
+        <Alert status="error" mb="4">
+          <AlertIcon />
+          <AlertTitle mr={2}>{error}</AlertTitle>
+        </Alert>
+      ) : null}
       <Text mb="1em">
         Please change your password for {constants.APP_NAME}
       </Text>

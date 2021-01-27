@@ -8,13 +8,14 @@ import java.util.UUID;
 import com.github.fabricservertools.deltalogger.QueueOperation;
 import com.github.fabricservertools.deltalogger.SQLUtils;
 import com.github.fabricservertools.deltalogger.beans.Placement;
-import com.github.fabricservertools.deltalogger.util.PlayerUtils;
 
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.PreparedBatch;
 
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.block.BlockState;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtHelper;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 
@@ -23,7 +24,7 @@ public class BlockDAO {
   public static final String SELECT_PLACEMENT = String.join(" ",
     "SELECT PL.id, P.name AS `player_name`,",
     SQLUtils.getDateFormatted("date"),
-    ", IT.name AS `block_type`, x, y, z, placed, DT.name as `dimension`"
+    ", IT.name AS `block_type`, state, x, y, z, placed, DT.name as `dimension`"
   );
   private final String JOIN_PLACEMENT =  String.join(" ",
     "INNER JOIN players as P ON P.id=player_id",
@@ -39,6 +40,7 @@ public class BlockDAO {
         rs.getString("player_name"),
         rs.getString("date"),
         rs.getString("block_type"),
+        rs.getString("state"),
         rs.getInt("x"), rs.getInt("y"), rs.getInt("z"),
         rs.getBoolean("placed"),
         rs.getString("dimension")
@@ -52,7 +54,7 @@ public class BlockDAO {
    * @param limit the number of rows to return
    * @return
    */
-  public List<Placement> search(Identifier dimension, int idOffset, int limit, String builtWhere) {
+  public List<Placement> search(int idOffset, int limit, String builtWhere) {
     try {
       return jdbi.withHandle(handle -> handle
         .createQuery(
@@ -78,6 +80,13 @@ public class BlockDAO {
   public List<Placement> customQuery(String sql) {
     return jdbi.withHandle(handle -> handle.select(sql, 100)).mapTo(Placement.class).list();
   }
+
+  /**
+   * Get latest placements anywhere
+   * @param idOffset must be the id of the row to offset from, if offset is 0 then get latest
+   * @param limit the number of rows to return
+   * @return
+   */
   public List<Placement> getLatestPlacements(int idOffset, int limit) {
     return jdbi.withHandle(handle -> handle
       .select(String.join(" ",
@@ -153,6 +162,7 @@ public class BlockDAO {
     Identifier blockid,
     boolean placed,
     BlockPos pos,
+    BlockState state,
     Identifier dimension_id,
     Instant date
   ) {
@@ -161,8 +171,8 @@ public class BlockDAO {
   
       public PreparedBatch prepareBatch(Handle handle) {
         return handle.prepareBatch(String.join(" ",
-          "INSERT INTO placements (date, placed, x, y, z, player_id, type, dimension_id)",
-          "SELECT :date, :placed, :x, :y, :z,",
+          "INSERT INTO placements (date, placed, x, y, z, `state`, player_id, type, dimension_id)",
+          "SELECT :date, :placed, :x, :y, :z, :state,",
             "(SELECT id FROM players WHERE uuid=:playeruuid),",
             "(SELECT id FROM registry WHERE name=:blockid),",
             "(SELECT id FROM registry WHERE name=:dimension_id)"
@@ -170,6 +180,11 @@ public class BlockDAO {
       }
   
       public PreparedBatch addBindings(PreparedBatch batch) {
+        CompoundTag allTag = NbtHelper.fromBlockState(state);
+        String stateProps = allTag.contains("Properties", 10)
+          ? allTag.getCompound("Properties").asString()
+          : null;
+
         return batch
           .bind("date", SQLUtils.instantToUTCString(date))
           .bind("placed", placed)
@@ -177,6 +192,7 @@ public class BlockDAO {
           .bind("playeruuid", player_id.toString())
           .bind("blockid", blockid.toString())
           .bind("dimension_id", dimension_id.toString())
+          .bind("state", stateProps)
           .add();
       }
     };

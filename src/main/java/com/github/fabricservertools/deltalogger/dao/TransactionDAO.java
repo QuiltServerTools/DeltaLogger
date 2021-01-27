@@ -18,11 +18,16 @@ import net.minecraft.util.math.BlockPos;
 
 public class TransactionDAO {
   private Jdbi jdbi;
-  private final String SELECT_TRANSACTIONS = String.join(" ", "SELECT CT.id, C.uuid,",
-      SQLUtils.getDateFormatted("CT.date", "date"), ", R.name as `item_type`, CT.item_count, P.name as `player_name`");
-  private final String JOIN_TRANSACTIONS = String.join(" ", "INNER JOIN registry as R ON CT.item_type = R.id",
-      "INNER JOIN containers as C ON CT.container_id = C.id", "LEFT JOIN registry as DT ON DT.id = C.dimension_id",
-      "INNER JOIN players as P ON CT.player_id = P.id");
+  private final String SELECT_TRANSACTIONS = String.join(" ",
+    "SELECT CT.id, C.uuid,", SQLUtils.getDateFormatted("CT.date", "date"),
+    ", R.name as `item_type`, CT.item_count, P.name as `player_name`"
+  );
+  private final String JOIN_TRANSACTIONS = String.join(" ",
+    "INNER JOIN registry as R ON CT.item_type = R.id",
+    "INNER JOIN containers as C ON CT.container_id = C.id",
+    "LEFT JOIN registry as DT ON DT.id = C.dimension_id",
+    "INNER JOIN players as P ON CT.player_id = P.id"
+  );
 
   public TransactionDAO(Jdbi jdbi) {
     this.jdbi = jdbi;
@@ -31,10 +36,25 @@ public class TransactionDAO {
             rs.getString("item_type"), rs.getInt("item_count"), UUID.fromString(rs.getString("uuid"))));
   }
 
-  public List<Transaction> getTransactions() {
+  /**
+   * Get latest transactions
+   * @param idOffset must be the id of the row to offset from, if offset is 0 then get latest
+   * @param limit the number of rows to return
+   * @return
+   */
+  public List<Transaction> getLatestTransactions(int idOffset, int limit) {
     try {
-      List<Transaction> tr = jdbi
-          .withHandle(handle -> handle.createQuery(SELECT_TRANSACTIONS).mapTo(Transaction.class).list());
+      List<Transaction> tr = jdbi.withHandle(handle -> handle
+        .select(String.join(" ",
+          SELECT_TRANSACTIONS,
+          "FROM (SELECT * FROM container_transactions WHERE id <",
+            SQLUtils.offsetOrZeroLatest("container_transactions", "id", idOffset), // sql perf optim.
+            "ORDER BY `id` DESC LIMIT ?) as CT",
+          JOIN_TRANSACTIONS
+        ), limit)
+        .mapTo(Transaction.class)
+        .list()
+      );
 
       return tr;
     } catch (Exception e) {
@@ -46,21 +66,33 @@ public class TransactionDAO {
   public List<Transaction> getTransactionsAt(Identifier dimension, BlockPos pos, int limit) {
     try {
       return jdbi.withHandle(handle -> handle.select(
-          String.join(" ", "SELECT CT.id, C.uuid, DATETIME(CT.date) as `date`, CT.item_count, P.name as `player_name`",
-              "FROM container_transactions as CT", JOIN_TRANSACTIONS, "WHERE C.x=? AND C.y=? AND C.z=? AND DT.name = ?",
-              "ORDER BY CT.date DESC LIMIT ?"),
-          pos.getX(), pos.getY(), pos.getZ(), dimension.toString(), limit).mapTo(Transaction.class).list());
+          String.join(" ",
+            // "SELECT CT.id, C.uuid,", SQLUtils.getDateFormatted("CT.date", "date"), ", CT.item_count, P.name as `player_name`",
+            SELECT_TRANSACTIONS,
+            "FROM container_transactions as CT",
+            JOIN_TRANSACTIONS,
+            "WHERE C.x=? AND C.y=? AND C.z=? AND DT.name = ?",
+            "ORDER BY CT.date DESC LIMIT ?"
+          ),
+          pos.getX(), pos.getY(), pos.getZ(), dimension.toString(), limit
+        ).mapTo(Transaction.class).list());
     } catch (Exception e) {
       e.printStackTrace();
     }
     return new ArrayList<>();
   }
 
-  public List<Transaction> search(Identifier dimension, int limit, String builtWhere) {
+  public List<Transaction> search(int limit, String builtWhere) {
     try {
       return jdbi
-          .withHandle(handle -> handle.select(String.join(" ", SELECT_TRANSACTIONS, "FROM container_transactions as CT",
-              JOIN_TRANSACTIONS, builtWhere, "ORDER BY CT.date DESC LIMIT " + limit)).mapTo(Transaction.class).list());
+          .withHandle(handle -> handle.select(String.join(" ",
+          String.join(" ",
+          "SELECT CT.id, C.x, C.y, C.z , C.uuid,", SQLUtils.getDateFormatted("CT.date", "date"),
+          ", R.name as `item_type`, CT.item_count, P.name as `player_name`"
+        ),
+            "FROM container_transactions as CT",
+            JOIN_TRANSACTIONS, builtWhere, "ORDER BY CT.date DESC LIMIT " + limit)
+          ).mapTo(Transaction.class).list());
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -78,8 +110,13 @@ public class TransactionDAO {
   public List<Transaction> getTransactionsFromUUID(UUID uuid, int limit) {
     try {
       return jdbi.withHandle(handle -> handle
-          .select(String.join(" ", SELECT_TRANSACTIONS, "FROM container_transactions as CT", JOIN_TRANSACTIONS,
-              "WHERE C.uuid=?", "ORDER BY CT.date DESC LIMIT ?"), uuid.toString(), limit)
+          .select(String.join(" ",
+            SELECT_TRANSACTIONS,
+            "FROM container_transactions as CT",
+            JOIN_TRANSACTIONS,
+            "WHERE C.uuid=?",
+            "ORDER BY CT.date DESC LIMIT ?"
+          ), uuid.toString(), limit)
           .mapTo(Transaction.class).list());
     } catch (Exception e) {
       e.printStackTrace();

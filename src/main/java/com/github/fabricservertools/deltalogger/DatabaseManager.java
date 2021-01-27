@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -26,6 +27,7 @@ import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.PreparedBatch;
 import org.jdbi.v3.core.statement.SqlLogger;
 import org.jdbi.v3.core.statement.StatementContext;
+import org.jdbi.v3.core.statement.UnableToCreateStatementException;
 import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 import org.jdbi.v3.sqlite3.SQLitePlugin;
 
@@ -206,7 +208,7 @@ public class DatabaseManager implements Runnable {
     int res = jdbi.withHandle(handle -> handle
       .createUpdate(String.join(" ",
         "INSERT INTO kv_store (`key`,`value`) VALUES ('schema_version', :version)",
-        SQLUtils.onDuplicateKeyUpdate("schema_version"), "`value`=:version"
+        SQLUtils.onDuplicateKeyUpdate("`key`"), "`value`=:version"
       ))
       .bind("version", Integer.toString(ver))
       .execute()
@@ -241,12 +243,23 @@ public class DatabaseManager implements Runnable {
       sver = "0";
     }
 
+    // TODO: check mysql ver
+    // if (isMysql()) {
+    //   Optional<String> maybeVer = jdbi.withHandle(handle -> handle
+    //     .createQuery("SELECT VERSION() as `version`")
+    //     .mapTo(String.class)
+    //     .findOne());
+
+    //   if (!maybeVer.isPresent()) throw new Error("Unable to retrieve MySQL version");
+    //   maybeVer.get()
+    // }
+
     // Check if there are any tables at all
     try {
       jdbi.withHandle(handle -> handle
         .execute("SELECT * FROM placements LIMIT 1")
       );
-    } catch (UnableToExecuteStatementException e) {
+    } catch (UnableToExecuteStatementException | UnableToCreateStatementException e) {
       sver = "-1";
     }
 
@@ -259,9 +272,11 @@ public class DatabaseManager implements Runnable {
 
     if (version == -1) {
       DeltaLogger.LOG.info("Creating first time SQL tables");
-      boolean success = 
+      failOnFalse(
         runScript("/data/watchtower/schema.sql")
-        && setDBSchemaVer(1);
+        && setDBSchemaVer(1),
+        "Failed creating SQL tables"
+      );
     } else if (version == 0) {
       if (isMysql()) {
         // if no schema ver and was MySQL then it has to be a WT DB
@@ -284,7 +299,11 @@ public class DatabaseManager implements Runnable {
           .execute()
         );
 
-        boolean success = setDBSchemaVer(1);
+        failOnFalse(
+          runScript("/data/watchtower/schema.sql")
+          && setDBSchemaVer(1),
+          "Failed creating SQL tables"
+        );
 
         DeltaLogger.LOG.info("Database migration completed.");
       }
@@ -368,7 +387,7 @@ public class DatabaseManager implements Runnable {
     ArrayList<QueueOperation> queued = new ArrayList<>(50);
     pq.drainTo(queued);
     if (queued.isEmpty()) return;
-    DeltaLogger.LOG.info("DeltaLogger: Processing leftover database operations...");
+    DeltaLogger.LOG.info("Processing leftover database operations...");
     processOps(queued);
   }
 
