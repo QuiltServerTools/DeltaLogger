@@ -33,8 +33,6 @@ dependencies {
 	include 'com.graphql-java:java-dataloader:2.2.3'
 	include 'org.reactivestreams:reactive-streams:1.0.3'
 
-	include 'commons-io:commons-io:2.8.0'
-
 	implementation(shadow('com.auth0:java-jwt:3.11.0'))
 	implementation(shadow('io.javalin:javalin:3.12.0'))
 	implementation(shadow('io.javalin:javalin-graphql:3.12.0'))
