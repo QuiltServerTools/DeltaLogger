@@ -9,7 +9,6 @@ import com.github.fabricservertools.deltalogger.DatabaseManager;
 import com.github.fabricservertools.deltalogger.ITransactable;
 import com.github.fabricservertools.deltalogger.NbtUuid;
 import com.github.fabricservertools.deltalogger.ItemUtils;
-import com.github.fabricservertools.deltalogger.SQLUtils;
 import com.github.fabricservertools.deltalogger.dao.TransactionDAO;
 import com.google.common.collect.Lists;
 
