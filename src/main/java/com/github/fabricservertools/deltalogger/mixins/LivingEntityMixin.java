@@ -3,7 +3,6 @@ package com.github.fabricservertools.deltalogger.mixins;
 import java.util.UUID;
 
 import com.github.fabricservertools.deltalogger.DatabaseManager;
-import com.github.fabricservertools.deltalogger.SQLUtils;
 import com.github.fabricservertools.deltalogger.dao.EntityDAO;
 
 import org.spongepowered.asm.mixin.Mixin;

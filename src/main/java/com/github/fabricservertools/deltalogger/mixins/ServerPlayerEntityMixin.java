@@ -6,7 +6,6 @@ import java.util.UUID;
 import com.github.fabricservertools.deltalogger.DatabaseManager;
 import com.github.fabricservertools.deltalogger.NbtUuid;
 import com.github.fabricservertools.deltalogger.ItemUtils;
-import com.github.fabricservertools.deltalogger.SQLUtils;
 import com.github.fabricservertools.deltalogger.dao.ContainerDAO;
 import com.mojang.authlib.GameProfile;
 

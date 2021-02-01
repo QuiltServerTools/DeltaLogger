@@ -5,7 +5,6 @@ import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.registry.Registry;
 
 import com.github.fabricservertools.deltalogger.DatabaseManager;
-import com.github.fabricservertools.deltalogger.SQLUtils;
 import com.github.fabricservertools.deltalogger.dao.EntityDAO;
 
 import org.spongepowered.asm.mixin.Mixin;

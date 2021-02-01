@@ -8,7 +8,6 @@ import com.github.fabricservertools.deltalogger.DatabaseManager;
 import com.github.fabricservertools.deltalogger.IChestBlockUUID;
 import com.github.fabricservertools.deltalogger.NbtUuid;
 import com.github.fabricservertools.deltalogger.ItemUtils;
-import com.github.fabricservertools.deltalogger.SQLUtils;
 import com.github.fabricservertools.deltalogger.dao.ContainerDAO;
 
 import java.util.Optional;
@@ -73,7 +72,7 @@ public abstract class ChestBlockMixin extends AbstractChestBlock<ChestBlockEntit
 
     ChestBlock chestblock = (ChestBlock)(Object)this;
 
-    return DoubleBlockProperties.toPropertySource((BlockEntityType)this.entityTypeRetriever.get(), ChestBlock::getDoubleBlockType, ChestBlock::getFacing, chestblock.FACING, state, world, pos, biPredicate2);
+    return DoubleBlockProperties.toPropertySource((BlockEntityType)this.entityTypeRetriever.get(), ChestBlock::getDoubleBlockType, ChestBlock::getFacing, ChestBlock.FACING, state, world, pos, biPredicate2);
  }
 
   public Optional<UUID> getNbtUuidAt(final BlockState state, final World world, final BlockPos pos) {

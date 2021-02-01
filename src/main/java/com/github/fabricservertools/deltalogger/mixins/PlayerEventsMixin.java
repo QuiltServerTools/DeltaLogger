@@ -1,8 +1,6 @@
 package com.github.fabricservertools.deltalogger.mixins;
 
 import com.github.fabricservertools.deltalogger.DatabaseManager;
-import com.github.fabricservertools.deltalogger.SQLUtils;
-import com.github.fabricservertools.deltalogger.beans.Player;
 import com.github.fabricservertools.deltalogger.dao.PlayerDAO;
 
 import org.spongepowered.asm.mixin.Mixin;
