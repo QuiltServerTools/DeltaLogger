@@ -15,6 +15,10 @@ import graphql.schema.idl.RuntimeWiring;
 
 public class GQLWiring {
   public static class ValidationError implements GraphQLError {
+    /**
+     * IDE go brrr
+     */
+    private static final long serialVersionUID = 1L;
     private String message;
 
     public ValidationError(String message) {

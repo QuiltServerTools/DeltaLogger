@@ -67,6 +67,12 @@ public class BlockInteractionMixin {
             .orElse(Chat.text("No transactions found in container"));
 
         Chat.send(player, transactionMessage);
+        MutableText placementMessage = DAO.block.getLatestPlacementsAt(dimension, pos, 0, 10).stream().map(p -> p.getText())
+        .reduce((p1, p2) -> Chat.concat("\n", p1, p2))
+        .map(txt -> Chat.concat("\n", Chat.text("Placement history"), txt))
+        .orElse(Chat.text("No placements found at " + pos.getX() + " " + pos.getY() + " " + pos.getZ()));
+
+        Chat.send(player, placementMessage);
       });
     }
 
