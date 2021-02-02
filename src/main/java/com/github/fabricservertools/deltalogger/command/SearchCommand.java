@@ -16,7 +16,6 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
-import net.minecraft.command.argument.*;
 
 import java.util.HashMap;
 
@@ -78,6 +77,7 @@ public class SearchCommand {
             int range = (Integer) propertyMap.get("range");
             BlockPos playerPos = sourcePlayer.getBlockPos();
             sqlPlace += rangeStatementBuilder(playerPos, range);
+            sqlGrief += rangeStatementBuilder(playerPos, range);
         }
 
         Identifier dimension;
@@ -90,6 +90,7 @@ public class SearchCommand {
         // Add to query searching in only one dimension
         sqlPlace += "AND dimension_id = (SELECT id FROM registry WHERE `name` = \"" + dimension + "\") ";
         sqlContainer += "AND dimension_id = (SELECT id FROM registry WHERE `name` = \"" + dimension + "\") ";
+        sqlGrief += "AND dimension_id = (SELECT id FROM registry WHERE `name` = \"" + dimension + "\") ";
 
         // Get optional limit value
         int limit = 10;
@@ -117,6 +118,10 @@ public class SearchCommand {
                 } else if (action.contains("grief")) {
                     sendGrief(scs, sqlGrief, limit);
                 }
+            } else {
+                sendGrief(scs, sqlGrief, limit);
+                sendTransactions(scs, sqlContainer, limit);
+                sendPlacements(scs, sqlPlace, limit);
             }
         } else {
             sendTransactions(scs, sqlContainer, limit);
