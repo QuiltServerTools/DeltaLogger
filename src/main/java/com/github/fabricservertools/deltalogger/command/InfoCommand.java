@@ -19,7 +19,7 @@ import java.util.Optional;
 
 public class InfoCommand {
     public static void register(LiteralCommandNode<ServerCommandSource> root) {
-        LiteralCommandNode<ServerCommandSource> searchNode = literal("info")
+        LiteralCommandNode<ServerCommandSource> searchNode = literal("view")
                 .then(literal("version").executes(context -> getVersion(context.getSource())))
                 .then(literal("discord").executes(context -> getDiscord(context.getSource()))).build();
 
