@@ -1,5 +1,10 @@
 package com.github.fabricservertools.deltalogger.beans;
 
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.MutableText;
+import net.minecraft.util.Formatting;
+import static com.github.fabricservertools.deltalogger.Chat.*;
+
 public class MobGrief {
   private int id;
   private String time;
@@ -83,5 +88,11 @@ public class MobGrief {
 
   public void setZ(int z) {
     this.z = z;
+  }
+  public MutableText getTextWithPos() {
+    return joinText(format(time, Formatting.GRAY),
+        format(new LiteralText(String.valueOf(x) + " " + String.valueOf(y) + " " + String.valueOf(z)), Formatting.AQUA),
+        format(getEntityType(), Formatting.ITALIC),
+        format(getTarget(), Formatting.YELLOW));
   }
 }

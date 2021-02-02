@@ -16,6 +16,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.command.argument.*;
 
 import java.util.HashMap;
 
@@ -53,12 +54,15 @@ public class SearchCommand {
         
         String sqlPlace = "";
         String sqlContainer = "";
+        String sqlGrief = "";
         if (propertyMap.containsKey("target")) {
             GameProfileArgumentType.GameProfileArgument targets = (GameProfileArgumentType.GameProfileArgument) propertyMap
                     .get("targets");
-            sqlPlace += "AND player_id = (SELECT  id FROM players WHERE uuid = "
+            sqlPlace += "AND player_id = (SELECT id FROM players WHERE uuid = "
                     + targets.getNames(scs).stream().map(gp -> gp.getId().toString()).toArray() + ") ";
-            sqlContainer += "AND player_id = (SELECT  id FROM players WHERE uuid = "
+            sqlContainer += "AND player_id = (SELECT id FROM players WHERE uuid = "
+                    + targets.getNames(scs).stream().map(gp -> gp.getId().toString()).toArray() + ") ";
+            sqlGrief += "AND player_id = (SELECT  id FROM players WHERE uuid = "
                     + targets.getNames(scs).stream().map(gp -> gp.getId().toString()).toArray() + ") ";
         }
         if (propertyMap.containsKey("block")) {
@@ -69,12 +73,13 @@ public class SearchCommand {
                     + Registry.BLOCK.getId(block.getBlockState().getBlock()).toString() + "\") ";
         }
 
-        //range
+        //range or pos
         if (propertyMap.containsKey("range")) {
             int range = (Integer) propertyMap.get("range");
             BlockPos playerPos = sourcePlayer.getBlockPos();
             sqlPlace += rangeStatementBuilder(playerPos, range);
         }
+
         Identifier dimension;
         if (propertyMap.containsKey("dimension")) {
             dimension = (Identifier) (propertyMap.get("dimension"));
@@ -104,11 +109,13 @@ public class SearchCommand {
                     sqlPlace += "AND placed = 0 ";
                     sendPlacements(scs, sqlPlace, limit);
                 } else if (action.contains("added")) {
-                    //sqlContainer += "AND item_count > 0 ";
+                    sqlContainer += "AND item_count > 0 ";
                     sendTransactions(scs, sqlContainer, limit);
                 } else if (action.contains("removed")) {
                     sqlContainer += "AND item_count < 0 ";
                     sendTransactions(scs, sqlContainer, limit);
+                } else if (action.contains("grief")) {
+                    sendGrief(scs, sqlGrief, limit);
                 }
             }
         } else {
@@ -141,6 +148,15 @@ public class SearchCommand {
                 .map(txt -> Chat.concat("\n", Chat.text("Placement history"), txt))
                 .orElse(Chat.text("No placements found with the terms specified"));
         scs.getPlayer().sendSystemMessage(placementMessage, Util.NIL_UUID);
+    }
+
+
+    private static void sendGrief(ServerCommandSource scs, String sqlPlace, int limit) throws CommandSyntaxException {
+        MutableText griefMessage = DAO.entity.search(0, limit, sqlPlace).stream().map(p -> p.getTextWithPos())
+        .reduce((p1, p2) -> Chat.concat("\n", p1, p2))
+        .map(txt -> Chat.concat("\n", Chat.text("Grief history"), txt))
+        .orElse(Chat.text("No griefs found with the terms specified"));
+        scs.getPlayer().sendSystemMessage(griefMessage, Util.NIL_UUID);
     }
 
     /*

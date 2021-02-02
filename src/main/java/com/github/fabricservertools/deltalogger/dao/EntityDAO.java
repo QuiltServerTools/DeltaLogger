@@ -46,12 +46,13 @@ public class EntityDAO {
     ));
   }
 
-  public List<MobGrief> getLatestMobGrief(int idOffset, int limit) {
+  public List<MobGrief> search(int idOffset, int limit, String where) {
     return jdbi.withHandle(handle -> handle
       .select(String.join(" ",
         "SELECT MG.id, date, ER.name as entity, PL.name as target, DR.name as dimension, x, y, z",
         "FROM (SELECT * FROM mob_grief WHERE id <",
           SQLUtils.offsetOrZeroLatest("mob_grief", "id", idOffset),
+        where,
         "ORDER BY `id` DESC LIMIT ?) as MG",
         "LEFT JOIN players as PL ON MG.target = PL.id",
         "INNER JOIN registry as ER ON MG.entity_type = ER.id",
