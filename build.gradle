@@ -3,7 +3,11 @@ plugins {
 	id 'com.github.johnrengelman.shadow' version '5.2.0'
 	id 'maven-publish'
 }
-
+repositories {
+    maven {
+        url = "https://maven.nucleoid.xyz"
+    }
+}
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
@@ -42,6 +46,10 @@ dependencies {
 	compile('org.slf4j:slf4j-simple:1.8.0-beta4')
 
 	implementation(shadow('io.vavr:vavr:0.10.3'))
+
+	// Server-side translations
+	modImplementation 'fr.catcore:server-translations-api:1.4.0'
+  	include 'fr.catcore:server-translations-api:1.4.0'
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"

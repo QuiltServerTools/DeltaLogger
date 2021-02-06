@@ -4,6 +4,7 @@ import static com.github.fabricservertools.deltalogger.Chat.*;
 
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 
 /**
@@ -21,8 +22,8 @@ public class Placement {
   private String dimension;
   private String state;
 
-  public Placement(int id, String playerName, String time, String blockType, String state, int x, int y, int z, boolean placed,
-      String dimension) {
+  public Placement(int id, String playerName, String time, String blockType, String state, int x, int y, int z,
+      boolean placed, String dimension) {
     this.id = id;
     this.playerName = playerName;
     this.time = time;
@@ -133,8 +134,23 @@ public class Placement {
   public MutableText getTextWithPos() {
     return joinText(format(time, Formatting.GRAY),
         format(new LiteralText(String.valueOf(x) + " " + String.valueOf(y) + " " + String.valueOf(z)), Formatting.AQUA),
-        format(playerName, Formatting.ITALIC),
-        format(placed ? "placed" : "removed", placed ? Formatting.GREEN : Formatting.DARK_RED),
-        format(blockType.replaceFirst("^minecraft:", ""), Formatting.YELLOW));
+        format(playerName, Formatting.ITALIC), getActionText(),
+        getTranslatedBlock());
+  }
+
+  private MutableText getActionText() {
+    MutableText text;
+    if(placed) {
+      text = new TranslatableText("placed").formatted(Formatting.GREEN);
+    }
+    else {
+      text = new TranslatableText("removed").formatted(Formatting.RED);
+    }
+    return text;
+  }
+  private MutableText getTranslatedBlock() {
+    blockType.replaceFirst("^minecraft:", "");
+    MutableText text = new TranslatableText(blockType).formatted(Formatting.YELLOW);
+    return text;
   }
 }

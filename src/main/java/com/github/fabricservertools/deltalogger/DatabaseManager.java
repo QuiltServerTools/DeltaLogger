@@ -227,7 +227,7 @@ public class DatabaseManager implements Runnable {
   public void checkValidSchema() throws IOException {
     DeltaLogger.LOG.info("Checking for valid schema..");
     failOnFalse(
-      runScript("/data/watchtower/kv_store_table.sql"),
+      runScript("/data/deltalogger/kv_store_table.sql"),
       "Problem creating kv table"
     );
 
@@ -272,7 +272,7 @@ public class DatabaseManager implements Runnable {
     if (version == -1) {
       DeltaLogger.LOG.info("Creating first time SQL tables");
       failOnFalse(
-        runScript("/data/watchtower/schema.sql")
+        runScript("/data/deltalogger/schema.sql")
         && setDBSchemaVer(1),
         "Failed creating SQL tables"
       );
@@ -280,7 +280,7 @@ public class DatabaseManager implements Runnable {
       if (isMysql()) {
         // if no schema ver and was MySQL then it has to be a WT DB
         String migrateSql = Resources.toString(
-            DatabaseManager.class.getResource("/data/watchtower/migration/wt_to_bl.sql"), StandardCharsets.UTF_8);
+            DatabaseManager.class.getResource("/data/deltalogger/migration/wt_to_bl.sql"), StandardCharsets.UTF_8);
         DeltaLogger.LOG.info(String.join("\n", "",
           "Migrating WatchTower database to DeltaLogger database.",
           "This may take a few minutes to a few hours depending on the size of your database.",
@@ -299,7 +299,7 @@ public class DatabaseManager implements Runnable {
         );
 
         failOnFalse(
-          runScript("/data/watchtower/schema.sql")
+          runScript("/data/deltalogger/schema.sql")
           && setDBSchemaVer(1),
           "Failed creating SQL tables"
         );

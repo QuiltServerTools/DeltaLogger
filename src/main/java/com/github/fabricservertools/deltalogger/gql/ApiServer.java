@@ -9,7 +9,7 @@ import io.javalin.Javalin;
 
 public class ApiServer {
   public static void start() {
-    String staticDirectory = "/data/watchtower/http";
+    String staticDirectory = "/data/deltalogger/http";
     int port;
     try {
       port = Integer.parseInt(ModInit.CONFIG.getProperty("webapp_port", "8080"));

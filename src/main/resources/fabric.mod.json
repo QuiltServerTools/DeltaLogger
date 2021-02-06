@@ -4,7 +4,7 @@
   "version": "1.0.0",
 
   "name": "DeltaLogger",
-  "description": "Change logger for Fabric mod servers",
+  "description": "Block, container and entity logging tool for the fabric mod loader",
   "authors": [
     "unsupervised@tutanota.com","yitzy299"
   ],

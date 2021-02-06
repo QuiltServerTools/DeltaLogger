@@ -9,7 +9,7 @@ import net.fabricmc.loader.api.Version;
 import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.ClickEvent;
-import net.minecraft.text.LiteralText;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Util;
 
@@ -32,14 +32,13 @@ public class InfoCommand {
             ModContainer deltaLogger = mc.get();
             ModMetadata data = deltaLogger.getMetadata();
             Version version = data.getVersion();
-            scs.getPlayer().sendSystemMessage(new LiteralText("You are using DeltaLogger v")
-                    .append(version.getFriendlyString()).formatted(Formatting.GREEN), Util.NIL_UUID);
+            scs.getPlayer().sendSystemMessage(new TranslatableText("You are using DeltaLogger version ", version.getFriendlyString()).formatted(Formatting.GREEN), Util.NIL_UUID);
         }
         return 1;
     }
 
     private static int getDiscord(ServerCommandSource scs) throws CommandSyntaxException {
-        scs.getPlayer().sendSystemMessage(new LiteralText("Click to join the DeltaLogger discord").styled(s -> s.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://discord.gg/UxHnDWr"))).formatted(Formatting.GREEN), Util.NIL_UUID);
+        scs.getPlayer().sendSystemMessage(new TranslatableText("Click to join the DeltaLogger discord").styled(s -> s.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://discord.gg/UxHnDWr"))).formatted(Formatting.GREEN), Util.NIL_UUID);
         return 1;
     }
 }

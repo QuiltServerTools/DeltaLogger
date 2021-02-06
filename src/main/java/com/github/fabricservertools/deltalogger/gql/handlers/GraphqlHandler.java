@@ -41,7 +41,7 @@ public class GraphqlHandler implements Handler {
 
   public static void buildSchema() throws IOException {
     // String schema = "type Query{hello: String}";
-    URL url = GraphqlHandler.class.getResource("/data/watchtower/schema.graphql");
+    URL url = GraphqlHandler.class.getResource("/data/deltalogger/schema.graphql");
     String schema = Resources.toString(url, StandardCharsets.UTF_8);
 
     SchemaParser schemaParser = new SchemaParser();
