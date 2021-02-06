@@ -2,6 +2,7 @@ package com.github.fabricservertools.deltalogger;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -14,8 +15,6 @@ import com.github.fabricservertools.deltalogger.command.Commands;
 import com.github.fabricservertools.deltalogger.dao.RegistryDAO;
 import com.github.fabricservertools.deltalogger.gql.ApiServer;
 import com.google.common.collect.Sets;
-import com.google.common.io.MoreFiles;
-import com.google.common.io.Resources;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -37,12 +36,7 @@ public class ModInit implements ModInitializer {
     if (!configPath.toFile().exists()) {
       // Create default config
       try {
-        Resources
-          .asByteSource(
-            ModInit.class
-            .getResource("/data/watchtower/default_config.properties")
-          )
-          .copyTo(MoreFiles.asByteSink(configPath));
+        Files.copy(ModInit.class.getResourceAsStream("/data/watchtower/default_config.properties"), configPath);
         DeltaLogger.LOG.info("Optional configuration for DeltaLogger created in `config` directory. Using SQLite by default.");
       } catch (IOException e1) {
         e1.printStackTrace();
