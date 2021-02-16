@@ -5,10 +5,7 @@ import java.util.HashMap;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.text.MutableText;
+import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -40,8 +37,8 @@ public class Chat {
     ((ServerPlayerEntity) p).sendMessage(joinText(texts), false);
   }
 
-  public static LiteralText text(String s) {
-    return new LiteralText(s);
+  public static TranslatableText text(String s) {
+    return new TranslatableText(s);
   }
 
   public static MutableText format(MutableText t, Formatting f) {

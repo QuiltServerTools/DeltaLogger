@@ -159,7 +159,7 @@ public class SearchCommand {
     private static void sendGrief(ServerCommandSource scs, String sqlPlace, int limit) throws CommandSyntaxException {
         MutableText griefMessage = DAO.entity.search(0, limit, sqlPlace).stream().map(p -> p.getTextWithPos())
         .reduce((p1, p2) -> Chat.concat("\n", p1, p2))
-        .map(txt -> Chat.concat("\n", Chat.text("Grief history"), txt))
+        .map(txt -> Chat.concat("\n", Chat.text("Grief History"), txt))
         .orElse(Chat.text("No griefs found with the terms specified"));
         scs.getPlayer().sendSystemMessage(griefMessage, Util.NIL_UUID);
     }

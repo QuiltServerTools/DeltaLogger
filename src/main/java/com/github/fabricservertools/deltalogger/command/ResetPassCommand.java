@@ -10,6 +10,7 @@ import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 
 public class ResetPassCommand {
@@ -25,7 +26,7 @@ public class ResetPassCommand {
                 if (now.getTime()>resetEpoch) {
                     resetEpoch = now.getTime()+interval;
                     if (p == null) {
-                        context.getSource().sendFeedback(new LiteralText("Command resetpass error: must be logged in as user to reset password."), false);
+                        context.getSource().sendFeedback(new TranslatableText("Command resetpass error: must be logged in as user to reset password."), false);
                         return 1;
                     }
                     Either<String, String> tempPass = DAO.auth.issueTemporaryPass(p.getUuid(), p.hasPermissionLevel(4));
@@ -33,11 +34,11 @@ public class ResetPassCommand {
                     if (tempPass.isLeft()) {
                         p.sendMessage(new LiteralText(tempPass.getLeft()), false);
                     } else {
-                        p.sendMessage(new LiteralText("Your temporary password for DeltaLogger panel is " + tempPass.get()), false);
+                        p.sendMessage(new TranslatableText("Your temporary password for DeltaLogger panel is " + tempPass.get()), false);
                     }
                 }
                 else {
-                    p.sendMessage(new LiteralText("Please wait for "+(resetEpoch - now.getTime())/1000+" seconds before resetting your password").formatted(Formatting.RED),false);
+                    p.sendMessage(new TranslatableText("Please wait for ").append(new LiteralText(String.valueOf((resetEpoch - now.getTime())/1000))+" seconds before resetting your password").formatted(Formatting.RED),false);
                 }
                 
                 return 1;
