@@ -1,9 +1,10 @@
 # DISCLAIMER
 
 This project is still under heavy development and is not recommended for use yet.
+We have a few bugs left to fix involving incorrect logging of transactions and hanging on `/stop`
 # DeltaLogger
 
-Block and chest/container inventory tracking tool for fabric that can be configured to use MySQL or SQLite.
+Block and chest/container inventory tracking tool for fabric that can be configured to use MySQL or SQLite with a fast and responsive web UI.
 [Join the DeltaLogger discord](https://discord.gg/UxHnDWr)
 
 ## Setup
@@ -17,7 +18,13 @@ Place the mod jar in the mods folder of your server directory and launch your fa
 # Whether you want to use an SQLite database. Put false for MySQL.
 use_sqlite=true
 
-##! MYSQL ONLY BELOW. If you are using SQLite these  are safe to ignore. !##
+# Port to use for the web app. Navigate to http://serverhostname:port to see web app
+webapp_port=
+
+# Server domain url or hostname. Used for giving links to the web app
+webapp_host=
+
+##! MYSQL ONLY BELOW. If you are using SQLite these are safe to ignore. !##
 
 # Name of the MySQL database to use. If you do not have one, then do
 # "CREATE DATABASE yourdbname" from a MySQL client first.
@@ -48,7 +55,7 @@ This mod also requires the fabric api mod, which you can find [here](https://www
 - `/dl inspect` Whack a block or container to see recent interactions with the target.
 - `/dl inspect <pos>` Shows database records for the block position provided.
 - `/dl search <args>` Builds a database query with the parameters specified
-- `/dl sql (block|transaction) <query>` Runs a query on the database with the SQL specified
+- `/dl sql (block|transaction) <query>` Runs a query on the database with the SQL specified. Only available in a development environment
 
 ## Support
 
@@ -81,3 +88,7 @@ The mod jars are then found in `build/libs`. For almost all uses, you want the j
 ## Contribute
 
 Feel free to fork and open a pull request with features you add. We do suggest asking on the discord about a feature before spending loads on time on it! Ping `@yitzy` if you want to have access to the development channel
+
+### Translations
+
+Please see `translations.md` for information about contributing translations

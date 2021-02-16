@@ -1,0 +1,18 @@
+{
+  "DeltaLogger inspect mode ":"DeltaLogger tryb inspekcji",
+  "on":"włączony",
+  "off":"wyłączony",
+  "No placements found at":"Brak konstrukcji znalezionych na",
+  "You are using DeltaLogger version ":"Używasz wersji DeltaLogger ",
+  "Click to join the DeltaLogger discord":"Kliknij tutaj aby dołączyć do serwera Discord DeltaLogger",
+  "Command resetpass error: must be logged in as user to reset password":"Błąd komendy resetpass: musisz być zalogowany jako użytkownik aby zresetować hasło",
+  "Your temporary password for DeltaLogger panel is ":"Twoje tymczasowe hasło do panelu DeltaLogger to",
+  "Please wait for ":"Prosimy o czekanie na",
+  " seconds before resetting your password":" sekund do zresetowania twojego hasła",
+  "No transactions found with the terms specified":"Brak transakcji znalezionych na wyznaczonych warunkach",
+  "Transaction History":"Historia Transakcji",
+  "Placement History":"Historia Konstrukcji",
+  "No griefs found with the terms specified":"Brak griefów znalezionych na wyznaczonych warunkach",
+  "Grief History":"Historia Griefów",
+  "No placements found with the terms specified":"Brak konstrukcji znalezionych na wyznaczonych warunkach"
+}

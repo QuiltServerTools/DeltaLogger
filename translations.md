@@ -22,7 +22,6 @@ As an example, we will add ``en_gb``. Copy the template found below into
     "No transactions found with the terms specified":"",
     "Transaction History":"",
     "Placement History":"",
-    "No placements found at ":"",
     "No griefs found with the terms specified":"",
     "Grief History":"",
     "No placements found with the terms specified":""
