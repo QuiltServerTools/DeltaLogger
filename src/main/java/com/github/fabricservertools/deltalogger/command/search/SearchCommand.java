@@ -1,6 +1,7 @@
-package com.github.fabricservertools.deltalogger.command;
+package com.github.fabricservertools.deltalogger.command.search;
 
 import com.github.fabricservertools.deltalogger.Chat;
+import com.github.fabricservertools.deltalogger.command.search.CriteriumParser;
 import com.github.fabricservertools.deltalogger.dao.DAO;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -17,6 +18,7 @@ import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 
+import java.util.Arrays;
 import java.util.HashMap;
 
 import static net.minecraft.server.command.CommandManager.argument;
@@ -58,11 +60,11 @@ public class SearchCommand {
             GameProfileArgumentType.GameProfileArgument targets = (GameProfileArgumentType.GameProfileArgument) propertyMap
                     .get("targets");
             sqlPlace += "AND player_id = (SELECT id FROM players WHERE uuid = "
-                    + targets.getNames(scs).stream().map(gp -> gp.getId().toString()).toArray() + ") ";
+                    + Arrays.toString(targets.getNames(scs).stream().map(gp -> gp.getId().toString()).toArray()) + ") ";
             sqlContainer += "AND player_id = (SELECT id FROM players WHERE uuid = "
-                    + targets.getNames(scs).stream().map(gp -> gp.getId().toString()).toArray() + ") ";
+                    + Arrays.toString(targets.getNames(scs).stream().map(gp -> gp.getId().toString()).toArray()) + ") ";
             sqlGrief += "AND player_id = (SELECT  id FROM players WHERE uuid = "
-                    + targets.getNames(scs).stream().map(gp -> gp.getId().toString()).toArray() + ") ";
+                    + Arrays.toString(targets.getNames(scs).stream().map(gp -> gp.getId().toString()).toArray()) + ") ";
         }
         if (propertyMap.containsKey("block")) {
             BlockStateArgument block = (BlockStateArgument) propertyMap.get("block");

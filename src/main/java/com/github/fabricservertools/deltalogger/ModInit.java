@@ -16,7 +16,6 @@ import com.github.fabricservertools.deltalogger.dao.RegistryDAO;
 import com.github.fabricservertools.deltalogger.gql.ApiServer;
 import com.google.common.collect.Sets;
 
-import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
@@ -60,7 +59,7 @@ public class ModInit implements ModInitializer {
 
   /**
    * Called from MinecraftDedicatedServer::setupServer
-   * @param server Server instnace
+   * @param server Server instance
    */
   public static void onServerInit(MinecraftServer server) {
     dm = DatabaseManager.create(server.getSavePath(WorldSavePath.ROOT).toFile());
@@ -95,16 +94,17 @@ public class ModInit implements ModInitializer {
       try {
         // FIXME hangs on /stop command
         Thread.sleep(500);
+
       } catch (InterruptedException e) {
         e.printStackTrace();
       }
       if (i == 60) {
         DeltaLogger.LOG.warn("Taking too long to finish up queue!");
         ModInit.dmThread.interrupt();
+
       }
     }
   }
-  
 
   @Override
   public void onInitialize() {

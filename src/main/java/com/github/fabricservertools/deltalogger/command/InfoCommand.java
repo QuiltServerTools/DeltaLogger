@@ -19,11 +19,11 @@ import java.util.Optional;
 
 public class InfoCommand {
     public static void register(LiteralCommandNode<ServerCommandSource> root) {
-        LiteralCommandNode<ServerCommandSource> searchNode = literal("view")
+        LiteralCommandNode<ServerCommandSource> viewNode = literal("view")
                 .then(literal("version").executes(context -> getVersion(context.getSource())))
                 .then(literal("discord").executes(context -> getDiscord(context.getSource()))).build();
 
-        root.addChild(searchNode);
+        root.addChild(viewNode);
     }
 
     private static int getVersion(ServerCommandSource scs) throws CommandSyntaxException {

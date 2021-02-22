@@ -1,5 +1,6 @@
 package com.github.fabricservertools.deltalogger.command;
 
+import com.github.fabricservertools.deltalogger.command.search.SearchCommand;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 

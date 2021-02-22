@@ -1,4 +1,4 @@
-package com.github.fabricservertools.deltalogger.command;
+package com.github.fabricservertools.deltalogger.command.search;
 
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
