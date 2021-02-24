@@ -1,10 +1,6 @@
 package com.github.fabricservertools.deltalogger.gql;
 
-import java.util.List;
-import java.util.UUID;
-
 import com.github.fabricservertools.deltalogger.dao.DAO;
-
 import graphql.ErrorClassification;
 import graphql.ErrorType;
 import graphql.GraphQLError;
@@ -13,113 +9,116 @@ import graphql.language.SourceLocation;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.idl.RuntimeWiring;
 
+import java.util.List;
+import java.util.UUID;
+
 public class GQLWiring {
-  public static class ValidationError implements GraphQLError {
-    /**
-     * IDE go brrr
-     */
-    private static final long serialVersionUID = 1L;
-    private String message;
+	public static class ValidationError implements GraphQLError {
+		/**
+		 * IDE go brrr
+		 */
+		private static final long serialVersionUID = 1L;
+		private String message;
 
-    public ValidationError(String message) {
-      this.message = message;
-    }
+		public ValidationError(String message) {
+			this.message = message;
+		}
 
-    @Override
-    public String getMessage() {
-      return message;
-    }
+		@Override
+		public String getMessage() {
+			return message;
+		}
 
-    @Override
-    public List<SourceLocation> getLocations() {
-      return null;
-    }
+		@Override
+		public List<SourceLocation> getLocations() {
+			return null;
+		}
 
-    @Override
-    public ErrorClassification getErrorType() {
-      return ErrorType.ValidationError;
-    }
-  }
+		@Override
+		public ErrorClassification getErrorType() {
+			return ErrorType.ValidationError;
+		}
+	}
 
-  private static DataFetcherResult<Object> dataResult(Object data) {
-    return DataFetcherResult.newResult().data(data).build();
-  }
+	private static DataFetcherResult<Object> dataResult(Object data) {
+		return DataFetcherResult.newResult().data(data).build();
+	}
 
-  private static DataFetcherResult<Object> errResult(String message) {
-    return DataFetcherResult.newResult().error(new ValidationError(message)).build();
-  }
+	private static DataFetcherResult<Object> errResult(String message) {
+		return DataFetcherResult.newResult().error(new ValidationError(message)).build();
+	}
 
-  private static <T> T getArgOrElse(DataFetchingEnvironment dfe, String key, T elseValue) {
-    T attempt = dfe.getArgument(key);
-    if (attempt == null) {
-      attempt = elseValue;
-    }
-    return attempt;
-  }
+	private static <T> T getArgOrElse(DataFetchingEnvironment dfe, String key, T elseValue) {
+		T attempt = dfe.getArgument(key);
+		if (attempt == null) {
+			attempt = elseValue;
+		}
+		return attempt;
+	}
 
-  public static RuntimeWiring getWiring() {
-    return RuntimeWiring.newRuntimeWiring()
-        .type("Query", builder -> builder
-          .dataFetcher("players", dfe -> Validators
-            .validatePagination(
-              getArgOrElse(dfe, "offset", 0),
-              getArgOrElse(dfe, "limit", 10),
-              100
-            )
-            .map(tup ->
-              dataResult(DAO.player.getPlayers(tup._1, tup._2))
-            )
-            .getOrElseGet(GQLWiring::errResult)
-          )
-          .dataFetcher("playerById", dfe -> DAO.player
-            .getPlayerById(dfe.getArgument("id")))
-          .dataFetcher("playerByUUID", dfe -> DAO.player
-            .getPlayerByUUID(UUID.fromString(dfe.getArgument("uuid"))))
-          .dataFetcher("placements", dfe -> Validators
-            .validatePagination(
-              getArgOrElse(dfe, "offset", 0),
-              getArgOrElse(dfe, "limit", 10), // FIXME change to applicative validation?
-              100
-            )
-            .map(tup ->
-              dataResult(DAO.block.getLatestPlacements(tup._1, tup._2))
-            )
-            .getOrElseGet(GQLWiring::errResult)
-          )
-          .dataFetcher("transactions", dfe -> Validators
-            .validatePagination(
-              getArgOrElse(dfe, "offset", 0),
-              getArgOrElse(dfe, "limit", 10), // FIXME change to applicative validation?
-              100
-            )
-            .map(tup ->
-              dataResult(DAO.transaction.getLatestTransactions(tup._1, tup._2))
-            )
-            .getOrElseGet(GQLWiring::errResult)
-          )
-          .dataFetcher("killedEntities", dfe -> Validators
-            .validatePagination(
-              getArgOrElse(dfe, "offset", 0),
-              getArgOrElse(dfe, "limit", 10), // FIXME change to applicative validation?
-              100
-            )
-            .map(tup ->
-              dataResult(DAO.entity.getLatestKilledEntities(tup._1, tup._2))
-            )
-            .getOrElseGet(GQLWiring::errResult)
-          )
-          .dataFetcher("mobGrief", dfe -> Validators
-            .validatePagination(
-              getArgOrElse(dfe, "offset", 0),
-              getArgOrElse(dfe, "limit", 10), // FIXME change to applicative validation?
-              100
-            )
-            .map(tup ->
-              dataResult(DAO.entity.search(tup._1, tup._2, ""))
-            )
-            .getOrElseGet(GQLWiring::errResult)
-          )
-        )
-        .build();
-  }
+	public static RuntimeWiring getWiring() {
+		return RuntimeWiring.newRuntimeWiring()
+				.type("Query", builder -> builder
+						.dataFetcher("players", dfe -> Validators
+								.validatePagination(
+										getArgOrElse(dfe, "offset", 0),
+										getArgOrElse(dfe, "limit", 10),
+										100
+								)
+								.map(tup ->
+										dataResult(DAO.player.getPlayers(tup._1, tup._2))
+								)
+								.getOrElseGet(GQLWiring::errResult)
+						)
+						.dataFetcher("playerById", dfe -> DAO.player
+								.getPlayerById(dfe.getArgument("id")))
+						.dataFetcher("playerByUUID", dfe -> DAO.player
+								.getPlayerByUUID(UUID.fromString(dfe.getArgument("uuid"))))
+						.dataFetcher("placements", dfe -> Validators
+								.validatePagination(
+										getArgOrElse(dfe, "offset", 0),
+										getArgOrElse(dfe, "limit", 10), // FIXME change to applicative validation?
+										100
+								)
+								.map(tup ->
+										dataResult(DAO.block.getLatestPlacements(tup._1, tup._2))
+								)
+								.getOrElseGet(GQLWiring::errResult)
+						)
+						.dataFetcher("transactions", dfe -> Validators
+								.validatePagination(
+										getArgOrElse(dfe, "offset", 0),
+										getArgOrElse(dfe, "limit", 10), // FIXME change to applicative validation?
+										100
+								)
+								.map(tup ->
+										dataResult(DAO.transaction.getLatestTransactions(tup._1, tup._2))
+								)
+								.getOrElseGet(GQLWiring::errResult)
+						)
+						.dataFetcher("killedEntities", dfe -> Validators
+								.validatePagination(
+										getArgOrElse(dfe, "offset", 0),
+										getArgOrElse(dfe, "limit", 10), // FIXME change to applicative validation?
+										100
+								)
+								.map(tup ->
+										dataResult(DAO.entity.getLatestKilledEntities(tup._1, tup._2))
+								)
+								.getOrElseGet(GQLWiring::errResult)
+						)
+						.dataFetcher("mobGrief", dfe -> Validators
+								.validatePagination(
+										getArgOrElse(dfe, "offset", 0),
+										getArgOrElse(dfe, "limit", 10), // FIXME change to applicative validation?
+										100
+								)
+								.map(tup ->
+										dataResult(DAO.entity.search(tup._1, tup._2, ""))
+								)
+								.getOrElseGet(GQLWiring::errResult)
+						)
+				)
+				.build();
+	}
 }

@@ -1,70 +1,70 @@
 package com.github.fabricservertools.deltalogger.gql.handlers;
 
-import java.util.HashMap;
-import java.util.Optional;
-
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.github.fabricservertools.deltalogger.dao.DAO;
-
-import io.javalin.http.BadRequestResponse;
 import io.javalin.http.Handler;
 import io.javalin.http.UnauthorizedResponse;
 import io.vavr.control.Either;
 
+import java.util.HashMap;
+import java.util.Optional;
+
 public class AuthHandlers {
-  public static final Handler validateHandler = ctx -> {
-    if (ctx.method() == "OPTIONS") return;
-    Optional<DecodedJWT> ojwt = Optional
-      .ofNullable(ctx.header("Authorization"))
-      .map(hv -> hv.replaceFirst("^Bearer ", ""))
-      .map(token -> token.isEmpty() ? null : token)
-      .flatMap(token -> {
-        return DAO.auth.verifyJWT(token);
-      });
+	public static final Handler validateHandler = ctx -> {
+		if (ctx.method() == "OPTIONS") return;
+		Optional<DecodedJWT> ojwt = Optional
+				.ofNullable(ctx.header("Authorization"))
+				.map(hv -> hv.replaceFirst("^Bearer ", ""))
+				.map(token -> token.isEmpty() ? null : token)
+				.flatMap(token -> {
+					return DAO.auth.verifyJWT(token);
+				});
 
-    if (ojwt.isPresent()) {
-      ctx.attribute("token", ojwt.get());
-    } else {
-      throw new UnauthorizedResponse();
-    }
-  };
+		if (ojwt.isPresent()) {
+			ctx.attribute("token", ojwt.get());
+		} else {
+			throw new UnauthorizedResponse();
+		}
+	};
 
-  private static class LoginRequestBody {
-    public String username;
-    public String password;
-  }
-  public static final Handler provideJwtHandler = ctx -> {
-    LoginRequestBody authInfo = ctx.bodyValidator(LoginRequestBody.class).get();
-    Optional<String> oToken = DAO.auth.generateJWT(authInfo.username, authInfo.password);
-    if (oToken.isPresent()) {
-      HashMap<String, String> resp = new HashMap<>();
-      resp.put("token", oToken.get());
-      ctx.json(resp);
-    } else {
-      throw new UnauthorizedResponse();
-    }
-  };
+	private static class LoginRequestBody {
+		public String username;
+		public String password;
+	}
 
-  private static class ChangePassBody {
-    public String password;
-  }
-  public static final Handler changePassHandler = ctx -> {
-    ChangePassBody body = ctx.bodyValidator(ChangePassBody.class).get();
-    DecodedJWT jwt = (DecodedJWT) ctx.attribute("token");
-    Either<String, String> oToken = DAO.auth.changePass(
-      jwt.getClaim("user_name").asString(),
-      body.password,
-      false
-    );
-    if (oToken.isRight()) {
-      HashMap<String, String> resp = new HashMap<>();
-      resp.put("token", oToken.get());
-      ctx.status(200).json(resp);
-    } else {
-      HashMap<String, String> resp = new HashMap<>();
-      resp.put("error", oToken.getLeft());
-      ctx.status(400).json(resp);
-      // throw new BadRequestResponse();
-    }
-  };
+	public static final Handler provideJwtHandler = ctx -> {
+		LoginRequestBody authInfo = ctx.bodyValidator(LoginRequestBody.class).get();
+		Optional<String> oToken = DAO.auth.generateJWT(authInfo.username, authInfo.password);
+		if (oToken.isPresent()) {
+			HashMap<String, String> resp = new HashMap<>();
+			resp.put("token", oToken.get());
+			ctx.json(resp);
+		} else {
+			throw new UnauthorizedResponse();
+		}
+	};
+
+	private static class ChangePassBody {
+		public String password;
+	}
+
+	public static final Handler changePassHandler = ctx -> {
+		ChangePassBody body = ctx.bodyValidator(ChangePassBody.class).get();
+		DecodedJWT jwt = (DecodedJWT) ctx.attribute("token");
+		Either<String, String> oToken = DAO.auth.changePass(
+				jwt.getClaim("user_name").asString(),
+				body.password,
+				false
+		);
+		if (oToken.isRight()) {
+			HashMap<String, String> resp = new HashMap<>();
+			resp.put("token", oToken.get());
+			ctx.status(200).json(resp);
+		} else {
+			HashMap<String, String> resp = new HashMap<>();
+			resp.put("error", oToken.getLeft());
+			ctx.status(400).json(resp);
+			// throw new BadRequestResponse();
+		}
+	};
 }

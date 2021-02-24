@@ -10,16 +10,16 @@ import net.minecraft.server.command.ServerCommandSource;
 import java.util.concurrent.CompletableFuture;
 
 public class ActionSuggestionProvider implements SuggestionProvider<ServerCommandSource> {
-    @Override
-    public CompletableFuture<Suggestions> getSuggestions(CommandContext<ServerCommandSource> context,
-            SuggestionsBuilder builder) throws CommandSyntaxException {
-        String current = builder.getRemaining().toLowerCase();
+	@Override
+	public CompletableFuture<Suggestions> getSuggestions(CommandContext<ServerCommandSource> context,
+														 SuggestionsBuilder builder) throws CommandSyntaxException {
+		String current = builder.getRemaining().toLowerCase();
 
-        for (EventTypes actions : EventTypes.values()) {
-            if (actions.name().contains(current)) {
-                builder.suggest(actions.name().toLowerCase());
-            }
-        }
-        return builder.buildFuture();
-    }
+		for (EventTypes actions : EventTypes.values()) {
+			if (actions.name().contains(current)) {
+				builder.suggest(actions.name().toLowerCase());
+			}
+		}
+		return builder.buildFuture();
+	}
 }
