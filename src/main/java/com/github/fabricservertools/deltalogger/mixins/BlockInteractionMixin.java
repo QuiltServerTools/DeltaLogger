@@ -7,6 +7,8 @@ import net.minecraft.block.ChestBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.LockableContainerBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.MutableText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
@@ -41,9 +43,17 @@ public class BlockInteractionMixin {
     World world, PlayerEntity player, Hand hand, BlockHitResult hit,
     CallbackInfoReturnable<ActionResult> ret
   ) {
+    if (world.isClient) return;
+
     Block block = ((BlockState)(Object)this).getBlock();
     BlockPos pos = hit.getBlockPos();
     BlockState state = world.getBlockState(pos);
+
+    if (hand != Hand.MAIN_HAND) {
+      ret.setReturnValue(block.onUse(state, world, pos, player, hand, hit));
+      return;
+    };
+
     if (!InspectCommand.hasToolEnabled(player)) {
       ret.setReturnValue(block.onUse(state, world, pos, player, hand, hit));
       return;
@@ -67,12 +77,6 @@ public class BlockInteractionMixin {
             .orElse(Chat.text("No transactions found in container"));
 
         Chat.send(player, transactionMessage);
-        MutableText placementMessage = DAO.block.getLatestPlacementsAt(dimension, pos, 0, 10).stream().map(p -> p.getText())
-        .reduce((p1, p2) -> Chat.concat("\n", p1, p2))
-        .map(txt -> Chat.concat("\n", Chat.text("Placement history"), txt))
-        .orElse(Chat.text("No placements found at " + pos.getX() + " " + pos.getY() + " " + pos.getZ()));
-
-        Chat.send(player, placementMessage);
       });
     }
 
@@ -84,5 +88,9 @@ public class BlockInteractionMixin {
     Chat.send(player, placementMessage);
 
     ret.setReturnValue(ActionResult.SUCCESS);
+    ((ServerPlayerEntity) player).networkHandler.sendPacket(new ScreenHandlerSlotUpdateS2CPacket(
+            -2,
+            player.inventory.selectedSlot,
+            player.inventory.getStack(player.inventory.selectedSlot)));
   }
 }
