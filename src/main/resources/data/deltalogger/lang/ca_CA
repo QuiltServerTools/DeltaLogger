@@ -1,0 +1,18 @@
+{
+  "DeltaLogger inspect mode ":"Mode d'inspecció DeltaLogger ",
+  "on":"activat",
+  "off":"desactivat",
+  "No placements found at ":"No s'han trobat disposicions a ",
+  "You are using DeltaLogger version ":"Estàs usant la versió de DeltaLogger ",
+  "Click to join the DeltaLogger discord":"Fes clic per unir-te al discord de DeltaLogger",
+  "Command resetpass error: must be logged in as user to reset password":"Error del comandament resetpass: has d'estar identificat com a usuari per restablir la constrasenya",
+  "Your temporary password for DeltaLogger panel is ":"La teva contrasenya temporal pel panell de DeltaLogger és ",
+  "Please wait for ":"Sisplau esperi ",
+  " seconds before resetting your password":" segons abans de restablir la teva constrasenya",
+  "No transactions found with the terms specified":"No s'han trobat operacions amb els termes especificats",
+  "Transaction History":"Històric d'operacions",
+  "Placement History":"Històric de disposicions",
+  "No griefs found with the terms specified":"No s'han trobat vandalitzacions amb els termes especificats",
+  "Grief History":"Històric de vandalitzacions",
+  "No placements found with the terms specified":"No s'han trobat disposicions amb els termes especificats"
+}
