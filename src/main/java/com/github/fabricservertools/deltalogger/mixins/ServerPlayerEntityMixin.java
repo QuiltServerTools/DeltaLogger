@@ -47,7 +47,6 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity {
         DatabaseManager.getSingleton().queueOp(ContainerDAO.insert(
           uuid, blockId, be.getPos(), this.getUuid(), java.time.Instant.now(), dimId
         ));
-        ItemUtils.registerContentListener(this.currentScreenHandler);
       }
   }
 }

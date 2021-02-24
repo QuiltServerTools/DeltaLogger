@@ -91,7 +91,6 @@ public abstract class ChestBlockMixin extends AbstractChestBlock<ChestBlockEntit
         DatabaseManager.getSingleton().queueOp(ContainerDAO.insert(
           chestWId, Registry.BLOCK.getId(this), pos, player.getUuid(), java.time.Instant.now(), dimension
         ));
-        ItemUtils.registerContentListener(player.currentScreenHandler);
       });;
   }
 
