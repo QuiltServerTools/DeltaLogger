@@ -29,6 +29,7 @@ public class ModInit implements ModInitializer {
   private static DatabaseManager dm;
   public static Properties CONFIG;
   public static Thread dmThread;
+  private static ApiServer apiServer = new ApiServer();
 
   public static Properties loadConfig(Path configPath) {
     Properties props = new Properties();
@@ -53,17 +54,19 @@ public class ModInit implements ModInitializer {
     return CONFIG;
   }
 
-  public void onModInit() {
-    loadConfig(Paths.get(FabricLoader.getInstance().getConfigDir().toString(), "deltalogger.properties"));
-  }
-
   /**
    * Called from MinecraftDedicatedServer::setupServer
    * @param server Server instance
    */
   public static void onServerInit(MinecraftServer server) {
     dm = DatabaseManager.create(server.getSavePath(WorldSavePath.ROOT).toFile());
-    ApiServer.start();
+
+    String portString = CONFIG.getProperty("webapp_port", "8080");
+    try {
+      apiServer.start(Integer.parseInt(portString));
+    } catch (NumberFormatException | NullPointerException e) {
+      throw new RuntimeException("invalid port number: " + portString);
+    }
   }
 
   public void afterWorldLoad(MinecraftServer server) {
@@ -80,7 +83,7 @@ public class ModInit implements ModInitializer {
       add(dimensionIds);
     }};
 
-    Set<Identifier> ids = idSets.stream().reduce((acc, s) -> Sets.union(acc, s)).orElse(new HashSet<Identifier>());
+    Set<Identifier> ids = idSets.stream().reduce(Sets::union).orElse(new HashSet<>());
 
     ids.forEach(id -> dm.queueOp(RegistryDAO.insert(id)));
 
@@ -89,32 +92,22 @@ public class ModInit implements ModInitializer {
   }
 
   public void onStop(MinecraftServer server) {
+    apiServer.stop();
     dm.stop();
-    for (int i = 1; i <= 2 * 30 && ModInit.dmThread.isAlive(); ++i) {
-      try {
-        // FIXME hangs on /stop command
-        Thread.sleep(500);
-
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      }
-      if (i == 60) {
-        DeltaLogger.LOG.warn("Taking too long to finish up queue!");
-        ModInit.dmThread.interrupt();
-
-      }
+    try {
+      dmThread.join();
+    } catch (InterruptedException e) {
+      DeltaLogger.LOG.warn("Interrupted while writing to database");
     }
   }
 
   @Override
   public void onInitialize() {
-    onModInit();
+    loadConfig(Paths.get(FabricLoader.getInstance().getConfigDir().toString(), "deltalogger.properties"));
 
     ServerLifecycleEvents.SERVER_STARTED.register(this::afterWorldLoad);
 
-    CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
-      Commands.register(dispatcher);
-    });
+    CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> Commands.register(dispatcher));
 
     ServerLifecycleEvents.SERVER_STOPPED.register(this::onStop);
   }

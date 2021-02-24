@@ -13,6 +13,6 @@ public class DebugRunner {
     ModInit.loadConfig(configPath);
 		DatabaseManager dm = DatabaseManager.create(null);
     // HttpServer.start();
-    ApiServer.start();
+    new ApiServer().start(8080);
   }
 }
