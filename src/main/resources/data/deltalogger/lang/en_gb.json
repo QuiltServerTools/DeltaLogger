@@ -4,7 +4,7 @@
   "off":"off",
   "deltalogger.none_found.pos":"No %s found at %s",
   "deltalogger.text.version":"You are using DeltaLogger version %s",
-  "deltalogger.discord":"Click to join the DeltaLogger discord",
+  "deltalogger.text.discord":"Click to join the DeltaLogger discord",
   "deltalogger.reset_pass.error":"Command resetpass error: must be logged in as user to reset password",
   "deltalogger.temp_pass":"Your temporary password for DeltaLogger panel is %s",
   "deltalogger.reset_pass.wait":"Please wait for %s seconds before resetting your password",
@@ -14,5 +14,5 @@
   "deltalogger.none_found.no_pos.grief":"No griefs found with the terms specified",
   "deltalogger.history.transaction":"Transaction History",
   "deltalogger.history.placement":"Placement History",
-  "deltalogger.history.grief":"Grief History",
+  "deltalogger.history.grief":"Grief History"
 }
