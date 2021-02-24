@@ -1,14 +1,9 @@
 package com.github.fabricservertools.deltalogger.mixins;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
 import com.github.fabricservertools.deltalogger.DatabaseManager;
 import com.github.fabricservertools.deltalogger.ITransactable;
-import com.github.fabricservertools.deltalogger.NbtUuid;
 import com.github.fabricservertools.deltalogger.ItemUtils;
+import com.github.fabricservertools.deltalogger.NbtUuid;
 import com.github.fabricservertools.deltalogger.dao.TransactionDAO;
 
 import net.minecraft.screen.slot.SlotActionType;
@@ -38,10 +33,10 @@ public abstract class ContainerMixin implements NbtUuid, ITransactable {
   public void setNbtUuid(UUID uuid) { this.uuid = uuid; }
   public UUID getNbtUuid() { return uuid; }
 
-  @Inject(at = @At(value = "HEAD"), method = "close")
-  public void close(PlayerEntity player, CallbackInfo info) {
-    UUID containerId = ((NbtUuid)this).getNbtUuid();
-    if (containerId == null) return;
+	@Inject(at = @At(value = "HEAD"), method = "close")
+	public void close(PlayerEntity player, CallbackInfo info) {
+		UUID containerId = ((NbtUuid) this).getNbtUuid();
+		if (containerId == null) return;
 
     Map<Item, Integer> transactions = ItemUtils.compressTransactions(this.getTransactions());
     transactions.forEach((item, count) -> {

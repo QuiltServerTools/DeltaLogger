@@ -1,22 +1,10 @@
 package com.github.fabricservertools.deltalogger.mixins;
 
-import java.util.UUID;
-import java.util.function.BiPredicate;
-import java.util.function.Supplier;
-
 import com.github.fabricservertools.deltalogger.DatabaseManager;
 import com.github.fabricservertools.deltalogger.IChestBlockUUID;
-import com.github.fabricservertools.deltalogger.NbtUuid;
 import com.github.fabricservertools.deltalogger.ItemUtils;
+import com.github.fabricservertools.deltalogger.NbtUuid;
 import com.github.fabricservertools.deltalogger.dao.ContainerDAO;
-
-import java.util.Optional;
-
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
 import net.minecraft.block.AbstractChestBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ChestBlock;
@@ -30,8 +18,17 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
-import net.minecraft.world.WorldAccess;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldAccess;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import java.util.Optional;
+import java.util.UUID;
+import java.util.function.BiPredicate;
+import java.util.function.Supplier;
 
 @Mixin(ChestBlock.class)
 public abstract class ChestBlockMixin extends AbstractChestBlock<ChestBlockEntity> implements IChestBlockUUID {
