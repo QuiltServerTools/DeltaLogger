@@ -25,7 +25,7 @@ dependencies {
 	implementation(include('org.jdbi:jdbi3-core:3.12.2'))
 
 	include 'org.antlr:antlr4-runtime:4.8'
-	include('com.github.ben-manes.caffeine:caffeine:2.8.0')
+	include 'com.github.ben-manes.caffeine:caffeine:2.8.0'
 	include 'io.leangen.geantyref:geantyref:1.3.7'
 
 	implementation(include('org.jdbi:jdbi3-sqlite:3.12.2'))
@@ -41,6 +41,7 @@ dependencies {
 	implementation(shadow('io.javalin:javalin-graphql:3.12.0'))
 
 	include(shadow('org.slf4j:slf4j-simple:1.7.30'))
+	shadow('org.slf4j:slf4j-simple:1.7.30')
 	include 'org.slf4j:slf4j-api:1.8.0-beta4'
 	compile "org.slf4j:slf4j-simple:1.8.0-beta4"
 
@@ -82,6 +83,10 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 }
 shadowJar {
 	// relocate 'org.jdbi.v3.core', 'shadow.dl.jdbicore'
+	minimize{
+		exclude(dependency("org.eclipse.jetty.websocket:.*:.*"))
+		exclude(dependency("com.github.ben-manes.caffeine:.*:.*"))
+	}
 	configurations = [project.configurations.shadow]
 	classifier = "shadow"
 }
