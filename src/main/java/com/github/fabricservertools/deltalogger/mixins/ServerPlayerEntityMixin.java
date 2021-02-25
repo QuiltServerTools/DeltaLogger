@@ -25,27 +25,26 @@ import java.util.UUID;
 
 @Mixin(ServerPlayerEntity.class)
 public abstract class ServerPlayerEntityMixin extends PlayerEntity {
-	public ServerPlayerEntityMixin(World world, BlockPos pos, float yaw, GameProfile profile) {
-		super(world, pos, yaw, profile);
-	}
+  public ServerPlayerEntityMixin(World world, BlockPos pos, float yaw, GameProfile profile) {
+    super(world, pos, yaw, profile);
+  }
 
-	@Inject(at = @At(value = "RETURN", ordinal = 2), method = "openHandledScreen")
-	public void openHandledScreen(
-			NamedScreenHandlerFactory nameableContainerFactory,
-			CallbackInfoReturnable<OptionalInt> info
-	) {
-		if (nameableContainerFactory instanceof LockableContainerBlockEntity && !(nameableContainerFactory instanceof ChestBlockEntity)) {
-			BlockEntity be = (BlockEntity) nameableContainerFactory;
-			UUID uuid = ((NbtUuid) be).getNbtUuid();
-			((NbtUuid) this.currentScreenHandler).setNbtUuid(uuid);
+  @Inject(at = @At(value = "RETURN", ordinal = 2), method = "openHandledScreen")
+  public void openHandledScreen(
+    NamedScreenHandlerFactory nameableContainerFactory,
+    CallbackInfoReturnable<OptionalInt> info
+  ) {
+      if (nameableContainerFactory instanceof LockableContainerBlockEntity && !(nameableContainerFactory instanceof ChestBlockEntity)) {
+        BlockEntity be = (BlockEntity) nameableContainerFactory;
+        UUID uuid = ((NbtUuid)be).getNbtUuid();
+        ((NbtUuid)this.currentScreenHandler).setNbtUuid(uuid);
 
-			Identifier dimId = ((PlayerEntity) (Object) this).getEntityWorld().getRegistryKey().getValue();
+        Identifier dimId = ((PlayerEntity)(Object)this).getEntityWorld().getRegistryKey().getValue();
 
-			Identifier blockId = Registry.BLOCK.getId(be.getCachedState().getBlock());
-			DatabaseManager.getSingleton().queueOp(ContainerDAO.insert(
-					uuid, blockId, be.getPos(), this.getUuid(), java.time.Instant.now(), dimId
-			));
-			ItemUtils.registerContentListener(this.currentScreenHandler);
-		}
-	}
+        Identifier blockId = Registry.BLOCK.getId(be.getCachedState().getBlock());
+        DatabaseManager.getSingleton().queueOp(ContainerDAO.insert(
+          uuid, blockId, be.getPos(), this.getUuid(), java.time.Instant.now(), dimId
+        ));
+      }
+  }
 }
