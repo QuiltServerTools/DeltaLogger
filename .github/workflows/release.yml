@@ -1,0 +1,24 @@
+on:
+  release:
+    types: [created]
+name: Handle Release
+jobs:
+  generate:
+    name: Get Release Artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@master
+      - name: Set up JDK 8
+        uses: actions/setup-java@v1
+      with:
+        java-version: 8
+      - name: Make gradlew executable
+        run chmod +x gradlew
+      - name: Build
+        run ./gradlew build
+        - name: Upload assets to GitHub
+          uses: AButler/upload-release-assets@v2.0
+          with:
+            files: 'build/libs/*;LICENSE'
+            repo-token: ${{ secrets.GITHUB_TOKEN }}
