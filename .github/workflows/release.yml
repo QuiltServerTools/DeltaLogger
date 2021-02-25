@@ -14,9 +14,9 @@ jobs:
         with:
           java-version: 8
       - name: Make gradlew executable
-        run chmod +x gradlew
+        run: chmod +x gradlew
       - name: Build
-        run ./gradlew build
+        run: ./gradlew build
         - name: Upload assets to GitHub
           uses: AButler/upload-release-assets@v2.0
           with:
