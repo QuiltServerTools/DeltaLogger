@@ -40,7 +40,6 @@ dependencies {
 	implementation(shadow('io.javalin:javalin:3.12.0'))
 	implementation(shadow('io.javalin:javalin-graphql:3.12.0'))
 
-	include(shadow('org.slf4j:slf4j-simple:1.7.30'))
 	shadow('org.slf4j:slf4j-simple:1.7.30')
 	include 'org.slf4j:slf4j-api:1.8.0-beta4'
 	compile "org.slf4j:slf4j-simple:1.8.0-beta4"
@@ -50,7 +49,6 @@ dependencies {
 	// Server-side translations
 	modImplementation 'fr.catcore:server-translations-api:1.4.0'
 	include 'fr.catcore:server-translations-api:1.4.0'
-
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
