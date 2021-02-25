@@ -17,8 +17,8 @@ jobs:
         run: chmod +x gradlew
       - name: Build
         run: ./gradlew build
-        - name: Upload assets to GitHub
-          uses: AButler/upload-release-assets@v2.0
-          with:
-            files: 'build/libs/*;LICENSE'
-            repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload assets to GitHub
+        uses: AButler/upload-release-assets@v2.0
+        with:
+          files: 'build/libs/*;LICENSE'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
