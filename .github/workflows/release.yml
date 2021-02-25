@@ -1,7 +1,7 @@
 on:
   release:
     types: [created]
-name: Handle Release
+name: Upload Release Artifacts
 jobs:
   generate:
     name: Get Release Artifacts
@@ -18,7 +18,7 @@ jobs:
       - name: Build
         run: ./gradlew build
       - name: Upload assets to GitHub
-        uses: AButler/upload-release-assets@v2.0
+        uses: actions/upload-artifact@v2
         with:
-          files: 'build/libs/*;LICENSE'
+          files: 'build/libs/*.jar;!build/libs/*-shadow.jar;!build/libs/*-dev.jar;!build/libs/*-sources.jar'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
