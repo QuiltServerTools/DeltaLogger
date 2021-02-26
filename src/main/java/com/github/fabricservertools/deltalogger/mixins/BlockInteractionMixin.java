@@ -43,27 +43,16 @@ public class BlockInteractionMixin {
     World world, PlayerEntity player, Hand hand, BlockHitResult hit,
     CallbackInfoReturnable<ActionResult> ret
   ) {
-    if (world.isClient) return;
+    if (world.isClient || hand != Hand.MAIN_HAND || !InspectCommand.hasToolEnabled(player)) return;
 
-    Block block = ((BlockState)(Object)this).getBlock();
     BlockPos pos = hit.getBlockPos();
     BlockState state = world.getBlockState(pos);
-
-    if (hand != Hand.MAIN_HAND) {
-      ret.setReturnValue(block.onUse(state, world, pos, player, hand, hit));
-      return;
-    };
-
-    if (!InspectCommand.hasToolEnabled(player)) {
-      ret.setReturnValue(block.onUse(state, world, pos, player, hand, hit));
-      return;
-    }
 
     Block targetBlock = state.getBlock();
     BlockEntity be = world.getBlockEntity(pos);
     Identifier dimension = world.getRegistryKey().getValue();
 
-    if (be != null && be instanceof LockableContainerBlockEntity) {
+    if (be instanceof LockableContainerBlockEntity) {
       Optional<UUID> opt;
       if (targetBlock instanceof ChestBlock) {
         opt = ((IChestBlockUUID) targetBlock).getNbtUuidAt(state, world, pos);
