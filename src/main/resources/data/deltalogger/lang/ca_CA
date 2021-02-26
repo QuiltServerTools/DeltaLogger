@@ -1,0 +1,18 @@
+{
+  "deltalogger.inspect_mode":"Mode d'inspecció DeltaLogger ",
+  "on":"activat",
+  "off":"desactivat",
+  "deltalogger.none_found.pos":"No s'han trobat %s a %s",
+  "deltalogger.text.version":"Estàs usant la versió de DeltaLogger ",
+  "deltalogger.text.discord":"Fes clic per unir-te al discord de DeltaLogger",
+  "deltalogger.reset_pass.error":"Error del comandament resetpass: has d'estar identificat com a usuari per restablir la constrasenya",
+  "deltalogger.temp_pass":"La teva contrasenya temporal pel panell de DeltaLogger és %s",
+  "deltalogger.reset_pass.wait":"Sisplau esperi %s segons abans de restablir la teva constrasenya",
+  "deltalogger.none_found.no_pos.placement":"No s'han trobat disposicions amb els termes especificats",
+  "deltalogger.none_found.no_pos.transaction":"No s'han trobat operacions amb els termes especificats",
+  "deltalogger.none_found.container":"No s'han trobat operacions en aquest contenidor",
+  "deltalogger.none_found.no_pos.grief":"No s'han trobat vandalitzacions amb els termes especificats",
+  "deltalogger.history.transaction":"Històric d'operacions",
+  "deltalogger.history.placement":"Històric de disposicions",
+  "deltalogger.history.grief":"Històric de vandalitzacions"
+}
