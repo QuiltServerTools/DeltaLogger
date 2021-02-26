@@ -1,0 +1,18 @@
+{
+  "deltalogger.inspect_mode":"DeltaLogger: режим проверки ",
+  "on":"включён",
+  "off":"выключен",
+  "deltalogger.none_found.pos":"%s не обнаружен в %s",
+  "deltalogger.text.version":"Вы используете DeltaLogger версии %s",
+  "deltalogger.text.discord":"Нажмите чтобы присоединится к серверу DeltaLogger в Дискорде",
+  "deltalogger.reset_pass.error":"Ошибка сброса пароля: необходимо войти как пользователь",
+  "deltalogger.temp_pass":"Временный пароль для панели DeltaLogger — %s",
+  "deltalogger.reset_pass.wait":"Пожалуйста подождите %s секунд перед сбросом пароля",
+  "deltalogger.none_found.no_pos.placement":"Не найдено установки/разрушений с такими параметрами",
+  "deltalogger.none_found.no_pos.transaction":"Не найдено транзакций с такими параметрами",
+  "deltalogger.none_found.container":"Не найдено транзакций для этого контейнера",
+  "deltalogger.none_found.no_pos.grief":"Не найдено разрушений от мобов с такими параметрами",
+  "deltalogger.history.transaction":"История транзакций",
+  "deltalogger.history.placement":"История установки/разрушений",
+  "deltalogger.history.grief":"История разрушений от мобов"
+}
