@@ -49,12 +49,7 @@ public class ModInit implements ModInitializer {
 		return CONFIG;
 	}
 
-	/**
-	 * Called from MinecraftDedicatedServer::setupServer
-	 *
-	 * @param server Server instance
-	 */
-	public static void onServerInit(MinecraftServer server) {
+	public void onServerSetup(MinecraftServer server) {
 		dm = DatabaseManager.create(server.getSavePath(WorldSavePath.ROOT).toFile());
 
 		String portString = CONFIG.getProperty("webapp_port", "8080");
@@ -65,7 +60,7 @@ public class ModInit implements ModInitializer {
 		}
 	}
 
-	public void afterWorldLoad(MinecraftServer server) {
+	public void onServerStart(MinecraftServer server) {
 		HashSet<Identifier> dimensionIds = new HashSet<>();
 		server.getWorlds().forEach(world -> {
 			Identifier dimid = world.getRegistryKey().getValue();
@@ -101,10 +96,10 @@ public class ModInit implements ModInitializer {
 	public void onInitialize() {
 		loadConfig(Paths.get(FabricLoader.getInstance().getConfigDir().toString(), "deltalogger.properties"));
 
-		ServerLifecycleEvents.SERVER_STARTED.register(this::afterWorldLoad);
+		ServerLifecycleEvents.SERVER_STARTING.register(this::onServerSetup);
+		ServerLifecycleEvents.SERVER_STARTED.register(this::onServerStart);
+		ServerLifecycleEvents.SERVER_STOPPED.register(this::onStop);
 
 		CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> Commands.register(dispatcher));
-
-		ServerLifecycleEvents.SERVER_STOPPED.register(this::onStop);
 	}
 }

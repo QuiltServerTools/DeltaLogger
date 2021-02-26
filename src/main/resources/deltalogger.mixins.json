@@ -14,8 +14,7 @@
     "LivingEntityMixin",
     "LockableContainerBlockEntityMixin",
     "PlayerEventsMixin",
-    "ServerPlayerEntityMixin",
-    "ServerStart"
+    "ServerPlayerEntityMixin"
   ],
   "client": [
   ],
