@@ -1,0 +1,18 @@
+{
+  "deltalogger.inspect_mode":"Modo de inspección DeltaLogger ",
+  "on":"activado",
+  "off":"desactivado",
+  "deltalogger.none_found.pos":"No se han encontrado %s en %s",
+  "deltalogger.text.version":"Estás usando la versión de DeltaLogger %s",
+  "deltalogger.text.discord":"Haz clic para unirte al discord de DeltaLogger",
+  "deltalogger.reset_pass.error":"Error en el comando resetpass: debes estar identificado como usuario para restablecer la constraseña",
+  "deltalogger.temp_pass":"Tu contraseña temporal para el panel de DeltaLogger es %s",
+  "deltalogger.reset_pass.wait":"Por favor, espere %s segundos antes de restablecer su contraseña",
+  "deltalogger.none_found.no_pos.placement":"No se han encontrado disposiciones con los términos especificados",
+  "deltalogger.none_found.no_pos.transaction":"No se han encontrado operaciones con los términos especificados",
+  "deltalogger.none_found.container":"No se han encontrado operaciones en este contenedor",
+  "deltalogger.none_found.no_pos.grief":"No se han encontrado vandalizaciones con los términos especificados",
+  "deltalogger.history.transaction":"Historial de operaciones",
+  "deltalogger.history.placement":"Historial de disposiciones",
+  "deltalogger.history.grief":"Historial de vandalizaciones"
+}
