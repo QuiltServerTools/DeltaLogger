@@ -1,5 +1,6 @@
 package com.github.fabricservertools.deltalogger.command;
 
+import com.github.fabricservertools.deltalogger.command.rollback.RollbackCommand;
 import com.github.fabricservertools.deltalogger.command.search.SearchCommand;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.tree.LiteralCommandNode;
@@ -21,6 +22,7 @@ public final class Commands {
 			SQLCommand.register(deltaNode);
 		}
 		InfoCommand.register(deltaNode);
+		RollbackCommand.register(deltaNode);
 	}
 
 }
