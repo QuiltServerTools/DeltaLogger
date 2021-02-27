@@ -62,6 +62,23 @@ public class EntityDAO {
 		);
 	}
 
+	public List<MobGrief> rollbackGriefs(int idOffset, String conditions, BlockPos pos) {
+		return jdbi.withHandle(handle -> handle
+				.select(String.join(" ",
+						"SELECT MG.id, date, ER.name as entity, PL.name as target, DR.name as dimension, x, y, z",
+						"FROM (SELECT * FROM mob_grief WHERE id <",
+						SQLUtils.offsetOrZeroLatest("mob_grief", "id", idOffset),
+						conditions,
+						"ORDER BY `id` DESC) as MG",
+						"LEFT JOIN players as PL ON MG.target = PL.id",
+						"INNER JOIN registry as ER ON MG.entity_type = ER.id",
+						"LEFT JOIN registry as DR ON MG.dimension_id = DR.id"
+				))
+				.mapTo(MobGrief.class)
+				.list()
+		);
+	}
+
 	public List<KilledEntity> getLatestKilledEntities(int idOffset, int limit) {
 		return jdbi.withHandle(handle -> handle
 				.select(String.join(" ",

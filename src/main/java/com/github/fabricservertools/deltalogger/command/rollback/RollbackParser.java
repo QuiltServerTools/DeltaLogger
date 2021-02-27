@@ -165,7 +165,7 @@ public class RollbackParser implements SuggestionProvider<ServerCommandSource> {
 			String query = "";
 			if(propertyMap.containsKey("target")) {
 				GameProfileArgumentType.GameProfileArgument targets = (GameProfileArgumentType.GameProfileArgument)propertyMap.get("target");
-				query += " AND player_id = (SELECT  id FROM players WHERE uuid = "+ targets.getNames(scs).stream().map(gp -> gp.getId().toString()).toArray() + ")";
+				query += " AND player_id = (SELECT  id FROM players WHERE uuid = "+ getUuid(targets, scs) + ")";
 				System.out.println(query);
 			}
 			return query;
@@ -174,5 +174,8 @@ public class RollbackParser implements SuggestionProvider<ServerCommandSource> {
 			player.sendSystemMessage(new LiteralText("Error parsing criteria").formatted(Formatting.RED), Util.NIL_UUID);
 		}
 		return "";
+	}
+	private static String getUuid(GameProfileArgumentType.GameProfileArgument player, ServerCommandSource scs) throws CommandSyntaxException {
+		return player.getNames(scs).stream().findFirst().get().getId().toString();
 	}
 }

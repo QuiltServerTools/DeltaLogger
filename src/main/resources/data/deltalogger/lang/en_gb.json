@@ -14,5 +14,10 @@
   "deltalogger.none_found.no_pos.grief":"No griefs found with the terms specified",
   "deltalogger.history.transaction":"Transaction History",
   "deltalogger.history.placement":"Placement History",
-  "deltalogger.history.grief":"Grief History"
+  "deltalogger.history.grief":"Grief History",
+  "deltalogger.rollback.block.complete": "Completed block rollback for selection",
+  "deltalogger.rollback.transaction.complete": "Completed transaction rollback for selection,",
+  "deltalogger.rollback.grief.complete": "Completed grief rollback for selection",
+  "deltalogger.rollback.complete": "Completed rollback",
+  "deltalogger.rollback.progress": " (%d/%d)"
 }

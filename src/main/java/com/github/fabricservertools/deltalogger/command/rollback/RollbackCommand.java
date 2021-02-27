@@ -1,13 +1,10 @@
 package com.github.fabricservertools.deltalogger.command.rollback;
 
 import com.github.fabricservertools.deltalogger.SQLUtils;
-import com.github.fabricservertools.deltalogger.beans.Placement;
-import com.github.fabricservertools.deltalogger.beans.Transaction;
 import com.github.fabricservertools.deltalogger.dao.DAO;
 import com.github.fabricservertools.deltalogger.util.TimeParser;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -20,6 +17,8 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.TranslatableText;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockBox;
 import net.minecraft.util.math.BlockPos;
@@ -29,7 +28,6 @@ import net.minecraft.world.World;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
@@ -71,24 +69,30 @@ public class RollbackCommand {
 		int[] boxBounds = {x1, y1, z1, x2, y2, z2};
 		BlockBox box = new BlockBox(boxBounds);
 		BlockPos.stream(box).forEach(pos -> {
-			try {
-				World world = source.getWorld();
-				Identifier dimension = world.getRegistryKey().getValue();
-				rollbackBlocksAtPos(source, parsedCriteria, pos, timeValue, dimension, world);
-				rollbackTransactionsAtPos(source, parsedCriteria, pos, timeValue, dimension, world);
-			} catch (CommandSyntaxException e) {
-				e.printStackTrace();
-			}
+			World world = source.getWorld();
+			Identifier dimension = world.getRegistryKey().getValue();
+			rollbackBlocksAtPos(parsedCriteria, pos, timeValue, dimension, world);
 		});
+
+		source.sendFeedback(new TranslatableText("deltalogger.rollback.block.complete").formatted(Formatting.ITALIC, Formatting.GRAY).append(new TranslatableText("deltalogger.rollback.progress", 0, 2).formatted(Formatting.YELLOW)), false);
+
+		BlockPos.stream(box).forEach(pos -> {
+			World world = source.getWorld();
+			Identifier dimension = world.getRegistryKey().getValue();
+			rollbackTransactionsAtPos(parsedCriteria, pos, timeValue, dimension, world);
+		});
+
+		source.sendFeedback(new TranslatableText("deltalogger.rollback.transaction.complete").formatted(Formatting.ITALIC, Formatting.GRAY).append(new TranslatableText("deltalogger.rollback.progress", 1, 2).formatted(Formatting.YELLOW)), false);
+
+		sendFinishFeedback(source, timeValue);
 	}
 
-	private static void rollbackBlocksAtPos(ServerCommandSource source, String criteria, BlockPos pos, String time, Identifier dimension, World world)
-			throws CommandSyntaxException {
+	private static void rollbackBlocksAtPos(String criteria, BlockPos pos, String time, Identifier dimension, World world) {
 		// Rollback blocks
 		DAO.block.rollbackQuery(dimension, pos, time, criteria).forEach(placement -> {
 			//Every placement is called here, where the block setting logic is
 			//Generates a BlockState object from identifier
-			BlockState state = Registry.BLOCK.get(createIdentifier(placement.getBlockType())).getDefaultState();
+			BlockState state = getBlock(createIdentifier(placement.getBlockType())).getDefaultState();
 
 			if (placement.getPlaced()) {
 				world.setBlockState(pos, Blocks.AIR.getDefaultState());
@@ -99,7 +103,7 @@ public class RollbackCommand {
 		});
 	}
 
-	private static void rollbackTransactionsAtPos(ServerCommandSource source, String criteria, BlockPos pos, String time, Identifier dimension, World world) {
+	private static void rollbackTransactionsAtPos(String criteria, BlockPos pos, String time, Identifier dimension, World world) {
 
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		BlockState state = world.getBlockState(pos);
@@ -126,7 +130,7 @@ public class RollbackCommand {
 						}
 					} else {
 						//Item was added, remove
-						if(inventory.getStack(i).getItem().equals(getItem(createIdentifier(transaction.getItemType())))) {
+						if (inventory.getStack(i).getItem().equals(getItem(createIdentifier(transaction.getItemType())))) {
 							inventory.setStack(i, ItemStack.EMPTY);
 							return;
 						}
@@ -137,6 +141,10 @@ public class RollbackCommand {
 		});
 	}
 
+	private static void sendFinishFeedback(ServerCommandSource scs, String time) {
+		scs.sendFeedback(new TranslatableText("deltalogger.rollback.complete").formatted(Formatting.GREEN).append(new TranslatableText("deltalogger.rollback.progress").formatted(Formatting.YELLOW)), true);
+	}
+
 	private static Identifier createIdentifier(String identifier) {
 		String[] identifierSplit = identifier.split(":");
 		return new Identifier(identifierSplit[0], identifierSplit[1]);
@@ -144,5 +152,9 @@ public class RollbackCommand {
 
 	private static Item getItem(Identifier id) {
 		return Registry.ITEM.get(id);
+	}
+
+	private static Block getBlock(Identifier id) {
+		return Registry.BLOCK.get(id);
 	}
 }

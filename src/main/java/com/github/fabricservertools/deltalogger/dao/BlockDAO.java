@@ -90,6 +90,7 @@ public class BlockDAO {
 									"FROM (",
 									"SELECT * FROM placements",
 									"WHERE x = :x AND y = :y AND z = :z AND dimension_id = (SELECT id FROM registry WHERE name = :dim) AND date > \""+time+"\"",
+									criteria,
 									"ORDER BY `id` DESC",
 									") as PL",
 									JOIN_PLACEMENT
