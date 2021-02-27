@@ -13,7 +13,6 @@
     "FireballEntityMixin",
     "LivingEntityMixin",
     "LockableContainerBlockEntityMixin",
-    "PlayerEventsMixin",
     "ServerPlayerEntityMixin"
   ],
   "client": [
