@@ -1,14 +1,17 @@
-package com.github.fabricservertools.deltalogger.mixins;
+package com.github.fabricservertools.deltalogger.mixins.events;
 
 import com.github.fabricservertools.deltalogger.DatabaseManager;
 import com.github.fabricservertools.deltalogger.dao.EntityDAO;
+import com.github.fabricservertools.deltalogger.events.CreeperExplodeCallback;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.mob.CreeperEntity;
 import net.minecraft.entity.mob.GhastEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.AbstractFireballEntity;
 import net.minecraft.entity.projectile.FireballEntity;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.GameRules;
@@ -32,25 +35,14 @@ public class FireballEntityMixin extends AbstractFireballEntity {
 
 	@Inject(
 			method = "onCollision",
-			at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Lnet/minecraft/world/GameRules$Key;)Z"))
-	private void tryLogFireballExplosion(HitResult result, CallbackInfo info) {
-		Entity owner = this.getOwner();
-		if (
-				!this.world.getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING)
-						|| !(owner instanceof GhastEntity)
-						|| owner == null
-		) return;
-		GhastEntity ghast = ((GhastEntity) owner);
-		if (ghast.getTarget() == null || !(ghast.getTarget() instanceof PlayerEntity)) return;
+			at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;createExplosion(Lnet/minecraft/entity/Entity;DDDFZLnet/minecraft/world/explosion/Explosion$DestructionType;)Lnet/minecraft/world/explosion/Explosion;"),
+			cancellable = true
+	)
+	private void tryLogFireballExplosion(HitResult hit, CallbackInfo info) {
+		ActionResult result = CreeperExplodeCallback.EVENT.invoker().explode((CreeperEntity) (Object) this);
 
-		DatabaseManager.getSingleton().queueOp(EntityDAO.insertMobGrief(
-				((PlayerEntity) ghast.getTarget()).getUuid(),
-				java.time.Instant.now(),
-				Registry.ENTITY_TYPE.getId(EntityType.GHAST),
-				this.getBlockPos(),
-				ghast.getEntityWorld().getRegistryKey().getValue()
-		));
-
+		if (result != ActionResult.PASS) {
+			info.cancel();
+		}
 	}
-
 }

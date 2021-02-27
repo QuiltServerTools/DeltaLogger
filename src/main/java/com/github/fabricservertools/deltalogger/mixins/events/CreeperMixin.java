@@ -1,12 +1,14 @@
-package com.github.fabricservertools.deltalogger.mixins;
+package com.github.fabricservertools.deltalogger.mixins.events;
 
 import com.github.fabricservertools.deltalogger.DatabaseManager;
 import com.github.fabricservertools.deltalogger.dao.EntityDAO;
+import com.github.fabricservertools.deltalogger.events.CreeperExplodeCallback;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.mob.CreeperEntity;
 import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
@@ -23,19 +25,12 @@ public class CreeperMixin extends HostileEntity {
 		super(type, world);
 	}
 
-	@Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/mob/CreeperEntity;explode()V"))
-	private void tryLogCreeperExplode(CallbackInfo info) {
-		LivingEntity target = this.getTarget();
-		if (target instanceof PlayerEntity) {
-			PlayerEntity playerTarget = (PlayerEntity) target;
+	@Inject(method = "explode", at = @At(value = "HEAD"), cancellable = true)
+	private void explode(CallbackInfo info) {
+		ActionResult result = CreeperExplodeCallback.EVENT.invoker().explode((CreeperEntity) (Object) this);
 
-			DatabaseManager.getSingleton().queueOp(EntityDAO.insertMobGrief(
-					playerTarget.getUuid(),
-					java.time.Instant.now(),
-					Registry.ENTITY_TYPE.getId(EntityType.CREEPER),
-					this.getBlockPos(),
-					this.getEntityWorld().getRegistryKey().getValue()
-			));
+		if (result != ActionResult.PASS) {
+			info.cancel();
 		}
 	}
 }

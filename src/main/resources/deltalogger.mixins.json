@@ -4,15 +4,15 @@
   "package": "com.github.fabricservertools.deltalogger.mixins",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "BlockInteractionMixin",
-    "BlockItemMixin",
     "ChestBlockMixin",
-    "ContainerMixin",
-    "CreeperMixin",
-    "FireballEntityMixin",
-    "LivingEntityMixin",
     "LockableContainerBlockEntityMixin",
-    "ServerPlayerEntityMixin"
+    "ScreenHandlerMixin",
+    "ShulkerBoxBlockEntityMixin",
+    "events.BlockItemMixin",
+    "events.CreeperMixin",
+    "events.FireballEntityMixin",
+    "events.LivingEntityMixin",
+    "events.ServerPlayerEntityMixin"
   ],
   "client": [
   ],
