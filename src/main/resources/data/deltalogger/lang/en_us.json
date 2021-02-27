@@ -1,7 +1,6 @@
 {
-  "deltalogger.inspect_mode":"DeltaLogger inspect mode ",
-  "on":"on",
-  "off":"off",
+  "deltalogger.inspect_mode.on":"DeltaLogger inspect mode on",
+  "deltalogger.inspect_mode.off":"DeltaLogger inspect mode off",
   "deltalogger.none_found.pos":"No %s found at %s",
   "deltalogger.text.version":"You are using DeltaLogger version %s",
   "deltalogger.text.discord":"Click to join the DeltaLogger discord",

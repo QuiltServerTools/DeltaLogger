@@ -1,7 +1,4 @@
 {
-  "deltalogger.inspect_mode":"DeltaLogger inspect mode ",
-  "on":"on",
-  "off":"off",
   "deltalogger.none_found.pos":"No %s found at %s",
   "deltalogger.text.version":"You are using DeltaLogger version %s",
   "deltalogger.text.discord":"Click to join the DeltaLogger discord",
@@ -19,5 +16,7 @@
   "deltalogger.rollback.transaction.complete": "Completed transaction rollback for selection,",
   "deltalogger.rollback.grief.complete": "Completed grief rollback for selection",
   "deltalogger.rollback.complete": "Completed rollback",
-  "deltalogger.rollback.progress": " (%d/%d)"
+  "deltalogger.rollback.progress": " (%d/%d)",
+  "deltalogger.inspect_mode.on": "DeltaLogger inspect mode on",
+  "deltalogger.inspect_mode.off": "DeltaLogger inspect mode off"
 }

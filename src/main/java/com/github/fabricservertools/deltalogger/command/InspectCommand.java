@@ -58,7 +58,7 @@ public class InspectCommand {
 			p = ctx.getSource().getPlayer();
 			boolean mode = !toolMap.getOrDefault(p, false);
 			toolMap.put(p, mode);
-			p.sendMessage(new TranslatableText("deltalogger.inspect_mode").append(new TranslatableText(mode ? "on" : "off").formatted(mode ? Formatting.GREEN : Formatting.RED)), true);
+			p.sendMessage(new TranslatableText(mode ? "deltalogger.inspect_mode.on" : "deltalogger.inspect_mode.off").formatted(mode ? Formatting.GREEN : Formatting.RED), true);
 		} catch (CommandSyntaxException e) {
 			e.printStackTrace();
 		}
