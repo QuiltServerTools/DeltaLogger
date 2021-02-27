@@ -5,6 +5,8 @@ import com.github.fabricservertools.deltalogger.dao.BlockDAO;
 import com.github.fabricservertools.deltalogger.dao.PlayerDAO;
 import com.github.fabricservertools.deltalogger.dao.RegistryDAO;
 import com.github.fabricservertools.deltalogger.gql.ApiServer;
+import com.github.fabricservertools.deltalogger.listeners.EntityEventListener;
+import com.github.fabricservertools.deltalogger.listeners.PlayerEventListener;
 import com.google.common.collect.Sets;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
@@ -103,40 +105,6 @@ public class ModInit implements ModInitializer {
 		}
 	}
 
-	private void onJoin(ServerPlayNetworkHandler networkHandler, PacketSender sender, MinecraftServer server) {
-		DatabaseManager.getSingleton()
-				.queueOp(PlayerDAO.insert(
-						networkHandler.player.getUuid(),
-						networkHandler.player.getName().asString(),
-						java.time.Instant.now()
-				));
-	}
-
-	private void onQuit(ServerPlayNetworkHandler networkHandler, MinecraftServer server) {
-		DatabaseManager.getSingleton()
-				.queueOp(PlayerDAO.insert(
-						networkHandler.player.getUuid(),
-						networkHandler.player.getName().asString(),
-						java.time.Instant.now()
-				));
-	}
-
-	private void onBreakFinished(World world, PlayerEntity player, BlockPos pos,
-								 BlockState state, /* Nullable */ BlockEntity blockEntity) {
-		Identifier id = Registry.BLOCK.getId(state.getBlock());
-		Identifier dimension = world.getRegistryKey().getValue();
-
-		DatabaseManager.getSingleton().queueOp(BlockDAO.insertPlacement(
-				player.getUuid(),
-				id,
-				false,
-				pos,
-				world.getBlockState(pos),
-				dimension,
-				java.time.Instant.now()
-		));
-	}
-
 	@Override
 	public void onInitialize() {
 		loadConfig(Paths.get(FabricLoader.getInstance().getConfigDir().toString(), "deltalogger.properties"));
@@ -145,10 +113,8 @@ public class ModInit implements ModInitializer {
 		ServerLifecycleEvents.SERVER_STARTED.register(this::onServerStart);
 		ServerLifecycleEvents.SERVER_STOPPED.register(this::onStop);
 
-		ServerPlayConnectionEvents.JOIN.register(this::onJoin);
-		ServerPlayConnectionEvents.DISCONNECT.register(this::onQuit);
-
-		PlayerBlockBreakEvents.AFTER.register(this::onBreakFinished);
+		new PlayerEventListener();
+		new EntityEventListener();
 
 		CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> Commands.register(dispatcher));
 	}

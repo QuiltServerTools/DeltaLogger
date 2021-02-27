@@ -1,12 +1,15 @@
-package com.github.fabricservertools.deltalogger.mixins;
+package com.github.fabricservertools.deltalogger.mixins.events;
 
 import com.github.fabricservertools.deltalogger.DatabaseManager;
 import com.github.fabricservertools.deltalogger.dao.EntityDAO;
+import com.github.fabricservertools.deltalogger.events.BlockPlaceCallback;
+import com.github.fabricservertools.deltalogger.events.EntityDeathCallback;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.ActionResult;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -30,25 +33,14 @@ public abstract class LivingEntityMixin extends Entity {
 					value = "INVOKE",
 					target = "Lnet/minecraft/entity/damage/DamageSource;getAttacker()Lnet/minecraft/entity/Entity;"
 			),
-			method = "onDeath"
+			method = "onDeath",
+			cancellable = true
 	)
 	public void onDeath(DamageSource source, CallbackInfo info) {
-		LivingEntity me = (LivingEntity) (Object) this;
-		Entity attacker = source.getAttacker();
-		if (me.getCustomName() == null) return;
+		ActionResult result = EntityDeathCallback.EVENT.invoker().death((LivingEntity) (Object) this, source);
 
-		UUID killer_id = null;
-		if (attacker != null && attacker instanceof PlayerEntity) {
-			killer_id = ((PlayerEntity) attacker).getUuid();
+		if (result != ActionResult.PASS) {
+			info.cancel();
 		}
-
-		DatabaseManager.getSingleton().queueOp(EntityDAO.insertKill(
-				me.getCustomName().asString(),
-				source.getName(),
-				killer_id,
-				java.time.Instant.now(),
-				me.getBlockPos(),
-				attacker.getEntityWorld().getRegistryKey().getValue()
-		));
 	}
 }

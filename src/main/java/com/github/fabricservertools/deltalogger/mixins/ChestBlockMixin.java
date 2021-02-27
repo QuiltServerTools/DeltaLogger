@@ -90,28 +90,4 @@ public abstract class ChestBlockMixin extends AbstractChestBlock<ChestBlockEntit
         ));
       });;
   }
-
-  // Logged by block breaker anyway
-  // @Inject(
-  //   at = @At(value = "INVOKE", target = "net.minecraft.util.ItemScatterer.spawn"),
-  //   method = "onBlockRemoved")
-  // public void onBlockRemoved(final BlockState state, final World world, final BlockPos pos, final BlockState newState, final boolean moved, final CallbackInfo info) {
-  //   // PropertySource this.getSource(state, world, pos, false);
-  //   final UUID sourceId = this.getNbtUuidAt(state, world, pos);
-  //   final NbtUuid chestBE = (NbtUuid)world.getBlockEntity(pos);
-  //   final UUID uuid = chestBE.getNbtUuid();
-  //   final List<ItemStack> beforeItems = new ArrayList<ItemStack>();
-  //   final List<ItemStack> afterItems = new ArrayList<ItemStack>();
-  //   Inventory afterInv = (Inventory)world.getBlockEntity(pos);
-
-  //   final Inventory beforeInv = ChestBlock.getInventory((ChestBlock)(Object)this, state, world, pos, false);
-  //   for (int i = 0; i < beforeInv.getInvSize(); i++) {
-  //     beforeItems.add(beforeInv.getInvStack(i));
-  //   }
-  //   for (int i = 0; i < afterInv.getInvSize(); i++) {
-  //     afterItems.add(afterInv.getInvStack(i));
-  //   }
-
-  //   System.out.println("REMOVED " + uuid + " SOURCE ID: " + sourceId + " before: " + beforeInv + " after: " + afterInv);
-  // }
 }

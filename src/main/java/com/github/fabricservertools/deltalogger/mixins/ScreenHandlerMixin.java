@@ -30,7 +30,7 @@ import java.util.UUID;
  * Hooks to log the transaction events with inventory screens
  */
 @Mixin(ScreenHandler.class)
-public abstract class ContainerMixin implements NbtUuid, ITransactable {
+public abstract class ScreenHandlerMixin implements NbtUuid, ITransactable {
   private ItemStack[] tracked;
   private List<Pair<Item, Integer>> transactions = new ArrayList<>();
 

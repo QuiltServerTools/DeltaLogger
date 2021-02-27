@@ -1,16 +1,20 @@
-package com.github.fabricservertools.deltalogger.mixins;
+package com.github.fabricservertools.deltalogger.mixins.events;
 
 import com.github.fabricservertools.deltalogger.DatabaseManager;
 import com.github.fabricservertools.deltalogger.ItemUtils;
 import com.github.fabricservertools.deltalogger.NbtUuid;
 import com.github.fabricservertools.deltalogger.dao.ContainerDAO;
+import com.github.fabricservertools.deltalogger.events.EntityDeathCallback;
+import com.github.fabricservertools.deltalogger.events.PlayerOpenScreenCallback;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.ChestBlockEntity;
 import net.minecraft.block.entity.LockableContainerBlockEntity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
@@ -29,22 +33,15 @@ public abstract class ServerPlayerEntityMixin extends PlayerEntity {
     super(world, pos, yaw, profile);
   }
 
-  @Inject(at = @At(value = "RETURN", ordinal = 2), method = "openHandledScreen")
+  @Inject(at = @At(value = "RETURN", ordinal = 2), method = "openHandledScreen", cancellable = true)
   public void openHandledScreen(
     NamedScreenHandlerFactory nameableContainerFactory,
     CallbackInfoReturnable<OptionalInt> info
   ) {
-      if (nameableContainerFactory instanceof LockableContainerBlockEntity && !(nameableContainerFactory instanceof ChestBlockEntity)) {
-        BlockEntity be = (BlockEntity) nameableContainerFactory;
-        UUID uuid = ((NbtUuid)be).getNbtUuid();
-        ((NbtUuid)this.currentScreenHandler).setNbtUuid(uuid);
+    ActionResult result = PlayerOpenScreenCallback.EVENT.invoker().openScreen((ServerPlayerEntity) (Object) this, nameableContainerFactory);
 
-        Identifier dimId = ((PlayerEntity)(Object)this).getEntityWorld().getRegistryKey().getValue();
-
-        Identifier blockId = Registry.BLOCK.getId(be.getCachedState().getBlock());
-        DatabaseManager.getSingleton().queueOp(ContainerDAO.insert(
-          uuid, blockId, be.getPos(), this.getUuid(), java.time.Instant.now(), dimId
-        ));
-      }
+    if (result != ActionResult.PASS) {
+      info.cancel();
+    }
   }
 }
