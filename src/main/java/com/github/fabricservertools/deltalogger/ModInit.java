@@ -1,6 +1,7 @@
 package com.github.fabricservertools.deltalogger;
 
 import com.github.fabricservertools.deltalogger.command.Commands;
+import com.github.fabricservertools.deltalogger.dao.BlockDAO;
 import com.github.fabricservertools.deltalogger.dao.PlayerDAO;
 import com.github.fabricservertools.deltalogger.dao.RegistryDAO;
 import com.github.fabricservertools.deltalogger.gql.ApiServer;
@@ -8,14 +9,20 @@ import com.google.common.collect.Sets;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.WorldSavePath;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.world.World;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -114,6 +121,22 @@ public class ModInit implements ModInitializer {
 				));
 	}
 
+	private void onBreakFinished(World world, PlayerEntity player, BlockPos pos,
+								 BlockState state, /* Nullable */ BlockEntity blockEntity) {
+		Identifier id = Registry.BLOCK.getId(state.getBlock());
+		Identifier dimension = world.getRegistryKey().getValue();
+
+		DatabaseManager.getSingleton().queueOp(BlockDAO.insertPlacement(
+				player.getUuid(),
+				id,
+				false,
+				pos,
+				world.getBlockState(pos),
+				dimension,
+				java.time.Instant.now()
+		));
+	}
+
 	@Override
 	public void onInitialize() {
 		loadConfig(Paths.get(FabricLoader.getInstance().getConfigDir().toString(), "deltalogger.properties"));
@@ -124,6 +147,8 @@ public class ModInit implements ModInitializer {
 
 		ServerPlayConnectionEvents.JOIN.register(this::onJoin);
 		ServerPlayConnectionEvents.DISCONNECT.register(this::onQuit);
+
+		PlayerBlockBreakEvents.AFTER.register(this::onBreakFinished);
 
 		CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> Commands.register(dispatcher));
 	}

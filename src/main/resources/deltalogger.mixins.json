@@ -6,7 +6,6 @@
   "mixins": [
     "BlockInteractionMixin",
     "BlockItemMixin",
-    "BlockMixin",
     "ChestBlockMixin",
     "ContainerMixin",
     "CreeperMixin",
