@@ -2,14 +2,22 @@ package com.github.fabricservertools.deltalogger.command.rollback;
 
 import com.github.fabricservertools.deltalogger.SQLUtils;
 import com.github.fabricservertools.deltalogger.beans.Placement;
+import com.github.fabricservertools.deltalogger.beans.Transaction;
 import com.github.fabricservertools.deltalogger.dao.DAO;
 import com.github.fabricservertools.deltalogger.util.TimeParser;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.ChestBlock;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.ChestBlockEntity;
+import net.minecraft.inventory.Inventory;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
@@ -64,24 +72,24 @@ public class RollbackCommand {
 		BlockBox box = new BlockBox(boxBounds);
 		BlockPos.stream(box).forEach(pos -> {
 			try {
-				RollbackCommand.addBlocks(source, parsedCriteria, pos, timeValue);
+				World world = source.getWorld();
+				Identifier dimension = world.getRegistryKey().getValue();
+				rollbackBlocksAtPos(source, parsedCriteria, pos, timeValue, dimension, world);
+				rollbackTransactionsAtPos(source, parsedCriteria, pos, timeValue, dimension, world);
 			} catch (CommandSyntaxException e) {
 				e.printStackTrace();
 			}
 		});
 	}
 
-	public static void addBlocks(ServerCommandSource source, String criteria, BlockPos pos, String time)
+	private static void rollbackBlocksAtPos(ServerCommandSource source, String criteria, BlockPos pos, String time, Identifier dimension, World world)
 			throws CommandSyntaxException {
 		// Rollback blocks
-		World world = source.getWorld();
-		Identifier dimension = world.getRegistryKey().getValue();
-		List<Placement> placementList = DAO.block.rollbackQuery(dimension, pos, time, criteria);
-		placementList.forEach(placement -> {
+		DAO.block.rollbackQuery(dimension, pos, time, criteria).forEach(placement -> {
 			//Every placement is called here, where the block setting logic is
 			//Generates a BlockState object from identifier
-			String[] identifierSplit = placement.getBlockType().split(":");
-			BlockState state = Registry.BLOCK.get(new Identifier(identifierSplit[0], identifierSplit[1])).getDefaultState();
+			BlockState state = Registry.BLOCK.get(createIdentifier(placement.getBlockType())).getDefaultState();
+
 			if (placement.getPlaced()) {
 				world.setBlockState(pos, Blocks.AIR.getDefaultState());
 			} else {
@@ -89,5 +97,52 @@ public class RollbackCommand {
 			}
 
 		});
+	}
+
+	private static void rollbackTransactionsAtPos(ServerCommandSource source, String criteria, BlockPos pos, String time, Identifier dimension, World world) {
+
+		BlockEntity blockEntity = world.getBlockEntity(pos);
+		BlockState state = world.getBlockState(pos);
+		Block block = state.getBlock();
+
+		DAO.transaction.rollbackQuery(dimension, pos, time, criteria).forEach(transaction -> {
+
+			Inventory inventory;
+			inventory = (Inventory) blockEntity;
+			if (inventory instanceof ChestBlockEntity && block instanceof ChestBlock) {
+				inventory = ChestBlock.getInventory((ChestBlock) block, state, world, pos, true);
+			}
+
+			int amount = transaction.getCount();
+			ItemStack itemStack = new ItemStack(getItem(createIdentifier(transaction.getItemType())), amount * (amount < 0 ? -1 : 1));
+
+			if (inventory != null) {
+				for (int i = 0; i < inventory.size(); i++) {
+					if (amount < 0) {
+						// Item was removed, add back
+						if (inventory.getStack(i).isEmpty()) {
+							inventory.setStack(i, itemStack);
+							return;
+						}
+					} else {
+						//Item was added, remove
+						if(inventory.getStack(i).getItem().equals(getItem(createIdentifier(transaction.getItemType())))) {
+							inventory.setStack(i, ItemStack.EMPTY);
+							return;
+						}
+					}
+				}
+			}
+
+		});
+	}
+
+	private static Identifier createIdentifier(String identifier) {
+		String[] identifierSplit = identifier.split(":");
+		return new Identifier(identifierSplit[0], identifierSplit[1]);
+	}
+
+	private static Item getItem(Identifier id) {
+		return Registry.ITEM.get(id);
 	}
 }

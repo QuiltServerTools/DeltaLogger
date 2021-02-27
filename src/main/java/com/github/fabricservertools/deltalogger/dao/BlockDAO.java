@@ -89,8 +89,8 @@ public class BlockDAO {
 									SELECT_PLACEMENT,
 									"FROM (",
 									"SELECT * FROM placements",
-									"WHERE x = :x AND y = :y AND z = :z AND dimension_id = (SELECT id FROM registry WHERE name = :dim) "/*AND date < \""+time+"\""*/,
-									"ORDER BY `id` DESC LIMIT 100000",
+									"WHERE x = :x AND y = :y AND z = :z AND dimension_id = (SELECT id FROM registry WHERE name = :dim) AND date > \""+time+"\"",
+									"ORDER BY `id` DESC",
 									") as PL",
 									JOIN_PLACEMENT
 							)

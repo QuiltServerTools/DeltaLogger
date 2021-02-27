@@ -98,6 +98,25 @@ public class TransactionDAO {
 		return new ArrayList<>();
 	}
 
+	public List<Transaction> rollbackQuery(Identifier dimension, BlockPos pos, String time, String criteria) {
+		try {
+			return jdbi.withHandle(handle -> handle.select(
+					String.join(" ",
+							// "SELECT CT.id, C.uuid,", SQLUtils.getDateFormatted("CT.date", "date"), ", CT.item_count, P.name as `player_name`",
+							SELECT_TRANSACTIONS,
+							"FROM container_transactions as CT",
+							JOIN_TRANSACTIONS,
+							"WHERE C.x=? AND C.y=? AND C.z=? AND DT.name = ? AND CT.date > ?",
+							"ORDER BY CT.date"
+					),
+					pos.getX(), pos.getY(), pos.getZ(), dimension.toString(), time
+			).mapTo(Transaction.class).list());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return new ArrayList<>();
+	}
+
 	public List<Transaction> customQuery(String sql) {
 		try {
 			return jdbi.withHandle(handle -> handle.select(sql, 100)).mapTo(Transaction.class).list();
