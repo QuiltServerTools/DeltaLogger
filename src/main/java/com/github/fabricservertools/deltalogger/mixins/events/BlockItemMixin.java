@@ -36,7 +36,7 @@ public abstract class BlockItemMixin extends Item {
 			method = "place(Lnet/minecraft/item/ItemPlacementContext;)Lnet/minecraft/util/ActionResult;",
 			cancellable = true
 	)
-	public void place(ItemPlacementContext context, CallbackInfoReturnable<Boolean> info) {
+	public void dlPlaceEventTrigger(ItemPlacementContext context, CallbackInfoReturnable<Boolean> info) {
 		ActionResult result = BlockPlaceCallback.EVENT.invoker().place(context.getPlayer(), context);
 
 		if (result != ActionResult.PASS) {

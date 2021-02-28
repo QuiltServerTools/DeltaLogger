@@ -26,7 +26,7 @@ public class CreeperMixin extends HostileEntity {
 	}
 
 	@Inject(method = "explode", at = @At(value = "HEAD"), cancellable = true)
-	private void explode(CallbackInfo info) {
+	private void dlExplodeEventTrigger(CallbackInfo info) {
 		ActionResult result = CreeperExplodeCallback.EVENT.invoker().explode((CreeperEntity) (Object) this);
 
 		if (result != ActionResult.PASS) {

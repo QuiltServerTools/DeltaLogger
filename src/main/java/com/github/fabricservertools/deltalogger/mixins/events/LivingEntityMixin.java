@@ -36,7 +36,7 @@ public abstract class LivingEntityMixin extends Entity {
 			method = "onDeath",
 			cancellable = true
 	)
-	public void onDeath(DamageSource source, CallbackInfo info) {
+	public void dlLogOnEntityDeath(DamageSource source, CallbackInfo info) {
 		ActionResult result = EntityDeathCallback.EVENT.invoker().death((LivingEntity) (Object) this, source);
 
 		if (result != ActionResult.PASS) {
