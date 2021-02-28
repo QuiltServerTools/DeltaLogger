@@ -74,7 +74,7 @@ public class RollbackCommand {
 			rollbackBlocksAtPos(parsedCriteria, pos, timeValue, dimension, world);
 		});
 
-		source.sendFeedback(new TranslatableText("deltalogger.rollback.block.complete").formatted(Formatting.ITALIC, Formatting.GRAY).append(new TranslatableText("deltalogger.rollback.progress", 0, 2).formatted(Formatting.YELLOW)), false);
+		source.sendFeedback(new TranslatableText("deltalogger.rollback.block.complete").formatted(Formatting.ITALIC, Formatting.GRAY).append(new TranslatableText("deltalogger.rollback.progress", 1, 2).formatted(Formatting.YELLOW)), false);
 
 		BlockPos.stream(box).forEach(pos -> {
 			World world = source.getWorld();
@@ -82,7 +82,7 @@ public class RollbackCommand {
 			rollbackTransactionsAtPos(parsedCriteria, pos, timeValue, dimension, world);
 		});
 
-		source.sendFeedback(new TranslatableText("deltalogger.rollback.transaction.complete").formatted(Formatting.ITALIC, Formatting.GRAY).append(new TranslatableText("deltalogger.rollback.progress", 1, 2).formatted(Formatting.YELLOW)), false);
+		source.sendFeedback(new TranslatableText("deltalogger.rollback.transaction.complete").formatted(Formatting.ITALIC, Formatting.GRAY).append(new TranslatableText("deltalogger.rollback.progress", 2, 2).formatted(Formatting.YELLOW)), false);
 
 		sendFinishFeedback(source, timeValue);
 	}
@@ -142,7 +142,7 @@ public class RollbackCommand {
 	}
 
 	private static void sendFinishFeedback(ServerCommandSource scs, String time) {
-		scs.sendFeedback(new TranslatableText("deltalogger.rollback.complete").formatted(Formatting.GREEN).append(new TranslatableText("deltalogger.rollback.progress").formatted(Formatting.YELLOW)), true);
+		scs.sendFeedback(new TranslatableText("deltalogger.rollback.complete").formatted(Formatting.GREEN).append(new TranslatableText("deltalogger.rollback.progress", 2, 2).formatted(Formatting.YELLOW)), true);
 	}
 
 	private static Identifier createIdentifier(String identifier) {

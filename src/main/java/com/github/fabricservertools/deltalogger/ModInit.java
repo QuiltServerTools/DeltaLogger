@@ -1,7 +1,6 @@
 package com.github.fabricservertools.deltalogger;
 
 import com.github.fabricservertools.deltalogger.command.Commands;
-import com.github.fabricservertools.deltalogger.dao.BlockDAO;
 import com.github.fabricservertools.deltalogger.dao.PlayerDAO;
 import com.github.fabricservertools.deltalogger.dao.RegistryDAO;
 import com.github.fabricservertools.deltalogger.gql.ApiServer;

@@ -30,11 +30,12 @@ public class EntityEventListener {
 		Entity attacker = source.getAttacker();
 		if (entity.getCustomName() == null) return ActionResult.PASS;
 
-		UUID killer_id = null;
+			UUID killer_id;
 		if (attacker instanceof PlayerEntity) {
 			killer_id = ((PlayerEntity) attacker).getUuid();
+		} else {
+			return ActionResult.PASS;
 		}
-
 		DatabaseManager.getSingleton().queueOp(EntityDAO.insertKill(
 				entity.getCustomName().asString(),
 				source.getName(),
