@@ -1,7 +1,6 @@
 {
-  "deltalogger.inspect_mode":"DeltaLogger查询模式",
-  "on":"开启",
-  "off":"关闭",
+  "deltalogger.inspect_mode.on":"DeltaLogger查询模式开启",
+  "deltalogger.inspect_mode.off":"DeltaLogger查询模式关闭",
   "deltalogger.none_found.pos":"在%2$s没有发现%1$s",
   "deltalogger.text.version":"你正在使用DeltaLogger版本：%s",
   "deltalogger.text.discord":"点击以加入DeltaLogger discord",
@@ -14,5 +13,10 @@
   "deltalogger.none_found.no_pos.grief":"依据相应的请求没有发现破坏记录",
   "deltalogger.history.transaction":"存取记录",
   "deltalogger.history.placement":"放置记录",
-  "deltalogger.history.grief":"破坏记录"
+  "deltalogger.history.grief":"破坏记录",
+  "deltalogger.rollback.block.complete": "完成了指定的方块回档",
+  "deltalogger.rollback.transaction.complete": "完成了指定的存取回档",
+  "deltalogger.rollback.grief.complete": "完成了指定的生物破坏回档",
+  "deltalogger.rollback.complete": "回档完成",
+  "deltalogger.rollback.progress": "（%d/%d）"
 }
