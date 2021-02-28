@@ -3,6 +3,7 @@ package com.github.fabricservertools.deltalogger.mixins.events;
 import com.github.fabricservertools.deltalogger.DatabaseManager;
 import com.github.fabricservertools.deltalogger.dao.EntityDAO;
 import com.github.fabricservertools.deltalogger.events.CreeperExplodeCallback;
+import com.github.fabricservertools.deltalogger.events.FireballExplodeCallback;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -39,7 +40,7 @@ public class FireballEntityMixin extends AbstractFireballEntity {
 			cancellable = true
 	)
 	private void tryLogFireballExplosion(HitResult hit, CallbackInfo info) {
-		ActionResult result = CreeperExplodeCallback.EVENT.invoker().explode((CreeperEntity) (Object) this);
+		ActionResult result = FireballExplodeCallback.EVENT.invoker().explode((FireballEntity) (Object) this, hit);
 
 		if (result != ActionResult.PASS) {
 			info.cancel();
