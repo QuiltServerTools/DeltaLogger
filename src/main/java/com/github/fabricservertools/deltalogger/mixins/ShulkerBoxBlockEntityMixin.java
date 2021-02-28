@@ -16,7 +16,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.UUID;
 
 /**
- * Assign UUID to shulker entities
+ * Save the uuid of shulker entities into their item forms so we retain transaction information
+ * even when the shulker box is moved
  */
 @Mixin(ShulkerBoxBlockEntity.class)
 public abstract class ShulkerBoxBlockEntityMixin extends LootableContainerBlockEntity implements NbtUuid {
@@ -24,23 +25,17 @@ public abstract class ShulkerBoxBlockEntityMixin extends LootableContainerBlockE
 		super(blockEntityType);
 	}
 
-	private UUID watchtowerid = UUID.randomUUID();
-
-	@Inject(at = @At("TAIL"), method = "fromTag")
-	public void fromTag(BlockState state, CompoundTag tag, CallbackInfo info) {
+	@Inject(at = @At("TAIL"), method = "deserializeInventory")
+	public void deserializeInventoryMixin(CompoundTag tag, CallbackInfo info) {
 		if (tag.containsUuid(ItemUtils.NBT_TAG_KEY)) {
-			this.watchtowerid = tag.getUuid(ItemUtils.NBT_TAG_KEY);
+			this.setNbtUuid(tag.getUuid(ItemUtils.NBT_TAG_KEY));
 		} else {
-			this.watchtowerid = UUID.randomUUID();
+			this.setNbtUuid(UUID.randomUUID());
 		}
 	}
 
-	@Inject(at = @At("TAIL"), method = "toTag")
-	public void toTag(CompoundTag tag, CallbackInfoReturnable<CompoundTag> ret) {
-		tag.putUuid(ItemUtils.NBT_TAG_KEY, this.watchtowerid);
-	}
-
-	public UUID getNbtUuid() {
-		return watchtowerid;
+	@Inject(at = @At("TAIL"), method = "serializeInventory")
+	public void serializeInventoryMixin(CompoundTag tag, CallbackInfoReturnable<CompoundTag> ret) {
+		tag.putUuid(ItemUtils.NBT_TAG_KEY, this.getNbtUuid());
 	}
 }

@@ -17,9 +17,10 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ChestBlock;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.ChestBlockEntity;
 import net.minecraft.block.entity.LockableContainerBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.DoubleInventory;
+import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
 import net.minecraft.screen.NamedScreenHandlerFactory;
@@ -50,8 +51,9 @@ public class PlayerEventListener {
 	}
 
 	private ActionResult onOpenScreen(ServerPlayerEntity playerEntity, NamedScreenHandlerFactory screenHandlerFactory) {
-		if (screenHandlerFactory instanceof LockableContainerBlockEntity && !(screenHandlerFactory instanceof ChestBlockEntity)) {
-			BlockEntity be = (BlockEntity) screenHandlerFactory;
+		Inventory inventory = playerEntity.currentScreenHandler.getSlot(0).inventory;
+		if (inventory instanceof LockableContainerBlockEntity) {
+			BlockEntity be = (BlockEntity) inventory;
 			UUID uuid = ((NbtUuid) be).getNbtUuid();
 			((NbtUuid) playerEntity.currentScreenHandler).setNbtUuid(uuid);
 
@@ -104,7 +106,6 @@ public class PlayerEventListener {
 		if (hand != Hand.MAIN_HAND) {
 			return ActionResult.PASS;
 		}
-		;
 
 		if (!InspectCommand.hasToolEnabled(player)) {
 			return ActionResult.PASS;
