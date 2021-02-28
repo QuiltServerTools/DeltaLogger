@@ -16,8 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.UUID;
 
 /**
- * Log most container entity access events which have LockableContainerBlockEntity
- * as a super class.
+ * Give all LocakableContainerBlockEntity objects an identifier to associate events with
  */
 @Mixin(LockableContainerBlockEntity.class)
 public abstract class LockableContainerBlockEntityMixin extends BlockEntity implements NbtUuid {
@@ -25,25 +24,28 @@ public abstract class LockableContainerBlockEntityMixin extends BlockEntity impl
 		super(type);
 	}
 
-	private UUID watchtowerid = UUID.randomUUID();
+	private UUID uuid = UUID.randomUUID();
 
 	@Inject(at = @At("TAIL"), method = "fromTag")
 	public void fromTag(BlockState state, CompoundTag tag, CallbackInfo info) {
 		if (tag.containsUuid(ItemUtils.NBT_TAG_KEY)) {
-			this.watchtowerid = tag.getUuid(ItemUtils.NBT_TAG_KEY);
-			// System.out.println("HAS UUID " + this.watchtowerid);
+			this.uuid = tag.getUuid(ItemUtils.NBT_TAG_KEY);
 		} else {
-			this.watchtowerid = UUID.randomUUID();
-			// System.out.println("ASSIGNED UUID " + this.watchtowerid);
+			this.uuid = UUID.randomUUID();
 		}
 	}
 
 	@Inject(at = @At("TAIL"), method = "toTag")
 	public void toTag(CompoundTag tag, CallbackInfoReturnable<CompoundTag> ret) {
-		tag.putUuid(ItemUtils.NBT_TAG_KEY, this.watchtowerid);
+		tag.putUuid(ItemUtils.NBT_TAG_KEY, this.uuid);
 	}
 
 	public UUID getNbtUuid() {
-		return watchtowerid;
+		return uuid;
+	}
+
+	@Override
+	public void setNbtUuid(UUID uuid) {
+		this.uuid = uuid;
 	}
 }
