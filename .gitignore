@@ -121,3 +121,8 @@ run/logs
 !gradle-wrapper.jar
 .project
 .classpath
+
+# JS caches/deps
+webui/.cache
+webui/dist
+webui/node_modules

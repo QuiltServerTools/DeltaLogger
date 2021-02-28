@@ -9,6 +9,10 @@ public class ApiServer {
 	private static final String STATIC_DIRECTORY = "/data/deltalogger/http";
 	private final Javalin app;
 
+	// NOTE: We do this because the shadow plugin remaps the string "graphql" to
+	// "com/github/fabricservertools/deltalogger/shadow/graphql". No, I'm not kidding. There's no fix.
+	private final String GRAPHQL_STRING = new StringBuilder().append("graph").append("ql").toString();
+
 	public ApiServer() {
 		this.app = Javalin.create(config -> {
 			// if (System.getProperty("develop").equals("true")) {
@@ -32,8 +36,8 @@ public class ApiServer {
 				.post("/auth", AuthHandlers.provideJwtHandler)
 				.before("/auth/change-pass", AuthHandlers.validateHandler)
 				.post("/auth/change-pass", AuthHandlers.changePassHandler)
-				.before("/graphql", AuthHandlers.validateHandler)
-				.post("/graphql", new GraphqlHandler());
+				.before("/" + GRAPHQL_STRING, AuthHandlers.validateHandler)
+				.post("/" + GRAPHQL_STRING, new GraphqlHandler());
 	}
 
 	public void start(int port) {
