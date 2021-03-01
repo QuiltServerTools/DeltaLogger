@@ -3,23 +3,15 @@ package com.github.fabricservertools.deltalogger.command.rollback;
 import com.mojang.brigadier.LiteralMessage;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
-import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-
-import net.minecraft.command.argument.BlockPosArgumentType;
 import net.minecraft.command.argument.GameProfileArgumentType;
-import net.minecraft.command.argument.TimeArgumentType;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.LiteralText;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Util;
 
 import java.util.HashMap;
 import java.util.Set;
@@ -159,22 +151,17 @@ public class RollbackParser implements SuggestionProvider<ServerCommandSource> {
 			}
 		}
 	}
-	public static String criteria (String criteria, ServerPlayerEntity player, ServerCommandSource scs) {
-		try {
-			HashMap<String, Object> propertyMap = RollbackParser.getInstance().rawProperties(criteria);
-			String query = "";
-			if(propertyMap.containsKey("target")) {
-				GameProfileArgumentType.GameProfileArgument targets = (GameProfileArgumentType.GameProfileArgument)propertyMap.get("target");
-				query += " AND player_id = (SELECT  id FROM players WHERE uuid = "+ getUuid(targets, scs) + ")";
-				System.out.println(query);
-			}
-			return query;
 
-		} catch (CommandSyntaxException e) {
-			player.sendSystemMessage(new LiteralText("Error parsing criteria").formatted(Formatting.RED), Util.NIL_UUID);
+	public static String criteria(String criteria, ServerPlayerEntity player, ServerCommandSource scs) throws CommandSyntaxException {
+		HashMap<String, Object> propertyMap = RollbackParser.getInstance().rawProperties(criteria);
+		String query = "";
+		if (propertyMap.containsKey("target")) {
+			GameProfileArgumentType.GameProfileArgument targets = (GameProfileArgumentType.GameProfileArgument) propertyMap.get("target");
+			query += " AND player_id = (SELECT id FROM players WHERE uuid = " + getUuid(targets, scs) + ")";
 		}
-		return "";
+		return query;
 	}
+
 	private static String getUuid(GameProfileArgumentType.GameProfileArgument player, ServerCommandSource scs) throws CommandSyntaxException {
 		return player.getNames(scs).stream().findFirst().get().getId().toString();
 	}

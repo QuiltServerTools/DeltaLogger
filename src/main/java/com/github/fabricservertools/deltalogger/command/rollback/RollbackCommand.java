@@ -5,6 +5,7 @@ import com.github.fabricservertools.deltalogger.dao.DAO;
 import com.github.fabricservertools.deltalogger.util.TimeParser;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -17,9 +18,11 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockBox;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
@@ -59,7 +62,16 @@ public class RollbackCommand {
 		Duration duration = TimeParser.parseTime(timeString);
 		String timeValue = SQLUtils.instantToUTCString(Instant.now().minus(duration.getSeconds(), ChronoUnit.SECONDS));
 		BlockPos playerPos = sourcePlayer.getBlockPos();
-		String parsedCriteria = RollbackParser.criteria(criteria, sourcePlayer, source);
+
+		String parsedCriteria= "";
+
+		try {
+			parsedCriteria = RollbackParser.criteria(criteria, sourcePlayer, source);
+		} catch (
+		CommandSyntaxException e) {
+			sourcePlayer.sendSystemMessage(new LiteralText("Error parsing criteria").formatted(Formatting.RED), Util.NIL_UUID);
+			return;
+		}
 
 		int x1 = playerPos.getX() + radius;
 		int y1 = playerPos.getY() + radius;
@@ -71,11 +83,11 @@ public class RollbackCommand {
 		World world = source.getWorld();
 		Identifier dimension = world.getRegistryKey().getValue();
 
-		rollbackBlocks(criteria, new BlockPos(x2, y2, z2), new BlockPos(x1, y1, z1), timeValue, dimension, world);
+		rollbackBlocks(parsedCriteria, new BlockPos(x2, y2, z2), new BlockPos(x1, y1, z1), timeValue, dimension, world);
 
 		source.sendFeedback(new TranslatableText("deltalogger.rollback.block.complete").formatted(Formatting.ITALIC, Formatting.GRAY).append(new TranslatableText("deltalogger.rollback.progress", 1, 2).formatted(Formatting.YELLOW)), false);
 
-		rollbackTransactions(criteria, new BlockPos(x2, y2, z2), new BlockPos(x1, y1, z1), timeValue, dimension, world);
+		rollbackTransactions(parsedCriteria, new BlockPos(x2, y2, z2), new BlockPos(x1, y1, z1), timeValue, dimension, world);
 
 		source.sendFeedback(new TranslatableText("deltalogger.rollback.transaction.complete").formatted(Formatting.ITALIC, Formatting.GRAY).append(new TranslatableText("deltalogger.rollback.progress", 2, 2).formatted(Formatting.YELLOW)), false);
 
