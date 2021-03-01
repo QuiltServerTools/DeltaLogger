@@ -60,57 +60,54 @@ public class RollbackCommand {
 		String timeValue = SQLUtils.instantToUTCString(Instant.now().minus(duration.getSeconds(), ChronoUnit.SECONDS));
 		BlockPos playerPos = sourcePlayer.getBlockPos();
 		String parsedCriteria = RollbackParser.criteria(criteria, sourcePlayer, source);
+
 		int x1 = playerPos.getX() + radius;
 		int y1 = playerPos.getY() + radius;
 		int z1 = playerPos.getZ() + radius;
 		int x2 = playerPos.getX() - radius;
 		int y2 = playerPos.getY() - radius;
 		int z2 = playerPos.getZ() - radius;
-		int[] boxBounds = {x1, y1, z1, x2, y2, z2};
+		
+		World world = source.getWorld();
+		Identifier dimension = world.getRegistryKey().getValue();
 		BlockBox box = new BlockBox(boxBounds);
-		BlockPos.stream(box).forEach(pos -> {
-			World world = source.getWorld();
-			Identifier dimension = world.getRegistryKey().getValue();
-			rollbackBlocksAtPos(parsedCriteria, pos, timeValue, dimension, world);
-		});
+
+		rollbackBlocks(criteria, new BlockPos(x2, y2, z2), new BlockPos(x1, y1, z1), timeValue, dimension, world);
 
 		source.sendFeedback(new TranslatableText("deltalogger.rollback.block.complete").formatted(Formatting.ITALIC, Formatting.GRAY).append(new TranslatableText("deltalogger.rollback.progress", 1, 2).formatted(Formatting.YELLOW)), false);
 
-		BlockPos.stream(box).forEach(pos -> {
-			World world = source.getWorld();
-			Identifier dimension = world.getRegistryKey().getValue();
-			rollbackTransactionsAtPos(parsedCriteria, pos, timeValue, dimension, world);
-		});
+		rollbackTransactions(criteria, new BlockPos(x2, y2, z2), new BlockPos(x1, y1, z1), timeValue, dimension, world);
 
 		source.sendFeedback(new TranslatableText("deltalogger.rollback.transaction.complete").formatted(Formatting.ITALIC, Formatting.GRAY).append(new TranslatableText("deltalogger.rollback.progress", 2, 2).formatted(Formatting.YELLOW)), false);
 
 		sendFinishFeedback(source, timeValue);
 	}
 
-	private static void rollbackBlocksAtPos(String criteria, BlockPos pos, String time, Identifier dimension, World world) {
+	private static void rollbackBlocks(String criteria, BlockPos posS, BlockPos posL, String time, Identifier dimension, World world) {
 		// Rollback blocks
-		DAO.block.rollbackQuery(dimension, pos, time, criteria).forEach(placement -> {
+		DAO.block.rollbackQuery(dimension, posS, posL, time, criteria).forEach(placement -> {
 			//Every placement is called here, where the block setting logic is
 			//Generates a BlockState object from identifier
 			BlockState state = getBlock(createIdentifier(placement.getBlockType())).getDefaultState();
 
 			if (placement.getPlaced()) {
-				world.setBlockState(pos, Blocks.AIR.getDefaultState());
+				world.setBlockState(new BlockPos(placement.getX(), placement.getY(), placement.getZ()), Blocks.AIR.getDefaultState());
 			} else {
-				world.setBlockState(pos, state);
+				world.setBlockState(new BlockPos(placement.getX(), placement.getY(), placement.getZ()), state);
 			}
 
 		});
 	}
 
-	private static void rollbackTransactionsAtPos(String criteria, BlockPos pos, String time, Identifier dimension, World world) {
+	private static void rollbackTransactions(String criteria, BlockPos posS, BlockPos posL, String time, Identifier dimension, World world) {
 
-		BlockEntity blockEntity = world.getBlockEntity(pos);
-		BlockState state = world.getBlockState(pos);
-		Block block = state.getBlock();
 
-		DAO.transaction.rollbackQuery(dimension, pos, time, criteria).forEach(transaction -> {
 
+		DAO.transaction.rollbackQuery(dimension, posS, posL, time, criteria).forEach(transaction -> {
+			BlockPos pos = transaction.getPos();
+			BlockEntity blockEntity = world.getBlockEntity(pos);
+			BlockState state = world.getBlockState(pos);
+			Block block = state.getBlock();
 			Inventory inventory;
 			inventory = (Inventory) blockEntity;
 			if (inventory instanceof ChestBlockEntity && block instanceof ChestBlock) {

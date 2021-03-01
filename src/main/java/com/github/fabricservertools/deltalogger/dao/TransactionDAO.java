@@ -3,6 +3,7 @@ package com.github.fabricservertools.deltalogger.dao;
 import com.github.fabricservertools.deltalogger.QueueOperation;
 import com.github.fabricservertools.deltalogger.SQLUtils;
 import com.github.fabricservertools.deltalogger.beans.Transaction;
+import com.github.fabricservertools.deltalogger.beans.TransactionPos;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import org.jdbi.v3.core.Handle;
@@ -32,6 +33,10 @@ public class TransactionDAO {
 		jdbi.registerRowMapper(Transaction.class,
 				(rs, ctx) -> new Transaction(rs.getInt("id"), rs.getString("player_name"), rs.getString("date"),
 						rs.getString("item_type"), rs.getInt("item_count"), UUID.fromString(rs.getString("uuid"))));
+
+		jdbi.registerRowMapper(TransactionPos.class,
+				(rs, ctx) -> new TransactionPos(rs.getInt("id"), rs.getString("player_name"), rs.getString("date"),
+						rs.getString("item_type"), rs.getInt("item_count"), UUID.fromString(rs.getString("uuid")), rs.getInt("x"), rs.getInt("y"), rs.getInt("z")));
 	}
 
 	/**
@@ -98,19 +103,23 @@ public class TransactionDAO {
 		return new ArrayList<>();
 	}
 
-	public List<Transaction> rollbackQuery(Identifier dimension, BlockPos pos, String time, String criteria) {
+	public List<TransactionPos> rollbackQuery(Identifier dimension, BlockPos posS, BlockPos posL, String time, String criteria) {
 		try {
 			return jdbi.withHandle(handle -> handle.select(
 					String.join(" ",
 							// "SELECT CT.id, C.uuid,", SQLUtils.getDateFormatted("CT.date", "date"), ", CT.item_count, P.name as `player_name`",
-							SELECT_TRANSACTIONS,
+							"SELECT CT.id, C.uuid,", SQLUtils.getDateFormatted("CT.date", "date"),
+							", R.name as `item_type`, CT.item_count, P.name as `player_name`, C.x, C.y, C.z",
 							"FROM container_transactions as CT",
 							JOIN_TRANSACTIONS,
-							"WHERE C.x=? AND C.y=? AND C.z=? AND DT.name = ? AND CT.date > ?",
+							"WHERE C.x >= :xs AND C.x <= :xl AND C.y >= :ys AND C.y <= :yl AND C.z >= :zs AND C.z <= :zl AND DT.name = :dim AND CT.date > :time",
 							"ORDER BY CT.date"
-					),
-					pos.getX(), pos.getY(), pos.getZ(), dimension.toString(), time
-			).mapTo(Transaction.class).list());
+					)
+					//pos.getX(), pos.getY(), pos.getZ(), dimension.toString(), time
+			).bind("xs", posS.getX()).bind("xl", posL.getX()).bind("ys", posS.getY()).bind("yl", posL.getY()).bind("zs", posS.getZ()).bind("zl", posL.getZ())
+					.bind("dim", dimension.toString()).bind("time", time)
+
+					.mapTo(TransactionPos.class).list());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

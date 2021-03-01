@@ -81,7 +81,7 @@ public class BlockDAO {
 		return jdbi.withHandle(handle -> handle.select(sql, 100)).mapTo(Placement.class).list();
 	}
 
-	public List<Placement> rollbackQuery(Identifier dimension, BlockPos pos, String time, String criteria) {
+	public List<Placement> rollbackQuery(Identifier dimension, BlockPos posS, BlockPos posL, String time, String criteria) {
 		try {
 			return jdbi.withHandle(handle -> handle
 					.createQuery(
@@ -89,14 +89,14 @@ public class BlockDAO {
 									SELECT_PLACEMENT,
 									"FROM (",
 									"SELECT * FROM placements",
-									"WHERE x = :x AND y = :y AND z = :z AND dimension_id = (SELECT id FROM registry WHERE name = :dim) AND date > \""+time+"\"",
+									"WHERE x >= :xs AND x <= :xl AND y >= :ys AND y <= :yl AND z >= :zs AND z <= :zl AND dimension_id = (SELECT id FROM registry WHERE name = :dim) AND date > \""+time+"\"",
 									criteria,
 									"ORDER BY `id` DESC",
 									") as PL",
 									JOIN_PLACEMENT
 							)
 					)
-					.bind("x", pos.getX()).bind("y", pos.getY()).bind("z", pos.getZ())
+					.bind("xs", posS.getX()).bind("xl", posL.getX()).bind("ys", posS.getY()).bind("yl", posL.getY()).bind("zs", posS.getZ()).bind("zl", posL.getZ())
 					.bind("dim", dimension.toString())
 					.mapTo(Placement.class).list()
 			);
