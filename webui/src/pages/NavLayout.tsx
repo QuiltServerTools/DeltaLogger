@@ -74,13 +74,13 @@ function Navigation() {
               title="Github" to="https://github.com/fabricservertools/DeltaLogger"
               isExternal
               fontSize="md"
-              icon={<Icon as={FaDiscord} mb="3px" mr="1" />}
+              icon={<Icon as={FaGithubAlt} mb="3px" mr="1" />}
             />
             <NavigationItem
               title="Discord" to="https://discord.gg/UEAZsRdxe2"
               isExternal
               fontSize="md"
-              icon={<Icon as={FaGithubAlt} mb="3px" mr="1" />}
+              icon={<Icon as={FaDiscord} mb="3px" mr="1" />}
             />
             <NavigationItem
               title="Logout" to="/logout"
