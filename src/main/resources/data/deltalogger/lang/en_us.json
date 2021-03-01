@@ -5,7 +5,7 @@
   "deltalogger.text.version":"You are using DeltaLogger version %s",
   "deltalogger.text.discord":"Click to join the DeltaLogger discord",
   "deltalogger.reset_pass.error":"Command resetpass error: must be logged in as user to reset password",
-  "deltalogger.temp_pass":"Your temporary password for DeltaLogger panel is %s",
+  "deltalogger.temp_pass":"Your temporary password for DeltaLogger panel is %s, click to copy",
   "deltalogger.reset_pass.wait":"Please wait for %s seconds before resetting your password",
   "deltalogger.none_found.no_pos.placement":"No placements found with the terms specified",
   "deltalogger.none_found.no_pos.transaction":"No transactions found with the terms specified",

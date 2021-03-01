@@ -6,6 +6,7 @@ import io.vavr.control.Either;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.ClickEvent;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
@@ -34,7 +35,7 @@ public class ResetPassCommand {
 						if (tempPass.isLeft()) {
 							p.sendMessage(new LiteralText(tempPass.getLeft()), false);
 						} else {
-							p.sendMessage(new TranslatableText("deltalogger.temp_pass", tempPass.get()), false);
+							p.sendMessage(new TranslatableText("deltalogger.temp_pass", tempPass.get()).styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, tempPass.get()))), false);
 						}
 					} else {
 						p.sendMessage(new TranslatableText("deltalogger.reset_pass.wait", String.valueOf((resetEpoch - now.getTime()) / 1000)).formatted(Formatting.RED), false);

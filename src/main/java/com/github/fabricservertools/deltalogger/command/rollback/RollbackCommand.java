@@ -36,7 +36,7 @@ import static net.minecraft.server.command.CommandManager.literal;
 
 public class RollbackCommand {
 	public static void register(LiteralCommandNode<ServerCommandSource> root) {
-		LiteralCommandNode<ServerCommandSource> rollbackNode = literal("rollback").then(
+		LiteralCommandNode<ServerCommandSource> rollbackNode = literal("rollback").requires(scs -> scs.hasPermissionLevel(3)).then(
 				argument("radius", IntegerArgumentType.integer()).then(argument("time", StringArgumentType.string())
 						.executes(ctx -> execute(ctx.getSource(), "", ctx.getSource().getPlayer(),
 								IntegerArgumentType.getInteger(ctx, "radius"),
