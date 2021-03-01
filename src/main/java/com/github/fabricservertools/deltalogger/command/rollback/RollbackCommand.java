@@ -67,10 +67,9 @@ public class RollbackCommand {
 		int x2 = playerPos.getX() - radius;
 		int y2 = playerPos.getY() - radius;
 		int z2 = playerPos.getZ() - radius;
-		
+
 		World world = source.getWorld();
 		Identifier dimension = world.getRegistryKey().getValue();
-		BlockBox box = new BlockBox(boxBounds);
 
 		rollbackBlocks(criteria, new BlockPos(x2, y2, z2), new BlockPos(x1, y1, z1), timeValue, dimension, world);
 
