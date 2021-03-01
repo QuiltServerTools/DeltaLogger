@@ -157,7 +157,7 @@ public class RollbackParser implements SuggestionProvider<ServerCommandSource> {
 		String query = "";
 		if (propertyMap.containsKey("target")) {
 			GameProfileArgumentType.GameProfileArgument targets = (GameProfileArgumentType.GameProfileArgument) propertyMap.get("target");
-			query += " AND player_id = (SELECT id FROM players WHERE uuid = " + getUuid(targets, scs) + ")";
+			query += " AND player_id = (SELECT id FROM players WHERE uuid = \"" + getUuid(targets, scs) + "\")";
 		}
 		return query;
 	}
