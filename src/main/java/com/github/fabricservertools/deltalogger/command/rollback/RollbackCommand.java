@@ -23,7 +23,6 @@ import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
-import net.minecraft.util.math.BlockBox;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
@@ -63,7 +62,7 @@ public class RollbackCommand {
 		String timeValue = SQLUtils.instantToUTCString(Instant.now().minus(duration.getSeconds(), ChronoUnit.SECONDS));
 		BlockPos playerPos = sourcePlayer.getBlockPos();
 
-		String parsedCriteria= "";
+		String parsedCriteria;
 
 		try {
 			parsedCriteria = RollbackParser.criteria(criteria, sourcePlayer, source);
@@ -91,7 +90,7 @@ public class RollbackCommand {
 
 		source.sendFeedback(new TranslatableText("deltalogger.rollback.transaction.complete").formatted(Formatting.ITALIC, Formatting.GRAY).append(new TranslatableText("deltalogger.rollback.progress", 2, 2).formatted(Formatting.YELLOW)), false);
 
-		sendFinishFeedback(source, timeValue);
+		sendFinishFeedback(source);
 	}
 
 	private static void rollbackBlocks(String criteria, BlockPos posS, BlockPos posL, String time, Identifier dimension, World world) {
@@ -149,7 +148,7 @@ public class RollbackCommand {
 		});
 	}
 
-	private static void sendFinishFeedback(ServerCommandSource scs, String time) {
+	private static void sendFinishFeedback(ServerCommandSource scs) {
 		scs.sendFeedback(new TranslatableText("deltalogger.rollback.complete").formatted(Formatting.GREEN).append(new TranslatableText("deltalogger.rollback.progress", 2, 2).formatted(Formatting.YELLOW)), true);
 	}
 
