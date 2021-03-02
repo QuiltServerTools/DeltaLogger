@@ -1,5 +1,15 @@
 # DeltaLogger
 
+![stars](https://img.shields.io/github/stars/fabricservertools/DeltaLogger?style=social)
+![image](https://img.shields.io/github/workflow/status/fabricservertools/DeltaLogger/build)
+![image](https://img.shields.io/github/languages/count/fabricservertools/DeltaLogger)
+![image](https://img.shields.io/github/languages/top/fabricservertools/DeltaLogger)
+[![image](https://img.shields.io/discord/764543203772334100?label=discord)](https://discord.gg/jydqZzkyEa)
+![image](https://img.shields.io/github/repo-size/fabricservertools/DeltaLogger)
+![downloads](https://img.shields.io/github/downloads/fabricservertools/DeltaLogger/total?label=GitHub%20downloads)
+![stable](https://img.shields.io/github/v/release/fabricservertools/DeltaLogger?label=stable%20release)
+![latest](https://img.shields.io/github/v/release/fabricservertools/DeltaLogger?color=%23e06820&include_prereleases&label=latest%20release)
+
 Block and chest/container inventory tracking tool for fabric that can be configured to use MySQL or SQLite with a fast and responsive web UI.
 [Join the DeltaLogger discord](https://discord.gg/UxHnDWr)
 
