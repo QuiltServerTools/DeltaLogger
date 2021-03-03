@@ -9,7 +9,7 @@
 ![stable](https://img.shields.io/github/v/release/fabricservertools/DeltaLogger?label=stable%20release)
 ![latest](https://img.shields.io/github/v/release/fabricservertools/DeltaLogger?color=%23e06820&include_prereleases&label=latest%20release)
 
-![CurseForge downloads](https://img.shields.io/badge/dynamic/json?color=brightgreen&label=Modrinth%20downloads&query=downloads&url=https%3A%2F%2Fapi.modrinth.com%2Fapi%2Fv1%2Fmod%2FWgFOx7Xi)
+![Modrinth downloads](https://img.shields.io/badge/dynamic/json?color=brightgreen&label=Modrinth%20downloads&query=downloads&url=https%3A%2F%2Fapi.modrinth.com%2Fapi%2Fv1%2Fmod%2FWgFOx7Xi)
 ![GitHub downloads](https://img.shields.io/github/downloads/fabricservertools/DeltaLogger/total?label=GitHub%20downloads&color=blueviolet)
 
 Block and chest/container inventory tracking tool for fabric that can be configured to use MySQL or SQLite with a fast and responsive web UI.
