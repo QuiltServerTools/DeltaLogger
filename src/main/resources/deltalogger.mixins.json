@@ -4,6 +4,7 @@
   "package": "com.github.fabricservertools.deltalogger.mixins",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
+    "BlockMixin",
     "ChestBlockMixin",
     "LockableContainerBlockEntityMixin",
     "ScreenHandlerMixin",
