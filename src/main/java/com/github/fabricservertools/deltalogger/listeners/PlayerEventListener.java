@@ -7,6 +7,7 @@ import com.github.fabricservertools.deltalogger.dao.BlockDAO;
 import com.github.fabricservertools.deltalogger.dao.ContainerDAO;
 import com.github.fabricservertools.deltalogger.dao.DAO;
 import com.github.fabricservertools.deltalogger.dao.PlayerDAO;
+import com.github.fabricservertools.deltalogger.events.BlockExplodeCallback;
 import com.github.fabricservertools.deltalogger.events.BlockPlaceCallback;
 import com.github.fabricservertools.deltalogger.events.PlayerOpenScreenCallback;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
@@ -35,7 +36,10 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
+import net.minecraft.world.explosion.Explosion;
 
+import java.time.Instant;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -48,6 +52,7 @@ public class PlayerEventListener {
 		UseBlockCallback.EVENT.register(this::onUseBlock);
 		BlockPlaceCallback.EVENT.register(this::onBlockPlace);
 		PlayerOpenScreenCallback.EVENT.register(this::onOpenScreen);
+		BlockExplodeCallback.EVENT.register(this::onBlockExplode);
 	}
 
 	private ActionResult onOpenScreen(ServerPlayerEntity playerEntity, NamedScreenHandlerFactory screenHandlerFactory) {
@@ -145,6 +150,14 @@ public class PlayerEventListener {
 				player.inventory.selectedSlot,
 				player.inventory.getStack(player.inventory.selectedSlot)));
 		return ActionResult.SUCCESS;
+	}
+
+	private ActionResult onBlockExplode(World world, BlockPos pos, Block block, Explosion explosion) {
+		DatabaseManager.getSingleton().queueOp(BlockDAO.insertPlacement(
+				Objects.requireNonNull(explosion.getCausingEntity()).getUuid(), Registry.BLOCK.getId(block),
+				false, pos, world.getBlockState(pos), world.getRegistryKey().getValue(), Instant.now()
+		));
+		return ActionResult.PASS;
 	}
 
 	private void onJoin(ServerPlayNetworkHandler networkHandler, PacketSender sender, MinecraftServer server) {
