@@ -1,14 +1,10 @@
 # DeltaLogger
 
 ![stars](https://img.shields.io/github/stars/fabricservertools/DeltaLogger?style=social)
-![image](https://img.shields.io/github/workflow/status/fabricservertools/DeltaLogger/build)
-![image](https://img.shields.io/github/languages/count/fabricservertools/DeltaLogger)
-![image](https://img.shields.io/github/languages/top/fabricservertools/DeltaLogger)
-[![image](https://img.shields.io/discord/764543203772334100?label=discord)](https://discord.gg/jydqZzkyEa)
-![image](https://img.shields.io/github/repo-size/fabricservertools/DeltaLogger)
-![stable](https://img.shields.io/github/v/release/fabricservertools/DeltaLogger?label=stable%20release)
-![latest](https://img.shields.io/github/v/release/fabricservertools/DeltaLogger?color=%23e06820&include_prereleases&label=latest%20release)
-
+![build](https://img.shields.io/github/workflow/status/fabricservertools/DeltaLogger/build)
+![top language](https://img.shields.io/github/languages/top/fabricservertools/DeltaLogger)
+[![discord](https://img.shields.io/discord/764543203772334100?label=discord)](https://discord.gg/jydqZzkyEa)
+![stable](https://img.shields.io/github/v/release/fabricservertools/DeltaLogger?label=latest%20release)
 ![Modrinth downloads](https://img.shields.io/badge/dynamic/json?color=brightgreen&label=Modrinth%20downloads&query=downloads&url=https%3A%2F%2Fapi.modrinth.com%2Fapi%2Fv1%2Fmod%2FWgFOx7Xi)
 ![GitHub downloads](https://img.shields.io/github/downloads/fabricservertools/DeltaLogger/total?label=GitHub%20downloads&color=blueviolet)
 
