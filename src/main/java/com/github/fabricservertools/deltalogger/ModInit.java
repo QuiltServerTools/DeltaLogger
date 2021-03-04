@@ -1,7 +1,6 @@
 package com.github.fabricservertools.deltalogger;
 
 import com.github.fabricservertools.deltalogger.command.Commands;
-import com.github.fabricservertools.deltalogger.dao.PlayerDAO;
 import com.github.fabricservertools.deltalogger.dao.RegistryDAO;
 import com.github.fabricservertools.deltalogger.gql.ApiServer;
 import com.github.fabricservertools.deltalogger.listeners.EntityEventListener;
@@ -10,20 +9,11 @@ import com.google.common.collect.Sets;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.WorldSavePath;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
-import net.minecraft.world.World;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -36,9 +26,9 @@ public class ModInit implements ModInitializer {
 	private static DatabaseManager dm;
 	public static Properties CONFIG;
 	public static Thread dmThread;
-	private static ApiServer apiServer = new ApiServer();
+	private static ApiServer apiServer; //= new ApiServer();
 
-	public static Properties loadConfig(Path configPath) {
+	public static void loadConfig(Path configPath) {
 		Properties props = new Properties();
 
 		if (!configPath.toFile().exists()) {
@@ -58,7 +48,6 @@ public class ModInit implements ModInitializer {
 		}
 
 		CONFIG = props;
-		return CONFIG;
 	}
 
 	private void onServerSetup(MinecraftServer server) {
@@ -66,7 +55,12 @@ public class ModInit implements ModInitializer {
 
 		String portString = CONFIG.getProperty("webapp_port", "8080");
 		try {
-			apiServer.start(Integer.parseInt(portString));
+			if(CONFIG.getProperty("use_webapp", "true").equals("true")) {
+				apiServer = new ApiServer();
+				apiServer.start(Integer.parseInt(portString));
+			} else {
+				DeltaLogger.LOG.warn("WebUI disabled in config, skipping");
+			}
 		} catch (NumberFormatException | NullPointerException e) {
 			throw new RuntimeException("invalid port number: " + portString);
 		}
@@ -95,7 +89,9 @@ public class ModInit implements ModInitializer {
 	}
 
 	private void onStop(MinecraftServer server) {
-		apiServer.stop();
+		if(CONFIG.getProperty("use_webapp", "true").equals("true")) {
+			apiServer.stop();
+		}
 		dm.stop();
 		try {
 			dmThread.join();
