@@ -16,7 +16,6 @@ import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 
-import java.util.Arrays;
 import java.util.HashMap;
 
 import static net.minecraft.server.command.CommandManager.argument;
@@ -56,13 +55,13 @@ public class SearchCommand {
 		String sqlGrief = "";
 		if (propertyMap.containsKey("target")) {
 			GameProfileArgumentType.GameProfileArgument targets = (GameProfileArgumentType.GameProfileArgument) propertyMap
-					.get("targets");
-			sqlPlace += "AND player_id = (SELECT id FROM players WHERE uuid = "
-					+ Arrays.toString(targets.getNames(scs).stream().map(gp -> gp.getId().toString()).toArray()) + ") ";
-			sqlContainer += "AND player_id = (SELECT id FROM players WHERE uuid = "
-					+ Arrays.toString(targets.getNames(scs).stream().map(gp -> gp.getId().toString()).toArray()) + ") ";
-			sqlGrief += "AND player_id = (SELECT  id FROM players WHERE uuid = "
-					+ Arrays.toString(targets.getNames(scs).stream().map(gp -> gp.getId().toString()).toArray()) + ") ";
+					.get("target");
+			sqlPlace += "AND player_id = (SELECT id FROM players WHERE uuid = \""
+					+ getUuid(targets, scs) + "\") ";
+			sqlContainer += "AND player_id = (SELECT id FROM players WHERE uuid = \""
+					+ getUuid(targets, scs) + "\") ";
+			sqlGrief += "AND player_id = (SELECT  id FROM players WHERE uuid = \""
+					+ getUuid(targets, scs) + "\") ";
 		}
 		if (propertyMap.containsKey("block")) {
 			BlockStateArgument block = (BlockStateArgument) propertyMap.get("block");
@@ -173,5 +172,9 @@ public class SearchCommand {
 		int z = pos.getZ();
 		return "AND x BETWEEN " + (x - range) + " AND " + (x + range) + " AND y BETWEEN " + (y - range) + " AND "
 				+ (y + range) + " AND z BETWEEN " + (z - range) + " AND " + (z + range) + " ";
+	}
+
+	private static String getUuid(GameProfileArgumentType.GameProfileArgument player, ServerCommandSource scs) throws CommandSyntaxException {
+		return player.getNames(scs).stream().findFirst().get().getId().toString();
 	}
 }

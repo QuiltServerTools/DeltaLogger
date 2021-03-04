@@ -31,7 +31,7 @@ public class CriteriumParser implements SuggestionProvider<ServerCommandSource> 
 
 	private CriteriumParser() {
 		criteriumSuggestors.put("action", new Suggestor(new ActionSuggestionProvider()));
-		criteriumSuggestors.put("targets", new Suggestor(GameProfileArgumentType.gameProfile()));
+		criteriumSuggestors.put("target", new Suggestor(GameProfileArgumentType.gameProfile()));
 		criteriumSuggestors.put("range", new Suggestor(IntegerArgumentType.integer()));
 		criteriumSuggestors.put("block", new Suggestor(BlockStateArgumentType.blockState()));
 		criteriumSuggestors.put("dimension", new Suggestor(DimensionArgumentType.dimension()));
