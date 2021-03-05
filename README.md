@@ -1,8 +1,6 @@
 # DeltaLogger
 
-![stars](https://img.shields.io/github/stars/fabricservertools/DeltaLogger?style=social)
 ![build](https://img.shields.io/github/workflow/status/fabricservertools/DeltaLogger/build)
-![top language](https://img.shields.io/github/languages/top/fabricservertools/DeltaLogger)
 [![discord](https://img.shields.io/discord/764543203772334100?label=discord)](https://discord.gg/jydqZzkyEa)
 ![stable](https://img.shields.io/github/v/release/fabricservertools/DeltaLogger?label=latest%20release)
 ![Modrinth downloads](https://img.shields.io/badge/dynamic/json?color=brightgreen&label=Modrinth%20downloads&query=downloads&url=https%3A%2F%2Fapi.modrinth.com%2Fapi%2Fv1%2Fmod%2FWgFOx7Xi)

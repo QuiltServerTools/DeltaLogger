@@ -32,6 +32,7 @@ import net.minecraft.text.MutableText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Util;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
@@ -153,10 +154,12 @@ public class PlayerEventListener {
 	}
 
 	private ActionResult onBlockExplode(World world, BlockPos pos, Block block, Explosion explosion) {
-		DatabaseManager.getSingleton().queueOp(BlockDAO.insertPlacement(
-				Objects.requireNonNull(explosion.getCausingEntity()).getUuid(), Registry.BLOCK.getId(block),
-				false, pos, world.getBlockState(pos), world.getRegistryKey().getValue(), Instant.now()
-		));
+		if(explosion.getCausingEntity() instanceof PlayerEntity) {
+			DatabaseManager.getSingleton().queueOp(BlockDAO.insertPlacement(
+					explosion.getCausingEntity().getUuid(), Registry.BLOCK.getId(block),
+					false, pos, world.getBlockState(pos), world.getRegistryKey().getValue(), Instant.now()
+			));
+		}
 		return ActionResult.PASS;
 	}
 
