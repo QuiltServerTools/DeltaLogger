@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS `placements` (
   `z` INTEGER NOT NULL,
   `placed` BOOLEAN NOT NULL,
   `dimension_id` SMALLINT UNSIGNED,
-  `state` TEXT DEFAULT NULL,
+  `state` VARCHAR(255) DEFAULT NULL,
   FOREIGN KEY (`player_id`) REFERENCES players(`id`),
   FOREIGN KEY (`dimension_id`) REFERENCES registry(`id`)
 );

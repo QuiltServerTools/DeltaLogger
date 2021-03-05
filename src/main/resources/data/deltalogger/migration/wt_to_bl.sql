@@ -46,7 +46,7 @@ ALTER TABLE players DROP INDEX `uuid`;
 ALTER TABLE registry DROP INDEX `name`;
 
 /* CHANGE COLUMNS */
-ALTER TABLE placements ADD `state` TEXT; 
+ALTER TABLE placements ADD `state` VARCHAR(255);
 ALTER TABLE container_transactions DROP COLUMN item_data; 
 ALTER TABLE container_transactions ADD item_data TEXT; 
 
