@@ -14,13 +14,13 @@ import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ChestBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.LockableContainerBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.DoubleInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
@@ -32,7 +32,6 @@ import net.minecraft.text.MutableText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.Util;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
@@ -40,7 +39,6 @@ import net.minecraft.world.World;
 import net.minecraft.world.explosion.Explosion;
 
 import java.time.Instant;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -52,7 +50,14 @@ public class PlayerEventListener {
 		PlayerBlockBreakEvents.AFTER.register(this::onBreakFinished);
 		UseBlockCallback.EVENT.register(this::onUseBlock);
 		BlockPlaceCallback.EVENT.register(this::onBlockPlace);
-		PlayerOpenScreenCallback.EVENT.register(this::onOpenScreen);
+
+		// AE2 ScreenHandlers bad
+		if(FabricLoader.getInstance().isModLoaded("appliedenergistics2")) {
+			PlayerOpenScreenCallback.EVENT.register(this::onOpenScreenAe2);
+		} else {
+			PlayerOpenScreenCallback.EVENT.register(this::onOpenScreen);
+		}
+
 		BlockExplodeCallback.EVENT.register(this::onBlockExplode);
 	}
 
@@ -72,6 +77,13 @@ public class PlayerEventListener {
 		}
 
 		return ActionResult.PASS;
+	}
+
+	private ActionResult onOpenScreenAe2(ServerPlayerEntity playerEntity, NamedScreenHandlerFactory screenHandlerFactory) {
+		if(playerEntity.currentScreenHandler.slots.isEmpty()) {
+			return ActionResult.PASS;
+		}
+		return onOpenScreen(playerEntity, screenHandlerFactory);
 	}
 
 	private ActionResult onBlockPlace(PlayerEntity playerEntity, ItemPlacementContext context) {
@@ -154,7 +166,7 @@ public class PlayerEventListener {
 	}
 
 	private ActionResult onBlockExplode(World world, BlockPos pos, Block block, Explosion explosion) {
-		if(explosion.getCausingEntity() instanceof PlayerEntity) {
+		if (explosion.getCausingEntity() instanceof PlayerEntity) {
 			DatabaseManager.getSingleton().queueOp(BlockDAO.insertPlacement(
 					explosion.getCausingEntity().getUuid(), Registry.BLOCK.getId(block),
 					false, pos, world.getBlockState(pos), world.getRegistryKey().getValue(), Instant.now()
