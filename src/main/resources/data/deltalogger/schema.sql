@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS `placements` (
   `z` INTEGER NOT NULL,
   `placed` BOOLEAN NOT NULL,
   `dimension_id` SMALLINT UNSIGNED,
-  `state` VARCHAR(255) DEFAULT NULL,
+  `state` TEXT DEFAULT NULL,
   FOREIGN KEY (`player_id`) REFERENCES players(`id`),
   FOREIGN KEY (`dimension_id`) REFERENCES registry(`id`)
 );
@@ -46,7 +46,7 @@ CREATE INDEX IF NOT EXISTS `placements_z_idx` ON placements(`z`);
 CREATE INDEX IF NOT EXISTS `placements_date_idx` ON placements(`date`);
 CREATE INDEX IF NOT EXISTS `placements_player_id_idx` ON placements(`player_id`);
 CREATE INDEX IF NOT EXISTS `placements_type_idx` ON placements(`type`);
-CREATE INDEX IF NOT EXISTS `placements_state_idx` ON placements(`state`);
+/*CREATE INDEX IF NOT EXISTS `placements_state_idx` ON placements(`state`);*/
 
 CREATE TABLE IF NOT EXISTS `containers` (
   `id` /**!PRIMARY_KEY*/,
