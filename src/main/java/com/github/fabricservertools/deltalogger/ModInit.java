@@ -52,7 +52,8 @@ public class ModInit implements ModInitializer {
 
 	private void onServerSetup(MinecraftServer server) {
 		dm = DatabaseManager.create(server.getSavePath(WorldSavePath.ROOT).toFile());
-
+		new PlayerEventListener();
+		new EntityEventListener();
 		String portString = CONFIG.getProperty("webapp_port", "8080");
 		try {
 			if(CONFIG.getProperty("use_webapp", "true").equals("true")) {
@@ -107,9 +108,6 @@ public class ModInit implements ModInitializer {
 		ServerLifecycleEvents.SERVER_STARTING.register(this::onServerSetup);
 		ServerLifecycleEvents.SERVER_STARTED.register(this::onServerStart);
 		ServerLifecycleEvents.SERVER_STOPPED.register(this::onStop);
-
-		new PlayerEventListener();
-		new EntityEventListener();
 
 		CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> Commands.register(dispatcher));
 	}
