@@ -73,7 +73,7 @@ If you find a bug, please open an issue on the [issues page](https://github.com/
 
 ### Known Issues
 
-Deltalogger is does not work with Dynmap 3.1-beta7, please use 3.1-beta6 until the issue is resolved.
+Deltalogger does not work with Dynmap 3.1-beta7, please use 3.1-beta6 until the issue is resolved.
 
 ### Issue resolving
 
