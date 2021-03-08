@@ -12,7 +12,7 @@ Block and chest/container inventory tracking tool for fabric that can be configu
 ## Setup
 
 DeltaLogger supports two types of database: MySQL and SQLite
-Place the mod jar in the mods folder of your server directory and launch your fabric server once to make it generate a `config/deltalogger.properties`. Or make a file called `deltalogger.properties` in the `config` folder of your server directory. Put the following as the file content:
+Place the mod jar in the mods folder of your server directory and launch your fabric server once to make it generate a `config/deltalogger.properties`, or make a file called `deltalogger.properties` in the `config` folder of your server directory. Put the following as the file content:
 
 ```
 # DeltaLogger configuration
@@ -62,6 +62,10 @@ This mod also requires the fabric api mod, which you can find [here](https://www
 ## Support
 
 Support can be obtained on the discord found [here](https://discord.gg/UxHnDWr)
+
+## Download
+
+You can find precompiled builds of DeltaLogger on [Curseforge](https://www.curseforge.com/minecraft/mc-mods/deltalogger) or [Modrinth](https://modrinth.com/mod/deltalogger)
 
 ## License
 
