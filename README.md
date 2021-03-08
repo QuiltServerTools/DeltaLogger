@@ -71,6 +71,10 @@ Licensed under AGPL with additional linking permission. See LICENSE file.
 
 If you find a bug, please open an issue on the [issues page](https://github.com/fabricservertools/DeltaLogger/issues). Please ask on the discord if you have a support issue which is not a bug
 
+### Known Issues
+
+Deltalogger does not work with Dynmap 3.1-beta7, please use 3.1-beta6 until the issue is resolved.
+
 ### Issue resolving
 
 Issues which are not valid will be closed as invalid. We will fix remaining issues once we decide the time is right. Generally, major issues will be fixed first.
