@@ -14,7 +14,7 @@ Block and chest/container inventory tracking tool for fabric that can be configu
 DeltaLogger supports two types of database: MySQL and SQLite
 Place the mod jar in the mods folder of your server directory and launch your fabric server once to make it generate a `config/deltalogger.properties`, or make a file called `deltalogger.properties` in the `config` folder of your server directory. Put the following as the file content:
 
-```
+```properties
 # DeltaLogger configuration
 
 # Whether you want to use an SQLite database. Put false for MySQL.
@@ -77,7 +77,19 @@ If you find a bug, please open an issue on the [issues page](https://github.com/
 
 ### Known Issues
 
-Deltalogger does not work with Dynmap 3.1-beta7, please use 3.1-beta6 until the issue is resolved.
+We are aware of these issues, so please do not open any issues regarding these as they will be ignored, whether these will be fixed is at our discretion, so please do not beg to have one of these fixed as it is unlikely that we will do so.
+
+#### Dynmap Incompatibility
+
+**Issue:** Deltalogger does not work with Dynmap 3.1-beta7
+
+**Workaround:** Use 3.1-beta6 until the issue is resolved.
+
+#### Bits and Chisels
+
+**Issue:** Bits and Chisels is incompatible with Deltalogger
+
+**Workaround:** Currently none
 
 ### Issue resolving
 
