@@ -70,7 +70,11 @@ public abstract class ServerPlayNetworkHandlerMixin {
     public void onSlotClickHead(ClickSlotC2SPacket packet, CallbackInfo info) {
         UUID uuid = ((NbtUuid) player.currentScreenHandler).getNbtUuid();
 
-        if (uuid != this.screenHandlerUUID) commit();
+        if (uuid != this.screenHandlerUUID) {
+            commit();
+            tracked = null;
+        }
+
         this.screenHandlerUUID = uuid;
 
         if (uuid != null) {
