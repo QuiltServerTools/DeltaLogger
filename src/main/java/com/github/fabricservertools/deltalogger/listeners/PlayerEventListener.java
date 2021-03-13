@@ -203,7 +203,7 @@ public class PlayerEventListener {
 				id,
 				false,
 				pos,
-				world.getBlockState(pos),
+				state,
 				dimension,
 				java.time.Instant.now()
 		));
