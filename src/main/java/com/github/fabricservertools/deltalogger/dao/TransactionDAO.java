@@ -86,7 +86,7 @@ public class TransactionDAO {
 		return new ArrayList<>();
 	}
 
-	public List<Transaction> search(int limit, String builtWhere) {
+	public List<TransactionPos> search(int limit, String builtWhere) {
 		try {
 			return jdbi
 					.withHandle(handle -> handle.select(String.join(" ",
@@ -96,7 +96,7 @@ public class TransactionDAO {
 							),
 							"FROM container_transactions as CT",
 							JOIN_TRANSACTIONS, builtWhere, "ORDER BY CT.date DESC LIMIT " + limit)
-					).mapTo(Transaction.class).list());
+					).mapTo(TransactionPos.class).list());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

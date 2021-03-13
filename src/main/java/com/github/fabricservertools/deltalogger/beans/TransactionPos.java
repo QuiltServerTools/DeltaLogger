@@ -1,5 +1,6 @@
 package com.github.fabricservertools.deltalogger.beans;
 
+import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
@@ -82,5 +83,19 @@ public class TransactionPos {
 
 	public BlockPos getPos() {
 		return this.pos;
+	}
+
+	public MutableText getText() {
+		return joinText(
+				format(time, Formatting.GRAY),
+				format(new LiteralText(pos.getX() + " " + pos.getY() + " " + pos.getY()), Formatting.AQUA),
+				format(playerName, Formatting.ITALIC),
+				format(
+						count < 0 ? "took" : "put",
+						count < 0 ? Formatting.DARK_RED : Formatting.GREEN
+				),
+				format(Math.abs(count)),
+				format(itemType.replaceFirst("^minecraft:", ""), Formatting.YELLOW)
+		);
 	}
 }
