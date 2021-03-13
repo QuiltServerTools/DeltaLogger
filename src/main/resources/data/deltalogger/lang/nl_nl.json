@@ -1,0 +1,22 @@
+{
+  "deltalogger.none_found.pos":"Geen %s gevonden op %s",
+  "deltalogger.text.version":"Je gebruikt DeltaLogger versie %s",
+  "deltalogger.text.discord":"Klik om de DeltaLogger Discord te joinen",
+  "deltalogger.reset_pass.error":"Commando resetpass fout: moet ingelogd zijn als gebruiker om wachtwoord te resetten",
+  "deltalogger.temp_pass":"Je tijdelijke wachtwoord voor DeltaLogger panel is %s, klik om te kopieren",
+  "deltalogger.reset_pass.wait":"Wacht %s seconden voor je je wachtwoord reset",
+  "deltalogger.none_found.no_pos.placement":"Geen plaatsingen gevonden met de gespecificeerde voorwaarden",
+  "deltalogger.none_found.no_pos.transaction":"Geen transacties gevonden met de opgegeven voorwaarden",
+  "deltalogger.none_found.container":"Geen transacties gevonden in de container",
+  "deltalogger.none_found.no_pos.grief":"Geen griefs gevonden met de opgegeven voorwaarden",
+  "deltalogger.history.transaction":"Transactie Geschiedenis",
+  "deltalogger.history.placement":"Plaatsings Geschiedenis",
+  "deltalogger.history.grief":"Grief Geschiedenis",
+  "deltalogger.rollback.block.complete": "Blok rollback afgerond voor de selectie",
+  "deltalogger.rollback.transaction.complete": "Transactie rollback afgerond voor de selectie,",
+  "deltalogger.rollback.grief.complete": "Grief rollback afgerond voor de selectie",
+  "deltalogger.rollback.complete": "Voltooide rollback",
+  "deltalogger.rollback.progress": " (%d/%d)",
+  "deltalogger.inspect_mode.on": "DeltaLogger inspectie modus aan",
+  "deltalogger.inspect_mode.off": "DeltaLogger inspectie modus uit"
+}
