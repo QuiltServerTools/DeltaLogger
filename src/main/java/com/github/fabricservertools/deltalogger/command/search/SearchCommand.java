@@ -6,8 +6,11 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+
+import net.minecraft.block.Block;
 import net.minecraft.command.argument.BlockStateArgument;
 import net.minecraft.command.argument.GameProfileArgumentType;
+import net.minecraft.command.argument.ItemStackArgument;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.MutableText;
@@ -69,6 +72,15 @@ public class SearchCommand {
 					+ Registry.BLOCK.getId(block.getBlockState().getBlock()).toString() + "\") ";
 			sqlContainer += "AND CT.item_type = (SELECT id FROM registry WHERE `name` = \""
 					+ Registry.BLOCK.getId(block.getBlockState().getBlock()).toString() + "\") ";
+		}
+
+		if (propertyMap.containsKey("item")) {
+			ItemStackArgument item = (ItemStackArgument)propertyMap.get("item");
+			Block block = Block.getBlockFromItem(item.getItem());
+			sqlPlace += "AND CT.item_type = (SELECT id FROM registry WHERE `name` = \""
+					+ Registry.BLOCK.getId(block).toString() + "\") ";
+			sqlContainer += "AND CT.item_type = (SELECT id FROM registry WHERE `name` = \""
+					+ Registry.ITEM.getId(item.getItem()).toString() + "\") ";
 		}
 
 		//range or pos
