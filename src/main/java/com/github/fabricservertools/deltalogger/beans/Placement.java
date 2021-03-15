@@ -134,7 +134,7 @@ public class Placement {
 
 	public MutableText getTextWithPos() {
 		return joinText(format(time, Formatting.GRAY),
-				format(new LiteralText(String.valueOf(x) + " " + String.valueOf(y) + " " + String.valueOf(z)), Formatting.AQUA),
+				format(new LiteralText(x + " " + y + " " + z), Formatting.AQUA),
 				format(playerName, Formatting.ITALIC), getActionText(),
 				getTranslatedBlock());
 	}

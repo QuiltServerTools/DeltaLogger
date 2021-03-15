@@ -10,6 +10,7 @@ import com.github.fabricservertools.deltalogger.dao.PlayerDAO;
 import com.github.fabricservertools.deltalogger.events.BlockExplodeCallback;
 import com.github.fabricservertools.deltalogger.events.BlockPlaceCallback;
 import com.github.fabricservertools.deltalogger.events.PlayerOpenScreenCallback;
+import com.github.fabricservertools.deltalogger.network.client.CheckClientStatusPacket;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
@@ -182,6 +183,8 @@ public class PlayerEventListener {
 						networkHandler.player.getName().asString(),
 						java.time.Instant.now()
 				));
+		// Check if the player has DeltaLogger installed on the client
+		CheckClientStatusPacket.sendToClient(networkHandler.player);
 	}
 
 	private void onQuit(ServerPlayNetworkHandler networkHandler, MinecraftServer server) {

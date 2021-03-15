@@ -5,8 +5,10 @@ import com.github.fabricservertools.deltalogger.dao.RegistryDAO;
 import com.github.fabricservertools.deltalogger.gql.ApiServer;
 import com.github.fabricservertools.deltalogger.listeners.EntityEventListener;
 import com.github.fabricservertools.deltalogger.listeners.PlayerEventListener;
+import com.github.fabricservertools.deltalogger.network.client.CheckClientStatusPacket;
+import com.github.fabricservertools.deltalogger.network.client.SearchPacket;
 import com.google.common.collect.Sets;
-import net.fabricmc.api.ModInitializer;
+import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
@@ -22,7 +24,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
-public class ModInit implements ModInitializer {
+public class ModInit implements DedicatedServerModInitializer {
 	private static DatabaseManager dm;
 	public static Properties CONFIG;
 	public static Thread dmThread;
@@ -102,7 +104,7 @@ public class ModInit implements ModInitializer {
 	}
 
 	@Override
-	public void onInitialize() {
+	public void onInitializeServer() {
 		loadConfig(Paths.get(FabricLoader.getInstance().getConfigDir().toString(), "deltalogger.properties"));
 
 		ServerLifecycleEvents.SERVER_STARTING.register(this::onServerSetup);
@@ -110,5 +112,8 @@ public class ModInit implements ModInitializer {
 		ServerLifecycleEvents.SERVER_STOPPED.register(this::onStop);
 
 		CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> Commands.register(dispatcher));
+
+		CheckClientStatusPacket.registerServer();
+		SearchPacket.registerServer();
 	}
 }
