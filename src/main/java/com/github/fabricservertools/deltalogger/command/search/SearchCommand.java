@@ -111,7 +111,7 @@ public class SearchCommand {
 				} else if (action.contains("added")) {
 					sqlContainer += "AND item_count > 0 ";
 					sendTransactions(scs, sqlContainer, limit);
-				} else if (action.contains("removed")) {
+				} else if (action.contains("taken")) {
 					sqlContainer += "AND item_count < 0 ";
 					sendTransactions(scs, sqlContainer, limit);
 				} else if (action.contains("grief")) {
