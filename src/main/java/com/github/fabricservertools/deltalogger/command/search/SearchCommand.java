@@ -2,9 +2,11 @@ package com.github.fabricservertools.deltalogger.command.search;
 
 import com.github.fabricservertools.deltalogger.Chat;
 import com.github.fabricservertools.deltalogger.dao.DAO;
+import com.mojang.brigadier.LiteralMessage;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 
 import net.minecraft.block.Block;
@@ -112,27 +114,27 @@ public class SearchCommand {
 		// Check for an action and only query the relevant tables
 		if (propertyMap.containsKey("action")) {
 			String action = (String) propertyMap.get("action");
-			if (!action.contains("everything")) {
-
-				if (action.contains("placed")) {
-					sqlPlace += "AND placed = 1 ";
-					sendPlacements(scs, sqlPlace, limit);
-				} else if (action.contains("broken")) {
-					sqlPlace += "AND placed = 0 ";
-					sendPlacements(scs, sqlPlace, limit);
-				} else if (action.contains("added")) {
-					sqlContainer += "AND item_count > 0 ";
-					sendTransactions(scs, sqlContainer, limit);
-				} else if (action.contains("taken")) {
-					sqlContainer += "AND item_count < 0 ";
-					sendTransactions(scs, sqlContainer, limit);
-				} else if (action.contains("grief")) {
-					sendGrief(scs, sqlGrief, limit);
-				}
-			} else {
+			if (action.equals("placed")) {
+				sqlPlace += "AND placed = 1 ";
+				sendPlacements(scs, sqlPlace, limit);
+			} else if (action.equals("broken")) {
+				sqlPlace += "AND placed = 0 ";
+				sendPlacements(scs, sqlPlace, limit);
+			} else if (action.equals("added")) {
+				sqlContainer += "AND item_count > 0 ";
+				sendTransactions(scs, sqlContainer, limit);
+			} else if (action.equals("taken")) {
+				sqlContainer += "AND item_count < 0 ";
+				sendTransactions(scs, sqlContainer, limit);
+			} else if (action.equals("grief")) {
+				sendGrief(scs, sqlGrief, limit);
+			} else if (action.equals("everything")) {
 				sendGrief(scs, sqlGrief, limit);
 				sendTransactions(scs, sqlContainer, limit);
 				sendPlacements(scs, sqlPlace, limit);
+			} else {
+				throw new SimpleCommandExceptionType(new LiteralMessage("Invalid action: " + action))
+						.create();
 			}
 		} else {
 			sendTransactions(scs, sqlContainer, limit);

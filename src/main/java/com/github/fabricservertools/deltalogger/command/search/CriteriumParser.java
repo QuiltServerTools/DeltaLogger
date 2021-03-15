@@ -111,14 +111,14 @@ public class CriteriumParser implements SuggestionProvider<ServerCommandSource> 
 	private static class Suggestor {
 		boolean useSuggestionProvider = false;
 		private SuggestionProvider<ServerCommandSource> suggestionProvider;
-		private ArgumentType argumentType;
+		private ArgumentType<?> argumentType;
 
 		public Suggestor(SuggestionProvider<ServerCommandSource> suggestionProvider) {
 			this.suggestionProvider = suggestionProvider;
 			this.useSuggestionProvider = true;
 		}
 
-		public Suggestor(ArgumentType argumentType) {
+		public Suggestor(ArgumentType<?> argumentType) {
 			this.argumentType = argumentType;
 		}
 
