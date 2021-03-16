@@ -88,7 +88,7 @@ public class TransactionPos {
 	public MutableText getText() {
 		return joinText(
 				format(time, Formatting.GRAY),
-				format(new LiteralText(pos.getX() + " " + pos.getY() + " " + pos.getY()), Formatting.AQUA),
+				format(new LiteralText(pos.getX() + " " + pos.getY() + " " + pos.getZ()), Formatting.AQUA),
 				format(playerName, Formatting.ITALIC),
 				format(
 						count < 0 ? "took" : "put",
