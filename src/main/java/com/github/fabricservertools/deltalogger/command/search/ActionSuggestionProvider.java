@@ -16,8 +16,9 @@ public class ActionSuggestionProvider implements SuggestionProvider<ServerComman
 		String current = builder.getRemaining().toLowerCase();
 
 		for (EventTypes actions : EventTypes.values()) {
-			if (actions.name().contains(current)) {
-				builder.suggest(actions.name().toLowerCase());
+			String name = actions.name().toLowerCase();
+			if (name.contains(current)) {
+				builder.suggest(name);
 			}
 		}
 		return builder.buildFuture();

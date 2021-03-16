@@ -2,12 +2,17 @@ package com.github.fabricservertools.deltalogger.command.search;
 
 import com.github.fabricservertools.deltalogger.Chat;
 import com.github.fabricservertools.deltalogger.dao.DAO;
+import com.mojang.brigadier.LiteralMessage;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+
+import net.minecraft.block.Block;
 import net.minecraft.command.argument.BlockStateArgument;
 import net.minecraft.command.argument.GameProfileArgumentType;
+import net.minecraft.command.argument.ItemStackArgument;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.MutableText;
@@ -71,6 +76,15 @@ public class SearchCommand {
 					+ Registry.BLOCK.getId(block.getBlockState().getBlock()).toString() + "\") ";
 		}
 
+		if (propertyMap.containsKey("item")) {
+			ItemStackArgument item = (ItemStackArgument)propertyMap.get("item");
+			Block block = Block.getBlockFromItem(item.getItem());
+			sqlPlace += "AND CT.item_type = (SELECT id FROM registry WHERE `name` = \""
+					+ Registry.BLOCK.getId(block).toString() + "\") ";
+			sqlContainer += "AND CT.item_type = (SELECT id FROM registry WHERE `name` = \""
+					+ Registry.ITEM.getId(item.getItem()).toString() + "\") ";
+		}
+
 		//range or pos
 		if (propertyMap.containsKey("range")) {
 			int range = (Integer) propertyMap.get("range");
@@ -100,27 +114,27 @@ public class SearchCommand {
 		// Check for an action and only query the relevant tables
 		if (propertyMap.containsKey("action")) {
 			String action = (String) propertyMap.get("action");
-			if (!action.contains("everything")) {
-
-				if (action.contains("placed")) {
-					sqlPlace += "AND placed = 1 ";
-					sendPlacements(scs, sqlPlace, limit);
-				} else if (action.contains("broken")) {
-					sqlPlace += "AND placed = 0 ";
-					sendPlacements(scs, sqlPlace, limit);
-				} else if (action.contains("added")) {
-					sqlContainer += "AND item_count > 0 ";
-					sendTransactions(scs, sqlContainer, limit);
-				} else if (action.contains("removed")) {
-					sqlContainer += "AND item_count < 0 ";
-					sendTransactions(scs, sqlContainer, limit);
-				} else if (action.contains("grief")) {
-					sendGrief(scs, sqlGrief, limit);
-				}
-			} else {
+			if (action.equals("placed")) {
+				sqlPlace += "AND placed = 1 ";
+				sendPlacements(scs, sqlPlace, limit);
+			} else if (action.equals("broken")) {
+				sqlPlace += "AND placed = 0 ";
+				sendPlacements(scs, sqlPlace, limit);
+			} else if (action.equals("added")) {
+				sqlContainer += "AND item_count > 0 ";
+				sendTransactions(scs, sqlContainer, limit);
+			} else if (action.equals("taken")) {
+				sqlContainer += "AND item_count < 0 ";
+				sendTransactions(scs, sqlContainer, limit);
+			} else if (action.equals("grief")) {
+				sendGrief(scs, sqlGrief, limit);
+			} else if (action.equals("everything")) {
 				sendGrief(scs, sqlGrief, limit);
 				sendTransactions(scs, sqlContainer, limit);
 				sendPlacements(scs, sqlPlace, limit);
+			} else {
+				throw new SimpleCommandExceptionType(new LiteralMessage("Invalid action: " + action))
+						.create();
 			}
 		} else {
 			sendTransactions(scs, sqlContainer, limit);
