@@ -90,6 +90,7 @@ public class SearchCommand {
 			int range = (Integer) propertyMap.get("range");
 			BlockPos playerPos = sourcePlayer.getBlockPos();
 			sqlPlace += rangeStatementBuilder(playerPos, range);
+			sqlContainer +=
 			sqlGrief += rangeStatementBuilder(playerPos, range);
 		}
 
@@ -186,6 +187,13 @@ public class SearchCommand {
 		int z = pos.getZ();
 		return "AND x BETWEEN " + (x - range) + " AND " + (x + range) + " AND y BETWEEN " + (y - range) + " AND "
 				+ (y + range) + " AND z BETWEEN " + (z - range) + " AND " + (z + range) + " ";
+	}
+	private static String rangeStatementBuilderTransaction(BlockPos pos, int range) {
+		int x = pos.getX();
+		int y = pos.getY();
+		int z = pos.getZ();
+		return "AND C.x BETWEEN " + (x - range) + " AND " + (x + range) + " AND C.y BETWEEN " + (y - range) + " AND "
+				+ (y + range) + " AND C.z BETWEEN " + (z - range) + " AND " + (z + range) + " ";
 	}
 
 	private static String getUuid(GameProfileArgumentType.GameProfileArgument player, ServerCommandSource scs) throws CommandSyntaxException {
