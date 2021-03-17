@@ -1,6 +1,9 @@
 package com.github.fabricservertools.deltalogger.command.search;
 
 import com.github.fabricservertools.deltalogger.Chat;
+import com.github.fabricservertools.deltalogger.beans.MobGrief;
+import com.github.fabricservertools.deltalogger.beans.Placement;
+import com.github.fabricservertools.deltalogger.beans.TransactionPos;
 import com.github.fabricservertools.deltalogger.dao.DAO;
 import com.mojang.brigadier.LiteralMessage;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -90,7 +93,7 @@ public class SearchCommand {
 			int range = (Integer) propertyMap.get("range");
 			BlockPos playerPos = sourcePlayer.getBlockPos();
 			sqlPlace += rangeStatementBuilder(playerPos, range);
-			sqlContainer +=
+			sqlContainer += rangeStatementBuilderTransaction(playerPos, range);
 			sqlGrief += rangeStatementBuilder(playerPos, range);
 		}
 
@@ -115,27 +118,34 @@ public class SearchCommand {
 		// Check for an action and only query the relevant tables
 		if (propertyMap.containsKey("action")) {
 			String action = (String) propertyMap.get("action");
-			if (action.equals("placed")) {
-				sqlPlace += "AND placed = 1 ";
-				sendPlacements(scs, sqlPlace, limit);
-			} else if (action.equals("broken")) {
-				sqlPlace += "AND placed = 0 ";
-				sendPlacements(scs, sqlPlace, limit);
-			} else if (action.equals("added")) {
-				sqlContainer += "AND item_count > 0 ";
-				sendTransactions(scs, sqlContainer, limit);
-			} else if (action.equals("taken")) {
-				sqlContainer += "AND item_count < 0 ";
-				sendTransactions(scs, sqlContainer, limit);
-			} else if (action.equals("grief")) {
-				sendGrief(scs, sqlGrief, limit);
-			} else if (action.equals("everything")) {
-				sendGrief(scs, sqlGrief, limit);
-				sendTransactions(scs, sqlContainer, limit);
-				sendPlacements(scs, sqlPlace, limit);
-			} else {
-				throw new SimpleCommandExceptionType(new LiteralMessage("Invalid action: " + action))
-						.create();
+			switch (action) {
+				case "placed":
+					sqlPlace += "AND placed = 1 ";
+					sendPlacements(scs, sqlPlace, limit);
+					break;
+				case "broken":
+					sqlPlace += "AND placed = 0 ";
+					sendPlacements(scs, sqlPlace, limit);
+					break;
+				case "added":
+					sqlContainer += "AND item_count > 0 ";
+					sendTransactions(scs, sqlContainer, limit);
+					break;
+				case "taken":
+					sqlContainer += "AND item_count < 0 ";
+					sendTransactions(scs, sqlContainer, limit);
+					break;
+				case "grief":
+					sendGrief(scs, sqlGrief, limit);
+					break;
+				case "everything":
+					sendGrief(scs, sqlGrief, limit);
+					sendTransactions(scs, sqlContainer, limit);
+					sendPlacements(scs, sqlPlace, limit);
+					break;
+				default:
+					throw new SimpleCommandExceptionType(new LiteralMessage("Invalid action: " + action))
+							.create();
 			}
 		} else {
 			sendTransactions(scs, sqlContainer, limit);
@@ -149,8 +159,8 @@ public class SearchCommand {
 	 * prints results to chat
 	 */
 	private static void sendTransactions(ServerCommandSource scs, String sqlContainer, int limit) throws CommandSyntaxException {
-		MutableText transactionMessage = DAO.transaction.search(10, sqlContainer).stream()
-				.map(t -> t.getText()).reduce((t1, t2) -> Chat.concat("\n", t1, t2))
+		MutableText transactionMessage = DAO.transaction.search(limit, sqlContainer).stream()
+				.map(TransactionPos::getText).reduce((t1, t2) -> Chat.concat("\n", t1, t2))
 				.map(txt -> Chat.concat("\n", Chat.text("deltalogger.history.transaction"), txt))
 				.orElse(Chat.text("deltalogger.none_found.no_pos.transaction"));
 
@@ -162,7 +172,7 @@ public class SearchCommand {
 	 * prints results to chat
 	 */
 	private static void sendPlacements(ServerCommandSource scs, String sqlPlace, int limit) throws CommandSyntaxException {
-		MutableText placementMessage = DAO.block.search(0, limit, sqlPlace).stream().map(p -> p.getTextWithPos())
+		MutableText placementMessage = DAO.block.search(0, limit, sqlPlace).stream().map(Placement::getTextWithPos)
 				.reduce((p1, p2) -> Chat.concat("\n", p1, p2))
 				.map(txt -> Chat.concat("\n", Chat.text("deltalogger.history.placement"), txt))
 				.orElse(Chat.text("deltalogger.none_found.no_pos.placement"));
@@ -171,7 +181,7 @@ public class SearchCommand {
 
 
 	private static void sendGrief(ServerCommandSource scs, String sqlPlace, int limit) throws CommandSyntaxException {
-		MutableText griefMessage = DAO.entity.search(0, limit, sqlPlace).stream().map(p -> p.getTextWithPos())
+		MutableText griefMessage = DAO.entity.search(0, limit, sqlPlace).stream().map(MobGrief::getTextWithPos)
 				.reduce((p1, p2) -> Chat.concat("\n", p1, p2))
 				.map(txt -> Chat.concat("\n", Chat.text("deltalogger.history.grief"), txt))
 				.orElse(Chat.text("deltalogger.none_found.no_pos.grief"));
@@ -197,6 +207,6 @@ public class SearchCommand {
 	}
 
 	private static String getUuid(GameProfileArgumentType.GameProfileArgument player, ServerCommandSource scs) throws CommandSyntaxException {
-		return player.getNames(scs).stream().findFirst().get().getId().toString();
+		return player.getNames(scs).stream().findFirst().isPresent() ? player.getNames(scs).stream().findFirst().get().getId().toString() : "";
 	}
 }

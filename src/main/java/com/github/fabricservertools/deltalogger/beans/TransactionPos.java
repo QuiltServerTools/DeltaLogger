@@ -21,7 +21,7 @@ public class TransactionPos {
 	private String itemType;
 	private int count;
 	private UUID containerUUID;
-	private BlockPos pos;
+	private final BlockPos pos;
 
 	public TransactionPos(int id, String playerName, String time, String itemType, int count, UUID containerUUID, int x, int y, int z) {
 		this.id = id;

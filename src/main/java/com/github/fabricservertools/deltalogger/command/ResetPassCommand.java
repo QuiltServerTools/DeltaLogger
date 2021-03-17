@@ -20,7 +20,6 @@ public class ResetPassCommand {
 	public static void register(LiteralCommandNode<ServerCommandSource> root) {
 		LiteralCommandNode<ServerCommandSource> inspectNode = CommandManager
 				.literal("resetpass")
-				.requires(source -> source.hasPermissionLevel(3))
 				.executes(context -> {
 					ServerPlayerEntity p = context.getSource().getPlayer();
 					Date now = new Date();

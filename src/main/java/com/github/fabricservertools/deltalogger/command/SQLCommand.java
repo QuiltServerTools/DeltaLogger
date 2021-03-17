@@ -1,6 +1,8 @@
 package com.github.fabricservertools.deltalogger.command;
 
 import com.github.fabricservertools.deltalogger.Chat;
+import com.github.fabricservertools.deltalogger.beans.Placement;
+import com.github.fabricservertools.deltalogger.beans.Transaction;
 import com.github.fabricservertools.deltalogger.dao.DAO;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.LiteralCommandNode;
@@ -29,7 +31,7 @@ public class SQLCommand {
 	}
 
 	private static int queryBlock(ServerCommandSource scs, Text sql) throws CommandSyntaxException {
-		MutableText message = DAO.transaction.customQuery(sql.asString()).stream().map(p -> p.getText())
+		MutableText message = DAO.block.customQuery(sql.asString()).stream().map(Placement::getTextWithPos)
 				.reduce((p1, p2) -> Chat.concat("\n", p1, p2))
 				.map(txt -> Chat.concat("\n", Chat.text("Results for custom block query"), txt))
 				.orElse(Chat.text("No results found with the terms specified"));
@@ -38,7 +40,7 @@ public class SQLCommand {
 	}
 
 	private static int queryTransaction(ServerCommandSource scs, Text sql) throws CommandSyntaxException {
-		MutableText message = DAO.transaction.customQuery(sql.asString()).stream().map(p -> p.getText())
+		MutableText message = DAO.transaction.customQuery(sql.asString()).stream().map(Transaction::getText)
 				.reduce((p1, p2) -> Chat.concat("\n", p1, p2))
 				.map(txt -> Chat.concat("\n", Chat.text("Results for custom transaction query"), txt))
 				.orElse(Chat.text("No results found with the terms specified"));

@@ -36,7 +36,7 @@ import static net.minecraft.server.command.CommandManager.literal;
 
 public class RollbackCommand {
 	public static void register(LiteralCommandNode<ServerCommandSource> root) {
-		LiteralCommandNode<ServerCommandSource> rollbackNode = literal("rollback").requires(scs -> scs.hasPermissionLevel(3)).then(
+		LiteralCommandNode<ServerCommandSource> rollbackNode = literal("rollback").then(
 				argument("radius", IntegerArgumentType.integer()).then(argument("time", StringArgumentType.string())
 						.executes(ctx -> execute(ctx.getSource(), "", ctx.getSource().getPlayer(),
 								IntegerArgumentType.getInteger(ctx, "radius"),
@@ -65,7 +65,7 @@ public class RollbackCommand {
 		String parsedCriteria;
 
 		try {
-			parsedCriteria = RollbackParser.criteria(criteria, sourcePlayer, source);
+			parsedCriteria = RollbackParser.criteria(criteria, source);
 		} catch (
 		CommandSyntaxException e) {
 			sourcePlayer.sendSystemMessage(new LiteralText("Error parsing criteria").formatted(Formatting.RED), Util.NIL_UUID);
