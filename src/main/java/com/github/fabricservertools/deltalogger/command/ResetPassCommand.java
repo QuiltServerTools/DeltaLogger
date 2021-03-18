@@ -20,6 +20,7 @@ public class ResetPassCommand {
 	public static void register(LiteralCommandNode<ServerCommandSource> root) {
 		LiteralCommandNode<ServerCommandSource> inspectNode = CommandManager
 				.literal("resetpass")
+				.requires(scs -> DlPermissions.checkPerms(scs, "deltalogger.resetpass"))
 				.executes(context -> {
 					ServerPlayerEntity p = context.getSource().getPlayer();
 					Date now = new Date();

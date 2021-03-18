@@ -125,14 +125,6 @@ public class TransactionDAO {
 		return new ArrayList<>();
 	}
 
-	public List<Transaction> customQuery(String sql) {
-		try {
-			return jdbi.withHandle(handle -> handle.select(sql, 100)).mapTo(Transaction.class).list();
-		} catch (Exception e) {
-			return new ArrayList<>();
-		}
-	}
-
 	public List<Transaction> getTransactionsFromUUID(UUID uuid, int limit) {
 		try {
 			return jdbi.withHandle(handle -> handle

@@ -57,7 +57,6 @@ This mod also requires the fabric api mod, which you can find [here](https://www
 - `/dl inspect` Whack a block or container to see recent interactions with the target.
 - `/dl inspect <pos>` Shows database records for the block position provided.
 - `/dl search <args>` Builds a database query with the parameters specified
-- `/dl sql (block|transaction) <query>` Runs a query on the database with the SQL specified. Only available in a development environment
 
 ## Support
 

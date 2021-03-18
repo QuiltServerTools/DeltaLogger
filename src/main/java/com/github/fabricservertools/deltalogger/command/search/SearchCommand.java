@@ -4,6 +4,7 @@ import com.github.fabricservertools.deltalogger.Chat;
 import com.github.fabricservertools.deltalogger.beans.MobGrief;
 import com.github.fabricservertools.deltalogger.beans.Placement;
 import com.github.fabricservertools.deltalogger.beans.TransactionPos;
+import com.github.fabricservertools.deltalogger.command.DlPermissions;
 import com.github.fabricservertools.deltalogger.dao.DAO;
 import com.mojang.brigadier.LiteralMessage;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -32,6 +33,7 @@ import static net.minecraft.server.command.CommandManager.literal;
 public class SearchCommand {
 	public static void register(LiteralCommandNode<ServerCommandSource> root) {
 		LiteralCommandNode<ServerCommandSource> searchNode = literal("search")
+				.requires(scs -> DlPermissions.checkPerms(scs, "deltalogger.search"))
 				.then(argument("criteria", StringArgumentType.greedyString()).suggests(CriteriumParser.getInstance())
 						.executes(context -> search(context, StringArgumentType.getString(context, "criteria"))))
 				.build();

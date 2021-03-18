@@ -1,6 +1,7 @@
 package com.github.fabricservertools.deltalogger.command.rollback;
 
 import com.github.fabricservertools.deltalogger.SQLUtils;
+import com.github.fabricservertools.deltalogger.command.DlPermissions;
 import com.github.fabricservertools.deltalogger.dao.DAO;
 import com.github.fabricservertools.deltalogger.util.TimeParser;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -35,133 +36,134 @@ import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public class RollbackCommand {
-	public static void register(LiteralCommandNode<ServerCommandSource> root) {
-		LiteralCommandNode<ServerCommandSource> rollbackNode = literal("rollback").then(
-				argument("radius", IntegerArgumentType.integer()).then(argument("time", StringArgumentType.string())
-						.executes(ctx -> execute(ctx.getSource(), "", ctx.getSource().getPlayer(),
-								IntegerArgumentType.getInteger(ctx, "radius"),
-								StringArgumentType.getString(ctx, "time")))
-						.then(argument("criteria", StringArgumentType.greedyString())
-								.suggests(RollbackParser.getInstance())
-								.executes(ctx -> execute(ctx.getSource(), StringArgumentType.getString(ctx, "criteria"),
-										ctx.getSource().getPlayer(), IntegerArgumentType.getInteger(ctx, "radius"),
-										StringArgumentType.getString(ctx, "time"))))))
-				.build();
-		root.addChild(rollbackNode);
-	}
+    public static void register(LiteralCommandNode<ServerCommandSource> root) {
+        LiteralCommandNode<ServerCommandSource> rollbackNode = literal("rollback")
+				.requires(scs -> DlPermissions.checkPerms(scs, "deltalogger.rollback"))
+				.then(
+                argument("radius", IntegerArgumentType.integer()).then(argument("time", StringArgumentType.string())
+                        .executes(ctx -> execute(ctx.getSource(), "", ctx.getSource().getPlayer(),
+                                IntegerArgumentType.getInteger(ctx, "radius"),
+                                StringArgumentType.getString(ctx, "time")))
+                        .then(argument("criteria", StringArgumentType.greedyString())
+                                .suggests(RollbackParser.getInstance())
+                                .executes(ctx -> execute(ctx.getSource(), StringArgumentType.getString(ctx, "criteria"),
+                                        ctx.getSource().getPlayer(), IntegerArgumentType.getInteger(ctx, "radius"),
+                                        StringArgumentType.getString(ctx, "time"))))))
+                .build();
+        root.addChild(rollbackNode);
+    }
 
-	private static int execute(ServerCommandSource source, String criteria, ServerPlayerEntity sourcePlayer, int radius,
-							   String timeString) {
-		RollbackCommand.startRollback(source, criteria, sourcePlayer, radius, timeString);
-		return 1;
-	}
+    private static int execute(ServerCommandSource source, String criteria, ServerPlayerEntity sourcePlayer, int radius,
+                               String timeString) {
+        RollbackCommand.startRollback(source, criteria, sourcePlayer, radius, timeString);
+        return 1;
+    }
 
-	private static void startRollback(ServerCommandSource source, String criteria, ServerPlayerEntity sourcePlayer,
-									  int radius, String timeString) {
-		Duration duration = TimeParser.parseTime(timeString);
-		String timeValue = SQLUtils.instantToUTCString(Instant.now().minus(duration.getSeconds(), ChronoUnit.SECONDS));
-		BlockPos playerPos = sourcePlayer.getBlockPos();
+    private static void startRollback(ServerCommandSource source, String criteria, ServerPlayerEntity sourcePlayer,
+                                      int radius, String timeString) {
+        Duration duration = TimeParser.parseTime(timeString);
+        String timeValue = SQLUtils.instantToUTCString(Instant.now().minus(duration.getSeconds(), ChronoUnit.SECONDS));
+        BlockPos playerPos = sourcePlayer.getBlockPos();
 
-		String parsedCriteria;
+        String parsedCriteria;
 
-		try {
-			parsedCriteria = RollbackParser.criteria(criteria, source);
-		} catch (
-		CommandSyntaxException e) {
-			sourcePlayer.sendSystemMessage(new LiteralText("Error parsing criteria").formatted(Formatting.RED), Util.NIL_UUID);
-			return;
-		}
+        try {
+            parsedCriteria = RollbackParser.criteria(criteria, source);
+        } catch (
+                CommandSyntaxException e) {
+            sourcePlayer.sendSystemMessage(new LiteralText("Error parsing criteria").formatted(Formatting.RED), Util.NIL_UUID);
+            return;
+        }
 
-		int x1 = playerPos.getX() + radius;
-		int y1 = playerPos.getY() + radius;
-		int z1 = playerPos.getZ() + radius;
-		int x2 = playerPos.getX() - radius;
-		int y2 = playerPos.getY() - radius;
-		int z2 = playerPos.getZ() - radius;
+        int x1 = playerPos.getX() + radius;
+        int y1 = playerPos.getY() + radius;
+        int z1 = playerPos.getZ() + radius;
+        int x2 = playerPos.getX() - radius;
+        int y2 = playerPos.getY() - radius;
+        int z2 = playerPos.getZ() - radius;
 
-		World world = source.getWorld();
-		Identifier dimension = world.getRegistryKey().getValue();
+        World world = source.getWorld();
+        Identifier dimension = world.getRegistryKey().getValue();
 
-		rollbackBlocks(parsedCriteria, new BlockPos(x2, y2, z2), new BlockPos(x1, y1, z1), timeValue, dimension, world);
+        rollbackBlocks(parsedCriteria, new BlockPos(x2, y2, z2), new BlockPos(x1, y1, z1), timeValue, dimension, world);
 
-		source.sendFeedback(new TranslatableText("deltalogger.rollback.block.complete").formatted(Formatting.ITALIC, Formatting.GRAY).append(new TranslatableText("deltalogger.rollback.progress", 1, 2).formatted(Formatting.YELLOW)), false);
+        source.sendFeedback(new TranslatableText("deltalogger.rollback.block.complete").formatted(Formatting.ITALIC, Formatting.GRAY).append(new TranslatableText("deltalogger.rollback.progress", 1, 2).formatted(Formatting.YELLOW)), false);
 
-		rollbackTransactions(parsedCriteria, new BlockPos(x2, y2, z2), new BlockPos(x1, y1, z1), timeValue, dimension, world);
+        rollbackTransactions(parsedCriteria, new BlockPos(x2, y2, z2), new BlockPos(x1, y1, z1), timeValue, dimension, world);
 
-		source.sendFeedback(new TranslatableText("deltalogger.rollback.transaction.complete").formatted(Formatting.ITALIC, Formatting.GRAY).append(new TranslatableText("deltalogger.rollback.progress", 2, 2).formatted(Formatting.YELLOW)), false);
+        source.sendFeedback(new TranslatableText("deltalogger.rollback.transaction.complete").formatted(Formatting.ITALIC, Formatting.GRAY).append(new TranslatableText("deltalogger.rollback.progress", 2, 2).formatted(Formatting.YELLOW)), false);
 
-		sendFinishFeedback(source);
-	}
+        sendFinishFeedback(source);
+    }
 
-	private static void rollbackBlocks(String criteria, BlockPos posS, BlockPos posL, String time, Identifier dimension, World world) {
-		// Rollback blocks
-		DAO.block.rollbackQuery(dimension, posS, posL, time, criteria).forEach(placement -> {
-			//Every placement is called here, where the block setting logic is
-			//Generates a BlockState object from identifier
-			BlockState state = getBlock(createIdentifier(placement.getBlockType())).getDefaultState();
+    private static void rollbackBlocks(String criteria, BlockPos posS, BlockPos posL, String time, Identifier dimension, World world) {
+        // Rollback blocks
+        DAO.block.rollbackQuery(dimension, posS, posL, time, criteria).forEach(placement -> {
+            //Every placement is called here, where the block setting logic is
+            //Generates a BlockState object from identifier
+            BlockState state = getBlock(createIdentifier(placement.getBlockType())).getDefaultState();
 
-			if (placement.getPlaced()) {
-				world.setBlockState(new BlockPos(placement.getX(), placement.getY(), placement.getZ()), Blocks.AIR.getDefaultState());
-			} else {
-				world.setBlockState(new BlockPos(placement.getX(), placement.getY(), placement.getZ()), state);
-			}
+            if (placement.getPlaced()) {
+                world.setBlockState(new BlockPos(placement.getX(), placement.getY(), placement.getZ()), Blocks.AIR.getDefaultState());
+            } else {
+                world.setBlockState(new BlockPos(placement.getX(), placement.getY(), placement.getZ()), state);
+            }
 
-		});
-	}
+        });
+    }
 
-	private static void rollbackTransactions(String criteria, BlockPos posS, BlockPos posL, String time, Identifier dimension, World world) {
+    private static void rollbackTransactions(String criteria, BlockPos posS, BlockPos posL, String time, Identifier dimension, World world) {
 
 
+        DAO.transaction.rollbackQuery(dimension, posS, posL, time, criteria).forEach(transaction -> {
+            BlockPos pos = transaction.getPos();
+            BlockEntity blockEntity = world.getBlockEntity(pos);
+            BlockState state = world.getBlockState(pos);
+            Block block = state.getBlock();
+            Inventory inventory;
+            inventory = (Inventory) blockEntity;
+            if (inventory instanceof ChestBlockEntity && block instanceof ChestBlock) {
+                inventory = ChestBlock.getInventory((ChestBlock) block, state, world, pos, true);
+            }
 
-		DAO.transaction.rollbackQuery(dimension, posS, posL, time, criteria).forEach(transaction -> {
-			BlockPos pos = transaction.getPos();
-			BlockEntity blockEntity = world.getBlockEntity(pos);
-			BlockState state = world.getBlockState(pos);
-			Block block = state.getBlock();
-			Inventory inventory;
-			inventory = (Inventory) blockEntity;
-			if (inventory instanceof ChestBlockEntity && block instanceof ChestBlock) {
-				inventory = ChestBlock.getInventory((ChestBlock) block, state, world, pos, true);
-			}
+            int amount = transaction.getCount();
+            ItemStack itemStack = new ItemStack(getItem(createIdentifier(transaction.getItemType())), amount * (amount < 0 ? -1 : 1));
 
-			int amount = transaction.getCount();
-			ItemStack itemStack = new ItemStack(getItem(createIdentifier(transaction.getItemType())), amount * (amount < 0 ? -1 : 1));
+            if (inventory != null) {
+                for (int i = 0; i < inventory.size(); i++) {
+                    if (amount < 0) {
+                        // Item was removed, add back
+                        if (inventory.getStack(i).isEmpty()) {
+                            inventory.setStack(i, itemStack);
+                            return;
+                        }
+                    } else {
+                        //Item was added, remove
+                        if (inventory.getStack(i).getItem().equals(getItem(createIdentifier(transaction.getItemType())))) {
+                            inventory.setStack(i, ItemStack.EMPTY);
+                            return;
+                        }
+                    }
+                }
+            }
 
-			if (inventory != null) {
-				for (int i = 0; i < inventory.size(); i++) {
-					if (amount < 0) {
-						// Item was removed, add back
-						if (inventory.getStack(i).isEmpty()) {
-							inventory.setStack(i, itemStack);
-							return;
-						}
-					} else {
-						//Item was added, remove
-						if (inventory.getStack(i).getItem().equals(getItem(createIdentifier(transaction.getItemType())))) {
-							inventory.setStack(i, ItemStack.EMPTY);
-							return;
-						}
-					}
-				}
-			}
+        });
+    }
 
-		});
-	}
+    private static void sendFinishFeedback(ServerCommandSource scs) {
+        scs.sendFeedback(new TranslatableText("deltalogger.rollback.complete").formatted(Formatting.GREEN).append(new TranslatableText("deltalogger.rollback.progress", 2, 2).formatted(Formatting.YELLOW)), true);
+    }
 
-	private static void sendFinishFeedback(ServerCommandSource scs) {
-		scs.sendFeedback(new TranslatableText("deltalogger.rollback.complete").formatted(Formatting.GREEN).append(new TranslatableText("deltalogger.rollback.progress", 2, 2).formatted(Formatting.YELLOW)), true);
-	}
+    private static Identifier createIdentifier(String identifier) {
+        String[] identifierSplit = identifier.split(":");
+        return new Identifier(identifierSplit[0], identifierSplit[1]);
+    }
 
-	private static Identifier createIdentifier(String identifier) {
-		String[] identifierSplit = identifier.split(":");
-		return new Identifier(identifierSplit[0], identifierSplit[1]);
-	}
+    private static Item getItem(Identifier id) {
+        return Registry.ITEM.get(id);
+    }
 
-	private static Item getItem(Identifier id) {
-		return Registry.ITEM.get(id);
-	}
-
-	private static Block getBlock(Identifier id) {
-		return Registry.BLOCK.get(id);
-	}
+    private static Block getBlock(Identifier id) {
+        return Registry.BLOCK.get(id);
+    }
 }
