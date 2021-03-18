@@ -53,10 +53,17 @@ This mod also requires the fabric api mod, which you can find [here](https://www
 
 ## In Game Commands
 
-- `/dl resetpass` get a temporary password for the web interface.
 - `/dl inspect` Whack a block or container to see recent interactions with the target.
 - `/dl inspect <pos>` Shows database records for the block position provided.
-- `/dl search <args>` Builds a database query with the parameters specified
+- `/dl search <filters>` Builds a database query with the parameters specified
+- `/dl rollback <radius> <time> [filters]` Runs a rollback with the terms specified
+- `/dl resetpass` get a temporary password for the web interface
+
+### Rollback time arguments
+
+You can use any one of the following to specify your times, but you can only use one
+
+`<years>y <days>d <hours>h <minutes>m <seconds>s`
 
 ## Support
 
