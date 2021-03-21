@@ -77,10 +77,6 @@ public class BlockDAO {
 		return new ArrayList<>();
 	}
 
-	public List<Placement> customQuery(String sql) {
-		return jdbi.withHandle(handle -> handle.select(sql, 100)).mapTo(Placement.class).list();
-	}
-
 	public List<Placement> rollbackQuery(Identifier dimension, BlockPos posS, BlockPos posL, String time, String criteria) {
 		try {
 			return jdbi.withHandle(handle -> handle

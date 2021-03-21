@@ -11,17 +11,17 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.command.argument.GameProfileArgumentType;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
 
 import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
+@SuppressWarnings("DuplicatedCode")
 public class RollbackParser implements SuggestionProvider<ServerCommandSource> {
-	private Set<String> criteria;
-	private HashMap<String, Suggestor> criteriumSuggestors = new HashMap<>();
+	private final Set<String> criteria;
+	private final HashMap<String, Suggestor> criteriumSuggestors = new HashMap<>();
 
-	private static RollbackParser instance = new RollbackParser();
+	private static final RollbackParser instance = new RollbackParser();
 
 	public static RollbackParser getInstance() {
 		return instance;
@@ -103,9 +103,9 @@ public class RollbackParser implements SuggestionProvider<ServerCommandSource> {
 	private static class Suggestor {
 		boolean useSuggestionProvider = false;
 		private SuggestionProvider<ServerCommandSource> suggestionProvider;
-		private ArgumentType argumentType;
+		private final ArgumentType<?> argumentType;
 
-		public Suggestor(ArgumentType argumentType) {
+		public Suggestor(ArgumentType<?> argumentType) {
 			this.argumentType = argumentType;
 		}
 
@@ -152,7 +152,7 @@ public class RollbackParser implements SuggestionProvider<ServerCommandSource> {
 		}
 	}
 
-	public static String criteria(String criteria, ServerPlayerEntity player, ServerCommandSource scs) throws CommandSyntaxException {
+	public static String criteria(String criteria, ServerCommandSource scs) throws CommandSyntaxException {
 		HashMap<String, Object> propertyMap = RollbackParser.getInstance().rawProperties(criteria);
 		String query = "";
 		if (propertyMap.containsKey("target")) {

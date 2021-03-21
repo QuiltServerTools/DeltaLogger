@@ -1,13 +1,22 @@
 package com.github.fabricservertools.deltalogger.command.search;
 
 import com.github.fabricservertools.deltalogger.Chat;
+import com.github.fabricservertools.deltalogger.beans.MobGrief;
+import com.github.fabricservertools.deltalogger.beans.Placement;
+import com.github.fabricservertools.deltalogger.beans.TransactionPos;
+import com.github.fabricservertools.deltalogger.command.DlPermissions;
 import com.github.fabricservertools.deltalogger.dao.DAO;
+import com.mojang.brigadier.LiteralMessage;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+
+import net.minecraft.block.Block;
 import net.minecraft.command.argument.BlockStateArgument;
 import net.minecraft.command.argument.GameProfileArgumentType;
+import net.minecraft.command.argument.ItemStackArgument;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.MutableText;
@@ -24,6 +33,7 @@ import static net.minecraft.server.command.CommandManager.literal;
 public class SearchCommand {
 	public static void register(LiteralCommandNode<ServerCommandSource> root) {
 		LiteralCommandNode<ServerCommandSource> searchNode = literal("search")
+				.requires(scs -> DlPermissions.checkPerms(scs, "deltalogger.search"))
 				.then(argument("criteria", StringArgumentType.greedyString()).suggests(CriteriumParser.getInstance())
 						.executes(context -> search(context, StringArgumentType.getString(context, "criteria"))))
 				.build();
@@ -71,11 +81,21 @@ public class SearchCommand {
 					+ Registry.BLOCK.getId(block.getBlockState().getBlock()).toString() + "\") ";
 		}
 
+		if (propertyMap.containsKey("item")) {
+			ItemStackArgument item = (ItemStackArgument)propertyMap.get("item");
+			Block block = Block.getBlockFromItem(item.getItem());
+			sqlPlace += "AND CT.item_type = (SELECT id FROM registry WHERE `name` = \""
+					+ Registry.BLOCK.getId(block).toString() + "\") ";
+			sqlContainer += "AND CT.item_type = (SELECT id FROM registry WHERE `name` = \""
+					+ Registry.ITEM.getId(item.getItem()).toString() + "\") ";
+		}
+
 		//range or pos
 		if (propertyMap.containsKey("range")) {
 			int range = (Integer) propertyMap.get("range");
 			BlockPos playerPos = sourcePlayer.getBlockPos();
 			sqlPlace += rangeStatementBuilder(playerPos, range);
+			sqlContainer += rangeStatementBuilderTransaction(playerPos, range);
 			sqlGrief += rangeStatementBuilder(playerPos, range);
 		}
 
@@ -100,27 +120,34 @@ public class SearchCommand {
 		// Check for an action and only query the relevant tables
 		if (propertyMap.containsKey("action")) {
 			String action = (String) propertyMap.get("action");
-			if (!action.contains("everything")) {
-
-				if (action.contains("placed")) {
+			switch (action) {
+				case "placed":
 					sqlPlace += "AND placed = 1 ";
 					sendPlacements(scs, sqlPlace, limit);
-				} else if (action.contains("broken")) {
+					break;
+				case "broken":
 					sqlPlace += "AND placed = 0 ";
 					sendPlacements(scs, sqlPlace, limit);
-				} else if (action.contains("added")) {
+					break;
+				case "added":
 					sqlContainer += "AND item_count > 0 ";
 					sendTransactions(scs, sqlContainer, limit);
-				} else if (action.contains("removed")) {
+					break;
+				case "taken":
 					sqlContainer += "AND item_count < 0 ";
 					sendTransactions(scs, sqlContainer, limit);
-				} else if (action.contains("grief")) {
+					break;
+				case "grief":
 					sendGrief(scs, sqlGrief, limit);
-				}
-			} else {
-				sendGrief(scs, sqlGrief, limit);
-				sendTransactions(scs, sqlContainer, limit);
-				sendPlacements(scs, sqlPlace, limit);
+					break;
+				case "everything":
+					sendGrief(scs, sqlGrief, limit);
+					sendTransactions(scs, sqlContainer, limit);
+					sendPlacements(scs, sqlPlace, limit);
+					break;
+				default:
+					throw new SimpleCommandExceptionType(new LiteralMessage("Invalid action: " + action))
+							.create();
 			}
 		} else {
 			sendTransactions(scs, sqlContainer, limit);
@@ -134,8 +161,8 @@ public class SearchCommand {
 	 * prints results to chat
 	 */
 	private static void sendTransactions(ServerCommandSource scs, String sqlContainer, int limit) throws CommandSyntaxException {
-		MutableText transactionMessage = DAO.transaction.search(10, sqlContainer).stream()
-				.map(t -> t.getText()).reduce((t1, t2) -> Chat.concat("\n", t1, t2))
+		MutableText transactionMessage = DAO.transaction.search(limit, sqlContainer).stream()
+				.map(TransactionPos::getText).reduce((t1, t2) -> Chat.concat("\n", t1, t2))
 				.map(txt -> Chat.concat("\n", Chat.text("deltalogger.history.transaction"), txt))
 				.orElse(Chat.text("deltalogger.none_found.no_pos.transaction"));
 
@@ -147,7 +174,7 @@ public class SearchCommand {
 	 * prints results to chat
 	 */
 	private static void sendPlacements(ServerCommandSource scs, String sqlPlace, int limit) throws CommandSyntaxException {
-		MutableText placementMessage = DAO.block.search(0, limit, sqlPlace).stream().map(p -> p.getTextWithPos())
+		MutableText placementMessage = DAO.block.search(0, limit, sqlPlace).stream().map(Placement::getTextWithPos)
 				.reduce((p1, p2) -> Chat.concat("\n", p1, p2))
 				.map(txt -> Chat.concat("\n", Chat.text("deltalogger.history.placement"), txt))
 				.orElse(Chat.text("deltalogger.none_found.no_pos.placement"));
@@ -156,7 +183,7 @@ public class SearchCommand {
 
 
 	private static void sendGrief(ServerCommandSource scs, String sqlPlace, int limit) throws CommandSyntaxException {
-		MutableText griefMessage = DAO.entity.search(0, limit, sqlPlace).stream().map(p -> p.getTextWithPos())
+		MutableText griefMessage = DAO.entity.search(0, limit, sqlPlace).stream().map(MobGrief::getTextWithPos)
 				.reduce((p1, p2) -> Chat.concat("\n", p1, p2))
 				.map(txt -> Chat.concat("\n", Chat.text("deltalogger.history.grief"), txt))
 				.orElse(Chat.text("deltalogger.none_found.no_pos.grief"));
@@ -173,8 +200,15 @@ public class SearchCommand {
 		return "AND x BETWEEN " + (x - range) + " AND " + (x + range) + " AND y BETWEEN " + (y - range) + " AND "
 				+ (y + range) + " AND z BETWEEN " + (z - range) + " AND " + (z + range) + " ";
 	}
+	private static String rangeStatementBuilderTransaction(BlockPos pos, int range) {
+		int x = pos.getX();
+		int y = pos.getY();
+		int z = pos.getZ();
+		return "AND C.x BETWEEN " + (x - range) + " AND " + (x + range) + " AND C.y BETWEEN " + (y - range) + " AND "
+				+ (y + range) + " AND C.z BETWEEN " + (z - range) + " AND " + (z + range) + " ";
+	}
 
 	private static String getUuid(GameProfileArgumentType.GameProfileArgument player, ServerCommandSource scs) throws CommandSyntaxException {
-		return player.getNames(scs).stream().findFirst().get().getId().toString();
+		return player.getNames(scs).stream().findFirst().isPresent() ? player.getNames(scs).stream().findFirst().get().getId().toString() : "";
 	}
 }

@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class TransactionDAO {
-	private Jdbi jdbi;
+	private final Jdbi jdbi;
 	private final String SELECT_TRANSACTIONS = String.join(" ",
 			"SELECT CT.id, C.uuid,", SQLUtils.getDateFormatted("CT.date", "date"),
 			", R.name as `item_type`, CT.item_count, P.name as `player_name`"
@@ -44,11 +44,11 @@ public class TransactionDAO {
 	 *
 	 * @param idOffset must be the id of the row to offset from, if offset is 0 then get latest
 	 * @param limit    the number of rows to return
-	 * @return
+	 * @return a list of all transactions with the terms specified
 	 */
 	public List<Transaction> getLatestTransactions(int idOffset, int limit) {
 		try {
-			List<Transaction> tr = jdbi.withHandle(handle -> handle
+			return jdbi.withHandle(handle -> handle
 					.select(String.join(" ",
 							SELECT_TRANSACTIONS,
 							"FROM (SELECT * FROM container_transactions WHERE id <",
@@ -59,8 +59,6 @@ public class TransactionDAO {
 					.mapTo(Transaction.class)
 					.list()
 			);
-
-			return tr;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -113,6 +111,7 @@ public class TransactionDAO {
 							"FROM container_transactions as CT",
 							JOIN_TRANSACTIONS,
 							"WHERE C.x >= :xs AND C.x <= :xl AND C.y >= :ys AND C.y <= :yl AND C.z >= :zs AND C.z <= :zl AND DT.name = :dim AND CT.date > :time",
+							criteria,
 							"ORDER BY CT.date"
 					)
 					//pos.getX(), pos.getY(), pos.getZ(), dimension.toString(), time
@@ -124,14 +123,6 @@ public class TransactionDAO {
 			e.printStackTrace();
 		}
 		return new ArrayList<>();
-	}
-
-	public List<Transaction> customQuery(String sql) {
-		try {
-			return jdbi.withHandle(handle -> handle.select(sql, 100)).mapTo(Transaction.class).list();
-		} catch (Exception e) {
-			return new ArrayList<>();
-		}
 	}
 
 	public List<Transaction> getTransactionsFromUUID(UUID uuid, int limit) {

@@ -6,6 +6,7 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.minecraft.command.argument.BlockPosArgumentType;
 import net.minecraft.command.argument.DimensionArgumentType;
 import net.minecraft.entity.player.PlayerEntity;
@@ -31,6 +32,7 @@ public class InspectCommand {
 
 	public static void register(LiteralCommandNode<ServerCommandSource> root) {
 		LiteralCommandNode<ServerCommandSource> inspectNode = CommandManager.literal("inspect")
+				.requires(scs -> DlPermissions.checkPerms(scs, "deltalogger.inspect"))
 				.executes(context -> toggleTool(context))
 				.then(CommandManager.argument("pos", BlockPosArgumentType.blockPos())
 						.executes(context -> inspect(context, null, 10))

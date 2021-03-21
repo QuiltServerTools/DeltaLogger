@@ -19,6 +19,7 @@ import static net.minecraft.server.command.CommandManager.literal;
 public class InfoCommand {
 	public static void register(LiteralCommandNode<ServerCommandSource> root) {
 		LiteralCommandNode<ServerCommandSource> viewNode = literal("view")
+				.requires(scs -> DlPermissions.checkPerms(scs, "deltalogger.view"))
 				.then(literal("version").executes(context -> getVersion(context.getSource())))
 				.then(literal("discord").executes(context -> getDiscord(context.getSource()))).build();
 

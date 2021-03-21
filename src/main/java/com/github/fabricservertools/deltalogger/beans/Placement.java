@@ -1,9 +1,13 @@
 package com.github.fabricservertools.deltalogger.beans;
 
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 import static com.github.fabricservertools.deltalogger.Chat.format;
 import static com.github.fabricservertools.deltalogger.Chat.joinText;
@@ -11,7 +15,7 @@ import static com.github.fabricservertools.deltalogger.Chat.joinText;
 /**
  * POJO representing a block placement
  */
-public class Placement {
+public class Placement extends Bean {
 	private int id;
 	private String playerName;
 	private String time;
@@ -123,7 +127,7 @@ public class Placement {
 
 	@Override
 	public String toString() {
-		return String.join(" ", time.toString(), playerName, placed ? "placed" : "removed", blockType);
+		return String.join(" ", time, playerName, placed ? "placed" : "removed", blockType);
 	}
 
 	public MutableText getText() {
@@ -151,7 +155,19 @@ public class Placement {
 
 	private MutableText getTranslatedBlock() {
 		blockType.replaceFirst("^minecraft:", "");
-		MutableText text = new TranslatableText(blockType).formatted(Formatting.YELLOW);
-		return text;
+		return new TranslatableText(blockType).formatted(Formatting.YELLOW);
+	}
+
+	@Override
+	public void rollback(World world) {
+		//Every placement is called here, where the block setting logic is
+		//Generates a BlockState object from identifier
+		BlockState state = getBlock(createIdentifier(blockType)).getDefaultState();
+
+		if (getPlaced()) {
+			world.setBlockState(new BlockPos(getX(), getY(), getZ()), Blocks.AIR.getDefaultState());
+		} else {
+			world.setBlockState(new BlockPos(getX(), getY(), getZ()), state);
+		}
 	}
 }

@@ -1,6 +1,11 @@
 package com.github.fabricservertools.deltalogger.beans;
 
-public class KilledEntity {
+import net.minecraft.entity.Entity;
+import net.minecraft.text.LiteralText;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.world.World;
+
+public class KilledEntity extends Bean {
 	private int id;
 	private String name;
 	private String source;
@@ -93,5 +98,16 @@ public class KilledEntity {
 
 	public void setZ(int z) {
 		this.z = z;
+	}
+
+	@Override
+	public void rollback(World world) {
+		/*Entity entity = Registry.ENTITY_TYPE.get(createIdentifier(INSERT ENTITY TYPE AFTER CHANGE))).create(world);
+		assert entity != null;
+		entity.setCustomName(new LiteralText(name));
+		entity.setPos(x, y, z);
+		world.spawnEntity(entity);*/
+		// Need to make a modification to the DB format via a migration script to enable this code
+		// Will add once numerous migration changes need to be made
 	}
 }
