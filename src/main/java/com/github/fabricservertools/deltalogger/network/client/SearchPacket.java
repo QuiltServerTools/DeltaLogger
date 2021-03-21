@@ -6,6 +6,7 @@ import com.github.fabricservertools.deltalogger.beans.TransactionPos;
 import com.github.fabricservertools.deltalogger.command.search.CriteriumParser;
 import com.github.fabricservertools.deltalogger.command.search.SearchCommand;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -28,7 +29,7 @@ public class SearchPacket {
 
 	public static void registerServer() {
 		ServerPlayNetworking.registerGlobalReceiver(PACKET_IDENTIFIER_C2S, ((server, player, handler, buf, responseSender) -> {
-			if (!player.hasPermissionLevel(2)) return;
+			if (!player.hasPermissionLevel(3) || !Permissions.check(player, "deltalogger.search")) return;
 			HashMap<String, Object> propertyMap;
 			try {
 				propertyMap = CriteriumParser.getInstance().rawProperties(buf.readString());
@@ -43,11 +44,6 @@ public class SearchPacket {
 			}
 		}));
 	}
-
-	public static void sendToServer(String where) {
-		ClientPlayNetworking.send(PACKET_IDENTIFIER_C2S, PacketByteBufs.create().writeString(where));
-	}
-
 
 	public static void sendToClient(Placement placement, ServerPlayerEntity player) {
 		String placementString = placement.getX() + "," + placement.getY() + "," + placement.getZ() + "," + placement.getBlockType() + "," + placement.getPlayerName() + "," + placement.getPlaced();
