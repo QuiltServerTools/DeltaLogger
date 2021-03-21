@@ -1,9 +1,17 @@
 package com.github.fabricservertools.deltalogger.beans;
 
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.ChestBlock;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.ChestBlockEntity;
+import net.minecraft.inventory.Inventory;
+import net.minecraft.item.ItemStack;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 import java.util.UUID;
 
@@ -14,7 +22,7 @@ import static com.github.fabricservertools.deltalogger.Chat.joinText;
  * POJO representing an accounting of transaction interactions with inventory
  * screens.
  */
-public class TransactionPos {
+public class TransactionPos extends Bean {
 	private int id;
 	private String playerName;
 	private String time;
@@ -97,5 +105,39 @@ public class TransactionPos {
 				format(Math.abs(count)),
 				format(itemType.replaceFirst("^minecraft:", ""), Formatting.YELLOW)
 		);
+	}
+
+	@Override
+	public void rollback(World world) {
+		BlockPos pos = getPos();
+		BlockEntity blockEntity = world.getBlockEntity(pos);
+		BlockState state = world.getBlockState(pos);
+		Block block = state.getBlock();
+		Inventory inventory;
+		inventory = (Inventory) blockEntity;
+		if (inventory instanceof ChestBlockEntity && block instanceof ChestBlock) {
+			inventory = ChestBlock.getInventory((ChestBlock) block, state, world, pos, true);
+		}
+
+		int amount = getCount();
+		ItemStack itemStack = new ItemStack(getItem(createIdentifier(getItemType())), amount * (amount < 0 ? -1 : 1));
+
+		if (inventory != null) {
+			for (int i = 0; i < inventory.size(); i++) {
+				if (amount < 0) {
+					// Item was removed, add back
+					if (inventory.getStack(i).isEmpty()) {
+						inventory.setStack(i, itemStack);
+						return;
+					}
+				} else {
+					//Item was added, remove
+					if (inventory.getStack(i).getItem().equals(getItem(createIdentifier(getItemType())))) {
+						inventory.setStack(i, ItemStack.EMPTY);
+						return;
+					}
+				}
+			}
+		}
 	}
 }

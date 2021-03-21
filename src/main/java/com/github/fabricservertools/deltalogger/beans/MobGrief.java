@@ -3,11 +3,12 @@ package com.github.fabricservertools.deltalogger.beans;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
 import net.minecraft.util.Formatting;
+import net.minecraft.world.World;
 
 import static com.github.fabricservertools.deltalogger.Chat.format;
 import static com.github.fabricservertools.deltalogger.Chat.joinText;
 
-public class MobGrief {
+public class MobGrief extends Bean {
 	private int id;
 	private String time;
 	private String entityType;
@@ -94,8 +95,13 @@ public class MobGrief {
 
 	public MutableText getTextWithPos() {
 		return joinText(format(time, Formatting.GRAY),
-				format(new LiteralText(String.valueOf(x) + " " + String.valueOf(y) + " " + String.valueOf(z)), Formatting.AQUA),
+				format(new LiteralText(x + " " + y + " " + z), Formatting.AQUA),
 				format(getEntityType(), Formatting.ITALIC),
 				format(getTarget(), Formatting.YELLOW));
+	}
+
+	@Override
+	public void rollback(World world) {
+		// Same as killed entities, need to make a DB modification script
 	}
 }

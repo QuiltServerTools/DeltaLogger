@@ -8,15 +8,6 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.ChestBlock;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.ChestBlockEntity;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
@@ -25,7 +16,6 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 
 import java.time.Duration;
@@ -98,72 +88,14 @@ public class RollbackCommand {
 
     private static void rollbackBlocks(String criteria, BlockPos posS, BlockPos posL, String time, Identifier dimension, World world) {
         // Rollback blocks
-        DAO.block.rollbackQuery(dimension, posS, posL, time, criteria).forEach(placement -> {
-            //Every placement is called here, where the block setting logic is
-            //Generates a BlockState object from identifier
-            BlockState state = getBlock(createIdentifier(placement.getBlockType())).getDefaultState();
-
-            if (placement.getPlaced()) {
-                world.setBlockState(new BlockPos(placement.getX(), placement.getY(), placement.getZ()), Blocks.AIR.getDefaultState());
-            } else {
-                world.setBlockState(new BlockPos(placement.getX(), placement.getY(), placement.getZ()), state);
-            }
-
-        });
+        DAO.block.rollbackQuery(dimension, posS, posL, time, criteria).forEach(placement -> placement.rollback(world));
     }
 
     private static void rollbackTransactions(String criteria, BlockPos posS, BlockPos posL, String time, Identifier dimension, World world) {
-
-
-        DAO.transaction.rollbackQuery(dimension, posS, posL, time, criteria).forEach(transaction -> {
-            BlockPos pos = transaction.getPos();
-            BlockEntity blockEntity = world.getBlockEntity(pos);
-            BlockState state = world.getBlockState(pos);
-            Block block = state.getBlock();
-            Inventory inventory;
-            inventory = (Inventory) blockEntity;
-            if (inventory instanceof ChestBlockEntity && block instanceof ChestBlock) {
-                inventory = ChestBlock.getInventory((ChestBlock) block, state, world, pos, true);
-            }
-
-            int amount = transaction.getCount();
-            ItemStack itemStack = new ItemStack(getItem(createIdentifier(transaction.getItemType())), amount * (amount < 0 ? -1 : 1));
-
-            if (inventory != null) {
-                for (int i = 0; i < inventory.size(); i++) {
-                    if (amount < 0) {
-                        // Item was removed, add back
-                        if (inventory.getStack(i).isEmpty()) {
-                            inventory.setStack(i, itemStack);
-                            return;
-                        }
-                    } else {
-                        //Item was added, remove
-                        if (inventory.getStack(i).getItem().equals(getItem(createIdentifier(transaction.getItemType())))) {
-                            inventory.setStack(i, ItemStack.EMPTY);
-                            return;
-                        }
-                    }
-                }
-            }
-
-        });
+        DAO.transaction.rollbackQuery(dimension, posS, posL, time, criteria).forEach(transaction -> transaction.rollback(world));
     }
 
     private static void sendFinishFeedback(ServerCommandSource scs) {
         scs.sendFeedback(new TranslatableText("deltalogger.rollback.complete").formatted(Formatting.GREEN).append(new TranslatableText("deltalogger.rollback.progress", 2, 2).formatted(Formatting.YELLOW)), true);
-    }
-
-    private static Identifier createIdentifier(String identifier) {
-        String[] identifierSplit = identifier.split(":");
-        return new Identifier(identifierSplit[0], identifierSplit[1]);
-    }
-
-    private static Item getItem(Identifier id) {
-        return Registry.ITEM.get(id);
-    }
-
-    private static Block getBlock(Identifier id) {
-        return Registry.BLOCK.get(id);
     }
 }
