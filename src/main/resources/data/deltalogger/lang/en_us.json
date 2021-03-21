@@ -18,5 +18,6 @@
   "deltalogger.rollback.transaction.complete": "Completed transaction rollback for selection,",
   "deltalogger.rollback.grief.complete": "Completed grief rollback for selection",
   "deltalogger.rollback.complete": "Completed rollback",
-  "deltalogger.rollback.progress": " (%d/%d)"
+  "deltalogger.rollback.progress": " (%d/%d)",
+  "deltalogger.network.failed_to_parse": "Failed to parse properties from received packets"
 }

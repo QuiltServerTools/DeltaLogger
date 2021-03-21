@@ -10,7 +10,6 @@ import com.github.fabricservertools.deltalogger.dao.PlayerDAO;
 import com.github.fabricservertools.deltalogger.events.BlockExplodeCallback;
 import com.github.fabricservertools.deltalogger.events.BlockPlaceCallback;
 import com.github.fabricservertools.deltalogger.events.PlayerOpenScreenCallback;
-import com.github.fabricservertools.deltalogger.network.client.CheckClientStatusPacket;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;

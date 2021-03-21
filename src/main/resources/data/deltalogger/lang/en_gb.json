@@ -18,5 +18,6 @@
   "deltalogger.rollback.complete": "Completed rollback",
   "deltalogger.rollback.progress": " (%d/%d)",
   "deltalogger.inspect_mode.on": "DeltaLogger inspect mode on",
-  "deltalogger.inspect_mode.off": "DeltaLogger inspect mode off"
+  "deltalogger.inspect_mode.off": "DeltaLogger inspect mode off",
+  "deltalogger.network.failed_to_parse": "Failed to parse properties from received packets"
 }

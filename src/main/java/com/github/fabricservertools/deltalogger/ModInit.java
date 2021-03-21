@@ -5,7 +5,6 @@ import com.github.fabricservertools.deltalogger.dao.RegistryDAO;
 import com.github.fabricservertools.deltalogger.gql.ApiServer;
 import com.github.fabricservertools.deltalogger.listeners.EntityEventListener;
 import com.github.fabricservertools.deltalogger.listeners.PlayerEventListener;
-import com.github.fabricservertools.deltalogger.network.client.CheckClientStatusPacket;
 import com.github.fabricservertools.deltalogger.network.client.SearchPacket;
 import com.google.common.collect.Sets;
 import net.fabricmc.api.DedicatedServerModInitializer;
@@ -113,7 +112,6 @@ public class ModInit implements DedicatedServerModInitializer {
 
 		CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> Commands.register(dispatcher));
 
-		CheckClientStatusPacket.registerServer();
 		SearchPacket.registerServer();
 	}
 }
