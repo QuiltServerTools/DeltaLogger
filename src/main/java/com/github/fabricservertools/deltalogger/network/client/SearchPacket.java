@@ -1,14 +1,11 @@
 package com.github.fabricservertools.deltalogger.network.client;
 
-import com.github.fabricservertools.deltalogger.beans.MobGrief;
 import com.github.fabricservertools.deltalogger.beans.Placement;
 import com.github.fabricservertools.deltalogger.beans.TransactionPos;
 import com.github.fabricservertools.deltalogger.command.search.CriteriumParser;
 import com.github.fabricservertools.deltalogger.command.search.SearchCommand;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import me.lucko.fabric.api.permissions.v0.Permissions;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -20,7 +17,6 @@ import java.util.HashMap;
 
 /*
 * Should be registered on the client using the S2C identifier, parsing as per the wiki docs
-*
  */
 
 public class SearchPacket {
@@ -29,7 +25,7 @@ public class SearchPacket {
 
 	public static void registerServer() {
 		ServerPlayNetworking.registerGlobalReceiver(PACKET_IDENTIFIER_C2S, ((server, player, handler, buf, responseSender) -> {
-			if (!player.hasPermissionLevel(3) || !Permissions.check(player, "deltalogger.search")) return;
+			if (!player.hasPermissionLevel(3) && !Permissions.check(player, "deltalogger.search")) return;
 			HashMap<String, Object> propertyMap;
 			try {
 				propertyMap = CriteriumParser.getInstance().rawProperties(buf.readString());
@@ -46,13 +42,11 @@ public class SearchPacket {
 	}
 
 	public static void sendToClient(Placement placement, ServerPlayerEntity player) {
-		String placementString = placement.getX() + "," + placement.getY() + "," + placement.getZ() + "," + placement.getBlockType() + "," + placement.getPlayerName() + "," + placement.getPlaced();
-		PacketByteBuf buf = PacketByteBufs.create().writeString(placementString);
+		PacketByteBuf buf = NetworkUtils.setPlacement(placement);
 		ServerPlayNetworking.send(player, PACKET_IDENTIFIER_S2C, buf);
 	}
 	public static void sendToClient(TransactionPos transactionPos, ServerPlayerEntity player) {
-		String placementString = transactionPos.getPos().getX() + "," + transactionPos.getPos().getY() + "," + transactionPos.getPos().getZ() + "," + transactionPos.getItemType() + "," + transactionPos.getPlayerName() + "," + transactionPos.getCount();
-		PacketByteBuf buf = PacketByteBufs.create().writeString(placementString);
+		PacketByteBuf buf = NetworkUtils.setTransaction(transactionPos);
 		ServerPlayNetworking.send(player, PACKET_IDENTIFIER_S2C, buf);
 	}
 

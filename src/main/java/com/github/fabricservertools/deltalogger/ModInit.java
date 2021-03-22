@@ -5,6 +5,7 @@ import com.github.fabricservertools.deltalogger.dao.RegistryDAO;
 import com.github.fabricservertools.deltalogger.gql.ApiServer;
 import com.github.fabricservertools.deltalogger.listeners.EntityEventListener;
 import com.github.fabricservertools.deltalogger.listeners.PlayerEventListener;
+import com.github.fabricservertools.deltalogger.network.client.InspectPacket;
 import com.github.fabricservertools.deltalogger.network.client.SearchPacket;
 import com.google.common.collect.Sets;
 import net.fabricmc.api.DedicatedServerModInitializer;
@@ -66,6 +67,10 @@ public class ModInit implements DedicatedServerModInitializer {
 		} catch (NumberFormatException | NullPointerException e) {
 			throw new RuntimeException("invalid port number: " + portString);
 		}
+		if (CONFIG.getProperty("enable_networking", "false").equals("true")) {
+			SearchPacket.registerServer();
+			InspectPacket.registerServer();
+		}
 	}
 
 	private void onServerStart(MinecraftServer server) {
@@ -111,7 +116,5 @@ public class ModInit implements DedicatedServerModInitializer {
 		ServerLifecycleEvents.SERVER_STOPPED.register(this::onStop);
 
 		CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> Commands.register(dispatcher));
-
-		SearchPacket.registerServer();
 	}
 }
