@@ -82,7 +82,7 @@ public class InspectCommand {
 		MutableText placementMessage = DAO.block.getLatestPlacementsAt(dimension, pos, 0, limit).stream()
 				.map(p -> p.getText()).reduce((p1, p2) -> Chat.concat("\n", p1, p2))
 				.map(txt -> Chat.concat("\n", new TranslatableText("deltalogger.history.placement"), txt))
-				.orElse(new TranslatableText("deltalogger.none_found.pos", "placements", pos.toString()));
+				.orElse(new TranslatableText("deltalogger.none_found.pos", "placements", Chat.stringFrom(pos)));
 
 		// FIXME: fix getting block from server console
 		Chat.send(scs.getSource().getPlayer(), placementMessage);

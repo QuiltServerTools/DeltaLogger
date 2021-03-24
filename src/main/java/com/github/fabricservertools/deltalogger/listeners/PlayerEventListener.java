@@ -141,7 +141,7 @@ public class PlayerEventListener {
         MutableText placementMessage = DAO.block.getLatestPlacementsAt(dimension, pos, 0, 10).stream().map(Placement::getText)
                 .reduce((p1, p2) -> Chat.concat("\n", p1, p2))
                 .map(txt -> Chat.concat("\n", Chat.text("Placement history"), txt))
-                .orElse(Chat.text("No placements found at " + pos.getX() + " " + pos.getY() + " " + pos.getZ()));
+                .orElse(Chat.text("No placements found at " + Chat.stringFrom(pos)));
 
         Chat.send(player, placementMessage);
 
