@@ -20,9 +20,6 @@
   "entrypoints": {
     "main": [
       "com.github.fabricservertools.deltalogger.ModInit"
-    ],
-    "client": [
-      "com.github.fabricservertools.deltalogger.client.ClientInit"
     ]
   },
   "mixins": [
