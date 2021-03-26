@@ -312,7 +312,7 @@ public class DatabaseManager implements Runnable {
 					.createScript(migrateSql)
 					.execute()
 			);
-			failOnFalse(runScript("/data/deltalogger/migration/entity-mob-migrate.sql"), "Unable to update database version");
+
 			setDBSchemaVer(2);
 		}
 	}
