@@ -39,12 +39,13 @@ public class NetworkUtils {
         buf.setInt(0, placement.getX());
         buf.setInt(1, placement.getY());
         buf.setInt(2, placement.getZ());
+        buf.setBoolean(3, placement.getPlaced());
         byte[] playerNameBytes = placement.getPlayerName().getBytes(StandardCharsets.UTF_8);
-        buf.setBytes(3, playerNameBytes);
-        buf.setLong(4, SQLUtils.getInstantFromDBTimeString(placement.getTime()).getEpochSecond());
+        buf.setBytes(4, playerNameBytes);
+        buf.setLong(5, SQLUtils.getInstantFromDBTimeString(placement.getTime()).getEpochSecond());
         byte[] blockType = placement.getBlockType().getBytes(StandardCharsets.UTF_8);
-        buf.setBytes(5, blockType);
-        buf.setBytes(6, placement.getState().getBytes(StandardCharsets.UTF_8));
+        buf.setBytes(6, blockType);
+        buf.setBytes(7, placement.getState().getBytes(StandardCharsets.UTF_8));
 
         return buf;
     }
