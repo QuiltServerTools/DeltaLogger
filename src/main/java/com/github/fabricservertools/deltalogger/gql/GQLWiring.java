@@ -114,7 +114,7 @@ public class GQLWiring {
 										100
 								)
 								.map(tup ->
-										dataResult(DAO.entity.search(tup._1, tup._2, ""))
+										dataResult(DAO.entity.searchGriefs(tup._1, tup._2, ""))
 								)
 								.getOrElseGet(GQLWiring::errResult)
 						)

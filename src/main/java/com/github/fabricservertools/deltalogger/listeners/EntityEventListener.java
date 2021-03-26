@@ -15,6 +15,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.FireballEntity;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 
 import java.util.UUID;
@@ -42,7 +43,8 @@ public class EntityEventListener {
 				killer_id,
 				java.time.Instant.now(),
 				entity.getBlockPos(),
-				attacker.getEntityWorld().getRegistryKey().getValue()
+				attacker.getEntityWorld().getRegistryKey().getValue(),
+				Registry.ENTITY_TYPE.getId(entity.getType())
 		));
 
 		return ActionResult.PASS;

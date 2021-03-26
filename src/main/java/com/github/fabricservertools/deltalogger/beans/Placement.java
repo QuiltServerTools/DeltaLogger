@@ -12,10 +12,13 @@ import net.minecraft.world.World;
 import static com.github.fabricservertools.deltalogger.Chat.format;
 import static com.github.fabricservertools.deltalogger.Chat.joinText;
 
+import static com.github.fabricservertools.deltalogger.command.rollback.RollbackUtils.createIdentifier;
+import static com.github.fabricservertools.deltalogger.command.rollback.RollbackUtils.getBlock;
+
 /**
  * POJO representing a block placement
  */
-public class Placement extends Bean {
+public class Placement implements Bean {
 	private int id;
 	private String playerName;
 	private String time;
@@ -163,7 +166,6 @@ public class Placement extends Bean {
 		//Every placement is called here, where the block setting logic is
 		//Generates a BlockState object from identifier
 		BlockState state = getBlock(createIdentifier(blockType)).getDefaultState();
-
 		if (getPlaced()) {
 			world.setBlockState(new BlockPos(getX(), getY(), getZ()), Blocks.AIR.getDefaultState());
 		} else {

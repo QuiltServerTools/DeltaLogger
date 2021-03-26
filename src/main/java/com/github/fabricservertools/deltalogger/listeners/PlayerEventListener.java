@@ -3,10 +3,7 @@ package com.github.fabricservertools.deltalogger.listeners;
 import com.github.fabricservertools.deltalogger.*;
 import com.github.fabricservertools.deltalogger.beans.Placement;
 import com.github.fabricservertools.deltalogger.command.InspectCommand;
-import com.github.fabricservertools.deltalogger.dao.BlockDAO;
-import com.github.fabricservertools.deltalogger.dao.ContainerDAO;
-import com.github.fabricservertools.deltalogger.dao.DAO;
-import com.github.fabricservertools.deltalogger.dao.PlayerDAO;
+import com.github.fabricservertools.deltalogger.dao.*;
 import com.github.fabricservertools.deltalogger.events.BlockExplodeCallback;
 import com.github.fabricservertools.deltalogger.events.BlockPlaceCallback;
 import com.github.fabricservertools.deltalogger.events.PlayerOpenScreenCallback;
@@ -19,6 +16,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.ChestBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.LockableContainerBlockEntity;
+import net.minecraft.entity.mob.CreeperEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemPlacementContext;
@@ -157,6 +155,13 @@ public class PlayerEventListener {
         if (explosion.getCausingEntity() instanceof PlayerEntity) {
             DatabaseManager.getSingleton().queueOp(BlockDAO.insertPlacement(
                     explosion.getCausingEntity().getUuid(), Registry.BLOCK.getId(block),
+                    false, pos, world.getBlockState(pos), world.getRegistryKey().getValue(), Instant.now()
+            ));
+        }
+        if(explosion.getCausingEntity() instanceof CreeperEntity) {
+            DatabaseManager.getSingleton().queueOp(BlockDAO.insertPlacement(
+                    explosion.getCausingEntity().getUuid(),
+                    Registry.BLOCK.getId(block),
                     false, pos, world.getBlockState(pos), world.getRegistryKey().getValue(), Instant.now()
             ));
         }

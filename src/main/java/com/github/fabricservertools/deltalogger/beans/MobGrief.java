@@ -8,7 +8,7 @@ import net.minecraft.world.World;
 import static com.github.fabricservertools.deltalogger.Chat.format;
 import static com.github.fabricservertools.deltalogger.Chat.joinText;
 
-public class MobGrief extends Bean {
+public class MobGrief implements Bean {
 	private int id;
 	private String time;
 	private String entityType;

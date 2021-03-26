@@ -268,7 +268,7 @@ public class DatabaseManager implements Runnable {
 			DeltaLogger.LOG.info("Creating first time SQL tables");
 			failOnFalse(
 					runScript("/data/deltalogger/schema.sql")
-							&& setDBSchemaVer(1),
+							&& setDBSchemaVer(2),
 					"Failed creating SQL tables"
 			);
 		} else if (version == 0) {
@@ -301,6 +301,19 @@ public class DatabaseManager implements Runnable {
 
 				DeltaLogger.LOG.info("Database migration completed.");
 			}
+		}
+		if(version == 1) {
+			String migrateSql = Resources.toString(
+					DatabaseManager.class.getResource("/data/deltalogger/migration/entity-mob-migrate.sql"), StandardCharsets.UTF_8);
+
+			DeltaLogger.LOG.info("Updating schema version");
+
+			jdbi.withHandle(handle -> handle
+					.createScript(migrateSql)
+					.execute()
+			);
+			failOnFalse(runScript("/data/deltalogger/migration/entity-mob-migrate.sql"), "Unable to update database version");
+			setDBSchemaVer(2);
 		}
 	}
 

@@ -17,12 +17,14 @@ import java.util.UUID;
 
 import static com.github.fabricservertools.deltalogger.Chat.format;
 import static com.github.fabricservertools.deltalogger.Chat.joinText;
+import static com.github.fabricservertools.deltalogger.command.rollback.RollbackUtils.createIdentifier;
+import static com.github.fabricservertools.deltalogger.command.rollback.RollbackUtils.getItem;
 
 /**
  * POJO representing an accounting of transaction interactions with inventory
  * screens.
  */
-public class TransactionPos extends Bean {
+public class TransactionPos implements Bean {
 	private int id;
 	private String playerName;
 	private String time;
