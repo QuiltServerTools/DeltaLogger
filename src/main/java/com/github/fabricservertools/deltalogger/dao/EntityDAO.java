@@ -29,7 +29,8 @@ public class EntityDAO {
 					rs.getString("date"),
 					rs.getInt("x"),
 					rs.getInt("y"),
-					rs.getInt("z")
+					rs.getInt("z"),
+					rs.getString("entity_type")
 			);
 		});
 
@@ -45,7 +46,7 @@ public class EntityDAO {
 		));
 	}
 
-	public List<MobGrief> search(int idOffset, int limit, String where) {
+	public List<MobGrief> searchGriefs(int idOffset, int limit, String where) {
 		return jdbi.withHandle(handle -> handle
 				.select(String.join(" ",
 						"SELECT MG.id, date, ER.name as entity, PL.name as target, DR.name as dimension, x, y, z",
@@ -62,23 +63,6 @@ public class EntityDAO {
 		);
 	}
 
-	public List<MobGrief> rollbackGriefs(int idOffset, String conditions, BlockPos pos) {
-		return jdbi.withHandle(handle -> handle
-				.select(String.join(" ",
-						"SELECT MG.id, date, ER.name as entity, PL.name as target, DR.name as dimension, x, y, z",
-						"FROM (SELECT * FROM mob_grief WHERE id <",
-						SQLUtils.offsetOrZeroLatest("mob_grief", "id", idOffset),
-						conditions,
-						"ORDER BY `id` DESC) as MG",
-						"LEFT JOIN players as PL ON MG.target = PL.id",
-						"INNER JOIN registry as ER ON MG.entity_type = ER.id",
-						"LEFT JOIN registry as DR ON MG.dimension_id = DR.id"
-				))
-				.mapTo(MobGrief.class)
-				.list()
-		);
-	}
-
 	public List<KilledEntity> getLatestKilledEntities(int idOffset, int limit) {
 		return jdbi.withHandle(handle -> handle
 				.select(String.join(" ",
@@ -89,6 +73,21 @@ public class EntityDAO {
 						"LEFT JOIN players as PL ON KE.killer_id = PL.id",
 						"LEFT JOIN registry as DR ON KE.dimension_id = DR.id"
 				), limit)
+				.mapTo(KilledEntity.class)
+				.list()
+		);
+	}
+
+	public List<KilledEntity> searchEntities(String where) {
+		return jdbi.withHandle(handle -> handle
+				.select(String.join(" ",
+						"SELECT KE.id, KE.name, source, PL.name as killer, DR.name as dimension, date, x, y, z",
+						"FROM (SELECT * FROM killed_entities WHERE ",
+						where,
+						"ORDER BY `id` DESC LIMIT ?) as KE",
+						"LEFT JOIN players as PL ON KE.killer_id = PL.id",
+						"LEFT JOIN registry as DR ON KE.dimension_id = DR.id"
+				))
 				.mapTo(KilledEntity.class)
 				.list()
 		);
@@ -135,7 +134,8 @@ public class EntityDAO {
 			UUID killer_id,
 			Instant date,
 			BlockPos pos,
-			Identifier dimId
+			Identifier dimId,
+			Identifier entityType
 	) {
 		return new QueueOperation() {
 			public int getPriority() {
@@ -144,10 +144,10 @@ public class EntityDAO {
 
 			public PreparedBatch prepareBatch(Handle handle) {
 				return handle.prepareBatch(String.join("",
-						"INSERT INTO killed_entities (name, source, killer_id, date, x, y, z, dimension_id) ",
+						"INSERT INTO killed_entities (name, source, killer_id, date, x, y, z, dimension_id, entity_type) ",
 						"VALUES (:name, :source, ",
 						"(CASE WHEN :killer_id IS NULL THEN NULL ELSE (SELECT id FROM players WHERE uuid=:killer_id) END), ",
-						":date, :x, :y, :z, (SELECT `id` FROM registry WHERE `name`=:dimension))"
+						":date, :x, :y, :z, (SELECT `id` FROM registry WHERE `name`=:dimension), (SELECT `id` FROM registry WHERE `name`=:entity))"
 				));
 			}
 
@@ -159,6 +159,7 @@ public class EntityDAO {
 						.bind("date", SQLUtils.instantToUTCString(date))
 						.bind("x", pos.getX()).bind("z", pos.getZ()).bind("y", pos.getY())
 						.bind("dimension", dimId.toString())
+						.bind("entity", entityType.toString())
 						.add();
 			}
 		};

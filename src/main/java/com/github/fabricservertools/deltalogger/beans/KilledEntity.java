@@ -5,7 +5,9 @@ import net.minecraft.text.LiteralText;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 
-public class KilledEntity extends Bean {
+import static com.github.fabricservertools.deltalogger.command.rollback.RollbackUtils.createIdentifier;
+
+public class KilledEntity implements Bean {
 	private int id;
 	private String name;
 	private String source;
@@ -15,8 +17,9 @@ public class KilledEntity extends Bean {
 	private int x;
 	private int y;
 	private int z;
+	private String entity_type;
 
-	public KilledEntity(int id, String name, String source, String killer, String dimension, String time, int x, int y, int z) {
+	public KilledEntity(int id, String name, String source, String killer, String dimension, String time, int x, int y, int z, String entity_type) {
 		this.id = id;
 		this.name = name;
 		this.source = source;
@@ -26,6 +29,7 @@ public class KilledEntity extends Bean {
 		this.x = x;
 		this.y = y;
 		this.z = z;
+		this.entity_type = entity_type;
 	}
 
 	public int getId() {
@@ -102,12 +106,10 @@ public class KilledEntity extends Bean {
 
 	@Override
 	public void rollback(World world) {
-		/*Entity entity = Registry.ENTITY_TYPE.get(createIdentifier(INSERT ENTITY TYPE AFTER CHANGE))).create(world);
+		Entity entity = Registry.ENTITY_TYPE.get(createIdentifier(this.entity_type)).create(world);
 		assert entity != null;
 		entity.setCustomName(new LiteralText(name));
 		entity.setPos(x, y, z);
-		world.spawnEntity(entity);*/
-		// Need to make a modification to the DB format via a migration script to enable this code
-		// Will add once numerous migration changes need to be made
+		world.spawnEntity(entity);
 	}
 }

@@ -74,17 +74,11 @@ public class ModInit implements DedicatedServerModInitializer {
 	}
 
 	private void onServerStart(MinecraftServer server) {
-		HashSet<Identifier> dimensionIds = new HashSet<>();
-		server.getWorlds().forEach(world -> {
-			Identifier dimid = world.getRegistryKey().getValue();
-			dimensionIds.add(dimid);
-		});
-
 		List<Set<Identifier>> idSets = new ArrayList<Set<Identifier>>() {{
 			add(Registry.BLOCK.getIds());
 			add(Registry.ITEM.getIds());
 			add(Registry.ENTITY_TYPE.getIds());
-			add(dimensionIds);
+			add(server.getSaveProperties().getGeneratorOptions().getDimensions().getIds());
 		}};
 
 		Set<Identifier> ids = idSets.stream().reduce(Sets::union).orElse(new HashSet<>());

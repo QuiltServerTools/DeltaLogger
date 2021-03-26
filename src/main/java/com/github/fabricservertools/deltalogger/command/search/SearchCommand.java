@@ -190,7 +190,7 @@ public class SearchCommand {
 
 
     private static void sendGrief(ServerPlayerEntity player, String sqlPlace, int limit) {
-        MutableText griefMessage = DAO.entity.search(0, limit, sqlPlace).stream().map(MobGrief::getTextWithPos)
+        MutableText griefMessage = DAO.entity.searchGrief(0, limit, sqlPlace).stream().map(MobGrief::getTextWithPos)
                 .reduce((p1, p2) -> Chat.concat("\n", p1, p2))
                 .map(txt -> Chat.concat("\n", Chat.text("deltalogger.history.grief"), txt))
                 .orElse(Chat.text("deltalogger.none_found.no_pos.grief"));

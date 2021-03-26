@@ -172,7 +172,7 @@ public class BlockDAO {
 
 			public PreparedBatch prepareBatch(Handle handle) {
 				return handle.prepareBatch(String.join(" ",
-						"INSERT INTO placements (date, placed, x, y, z, `state`, player_id, type, dimension_id)",
+						"INSERT INTO placements (date, placed, x, y, z, state, player_id, type, dimension_id)",
 						"SELECT :date, :placed, :x, :y, :z, :state,",
 						"(SELECT id FROM players WHERE uuid=:playeruuid),",
 						"(SELECT id FROM registry WHERE name=:blockid),",

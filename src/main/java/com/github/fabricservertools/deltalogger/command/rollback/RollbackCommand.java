@@ -83,6 +83,10 @@ public class RollbackCommand {
 
         source.sendFeedback(new TranslatableText("deltalogger.rollback.transaction.complete").formatted(Formatting.ITALIC, Formatting.GRAY).append(new TranslatableText("deltalogger.rollback.progress", 2, 2).formatted(Formatting.YELLOW)), false);
 
+        //rollbackEntities(parsedCriteria, world);
+
+        //source.sendFeedback(new TranslatableText("deltalogger.rollback.transaction.complete").formatted(Formatting.ITALIC, Formatting.GRAY).append(new TranslatableText("deltalogger.rollback.progress", 3, 3).formatted(Formatting.YELLOW)), false);
+
         sendFinishFeedback(source);
     }
 
@@ -97,5 +101,9 @@ public class RollbackCommand {
 
     private static void sendFinishFeedback(ServerCommandSource scs) {
         scs.sendFeedback(new TranslatableText("deltalogger.rollback.complete").formatted(Formatting.GREEN).append(new TranslatableText("deltalogger.rollback.progress", 2, 2).formatted(Formatting.YELLOW)), true);
+    }
+    private static void rollbackEntities(String criteria, World world) {
+        //TODO entity rollbacks
+        DAO.entity.searchEntities(criteria).forEach(killedEntity -> killedEntity.rollback(world));
     }
 }
