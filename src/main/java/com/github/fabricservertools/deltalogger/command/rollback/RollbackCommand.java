@@ -28,17 +28,18 @@ import static net.minecraft.server.command.CommandManager.literal;
 public class RollbackCommand {
     public static void register(LiteralCommandNode<ServerCommandSource> root) {
         LiteralCommandNode<ServerCommandSource> rollbackNode = literal("rollback")
-				.requires(scs -> DlPermissions.checkPerms(scs, "deltalogger.rollback"))
-				.then(
-                argument("radius", IntegerArgumentType.integer()).then(argument("time", StringArgumentType.string())
-                        .executes(ctx -> execute(ctx.getSource(), "", ctx.getSource().getPlayer(),
-                                IntegerArgumentType.getInteger(ctx, "radius"),
-                                StringArgumentType.getString(ctx, "time")))
-                        .then(argument("criteria", StringArgumentType.greedyString())
-                                .suggests(RollbackParser.getInstance())
-                                .executes(ctx -> execute(ctx.getSource(), StringArgumentType.getString(ctx, "criteria"),
-                                        ctx.getSource().getPlayer(), IntegerArgumentType.getInteger(ctx, "radius"),
-                                        StringArgumentType.getString(ctx, "time"))))))
+                .requires(scs -> DlPermissions.checkPerms(scs, "deltalogger.rollback"))
+                .then(
+                        argument("radius", IntegerArgumentType.integer()).then(argument("time", StringArgumentType.string())
+                                .suggests(TimeParser.INSTANCE)
+                                .executes(ctx -> execute(ctx.getSource(), "", ctx.getSource().getPlayer(),
+                                        IntegerArgumentType.getInteger(ctx, "radius"),
+                                        StringArgumentType.getString(ctx, "time")))
+                                .then(argument("criteria", StringArgumentType.greedyString())
+                                        .suggests(RollbackParser.getInstance())
+                                        .executes(ctx -> execute(ctx.getSource(), StringArgumentType.getString(ctx, "criteria"),
+                                                ctx.getSource().getPlayer(), IntegerArgumentType.getInteger(ctx, "radius"),
+                                                StringArgumentType.getString(ctx, "time"))))))
                 .build();
         root.addChild(rollbackNode);
     }
@@ -102,6 +103,7 @@ public class RollbackCommand {
     private static void sendFinishFeedback(ServerCommandSource scs) {
         scs.sendFeedback(new TranslatableText("deltalogger.rollback.complete").formatted(Formatting.GREEN).append(new TranslatableText("deltalogger.rollback.progress", 2, 2).formatted(Formatting.YELLOW)), true);
     }
+
     private static void rollbackEntities(String criteria, World world) {
         //TODO entity rollbacks
         DAO.entity.searchEntities(criteria).forEach(killedEntity -> killedEntity.rollback(world));

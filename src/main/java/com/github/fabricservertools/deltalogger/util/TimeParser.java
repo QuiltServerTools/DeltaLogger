@@ -1,8 +1,19 @@
 package com.github.fabricservertools.deltalogger.util;
 
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
+import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import net.minecraft.server.command.ServerCommandSource;
+
 import java.time.Duration;
+import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
 
 public class TimeParser {
+	public static TimeParserSuggestor INSTANCE = new TimeParserSuggestor();
+
 	private static class Pair<K, V> {
 		K key;
 		V value;
@@ -10,6 +21,31 @@ public class TimeParser {
 		public Pair(K key, V value) {
 			this.key = key;
 			this.value = value;
+		}
+	}
+
+	private static class TimeParserSuggestor implements SuggestionProvider<ServerCommandSource> {
+		private enum time_units {
+			S,//Seconds
+			M,//Minutes
+			H,//Hours
+			D,//Days
+			Y//Years
+		}
+		@Override
+		public CompletableFuture<Suggestions> getSuggestions(CommandContext context, SuggestionsBuilder builder) throws CommandSyntaxException {
+			String current = builder.getRemaining().toLowerCase();
+			for (time_units actions : time_units.values()) {
+				String name = actions.name().toLowerCase();
+				if (name.contains(current)) {
+					for(int i = 1; i < 11; i++) {
+						builder.suggest(i + name.toLowerCase(Locale.ROOT));
+					}
+				} else if (Character.isDigit(current.charAt(0))) {
+					builder.suggest(current.charAt(0) + name);
+				}
+			}
+			return builder.buildFuture();
 		}
 	}
 
