@@ -8,7 +8,7 @@ import com.github.fabricservertools.deltalogger.listeners.PlayerEventListener;
 import com.github.fabricservertools.deltalogger.network.client.InspectPacket;
 import com.github.fabricservertools.deltalogger.network.client.SearchPacket;
 import com.google.common.collect.Sets;
-import net.fabricmc.api.DedicatedServerModInitializer;
+import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
@@ -24,7 +24,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
-public class ModInit implements DedicatedServerModInitializer {
+public class ModInit implements ModInitializer {
 	private static DatabaseManager dm;
 	public static Properties CONFIG;
 	public static Thread dmThread;
@@ -102,7 +102,7 @@ public class ModInit implements DedicatedServerModInitializer {
 	}
 
 	@Override
-	public void onInitializeServer() {
+	public void onInitialize() {
 		loadConfig(Paths.get(FabricLoader.getInstance().getConfigDir().toString(), "deltalogger.properties"));
 
 		ServerLifecycleEvents.SERVER_STARTING.register(this::onServerSetup);
