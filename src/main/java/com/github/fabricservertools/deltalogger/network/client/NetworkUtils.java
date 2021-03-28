@@ -31,7 +31,7 @@ public class NetworkUtils {
     }
 
     public static PacketByteBuf setTransaction(TransactionPos transactionPos) {
-        return setTransaction(new Transaction(0, transactionPos.getPlayerName(), transactionPos.getTime(), transactionPos.getItemType(), transactionPos.getCount(), Util.NIL_UUID), transactionPos.getPos());
+        return setTransaction(new Transaction(0, transactionPos.getPlayerName(), transactionPos.getTime(), transactionPos.getItemType(), transactionPos.getCount(), Util.NIL_UUID, null), transactionPos.getPos());
     }
 
     public static PacketByteBuf setPlacement(Placement placement) {

@@ -19,14 +19,16 @@ public class Transaction {
 	private String itemType;
 	private int count;
 	private UUID containerUUID;
+	private final String data;
 
-	public Transaction(int id, String playerName, String time, String itemType, int count, UUID containerUUID) {
+	public Transaction(int id, String playerName, String time, String itemType, int count, UUID containerUUID, String data) {
 		this.id = id;
 		this.playerName = playerName;
 		this.time = time;
 		this.itemType = itemType;
 		this.count = count;
 		this.containerUUID = containerUUID;
+		this.data = data;
 	}
 
 	public int getId() {
@@ -75,6 +77,10 @@ public class Transaction {
 
 	public void setContainerUUID(UUID containerUUID) {
 		this.containerUUID = containerUUID;
+	}
+
+	public String getData() {
+		return this.data;
 	}
 
 	public MutableText getText() {
