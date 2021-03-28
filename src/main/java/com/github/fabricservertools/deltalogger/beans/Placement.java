@@ -1,7 +1,12 @@
 package com.github.fabricservertools.deltalogger.beans;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtHelper;
+import net.minecraft.nbt.StringNbtReader;
+import net.minecraft.nbt.Tag;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.TranslatableText;
@@ -165,7 +170,15 @@ public class Placement implements Bean {
 	public void rollback(World world) {
 		//Every placement is called here, where the block setting logic is
 		//Generates a BlockState object from identifier
-		BlockState state = getBlock(createIdentifier(blockType)).getDefaultState();
+		//BlockState state = getBlock(createIdentifier(blockType)).getDefaultState();
+		CompoundTag allTag = new CompoundTag();
+		allTag.putString("Name", createIdentifier(blockType).toString());
+		try {
+			allTag.put("Properties", StringNbtReader.parse(state));
+		} catch (CommandSyntaxException e) {
+			e.printStackTrace();
+		}
+		BlockState state = NbtHelper.toBlockState(allTag);
 		if (getPlaced()) {
 			world.setBlockState(new BlockPos(getX(), getY(), getZ()), Blocks.AIR.getDefaultState());
 		} else {
