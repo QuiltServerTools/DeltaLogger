@@ -134,9 +134,8 @@ public class TransactionPos implements Bean {
         ItemStack itemStack = new ItemStack(getItem(createIdentifier(getItemType())), amount * (amount < 0 ? -1 : 1));
 
         if (data != null) {
-            CompoundTag tag = new CompoundTag();
             try {
-                tag.put("Properties", StringNbtReader.parse(data));
+                CompoundTag tag = StringNbtReader.parse(data);
                 itemStack.setTag(tag);
             } catch (CommandSyntaxException e) {
                 e.printStackTrace();

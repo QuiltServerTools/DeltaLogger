@@ -4,6 +4,8 @@ import com.github.fabricservertools.deltalogger.QueueOperation;
 import com.github.fabricservertools.deltalogger.SQLUtils;
 import com.github.fabricservertools.deltalogger.beans.Transaction;
 import com.github.fabricservertools.deltalogger.beans.TransactionPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtHelper;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import org.jdbi.v3.core.Handle;
@@ -143,7 +145,7 @@ public class TransactionDAO {
 	}
 
 	public static QueueOperation insert(UUID playerId, UUID containerId, Instant date, Identifier item_type,
-										Integer item_count, byte[] item_data) {
+										Integer item_count, CompoundTag item_data) {
 		return new QueueOperation() {
 			public int getPriority() {
 				return 3;
@@ -160,7 +162,7 @@ public class TransactionDAO {
 			public PreparedBatch addBindings(PreparedBatch batch) {
 				return batch.bind("playerId", playerId.toString()).bind("containerId", containerId.toString())
 						.bind("date", SQLUtils.instantToUTCString(date)).bind("item_type", item_type.toString())
-						.bind("item_count", item_count).bind("item_data", item_data).add();
+						.bind("item_count", item_count).bind("item_data", item_data!=null ? item_data.asString(): null).add();
 			}
 		};
 	}

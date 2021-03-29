@@ -4,7 +4,9 @@ import com.github.fabricservertools.deltalogger.DatabaseManager;
 import com.github.fabricservertools.deltalogger.ItemUtils;
 import com.github.fabricservertools.deltalogger.NbtUuid;
 import com.github.fabricservertools.deltalogger.dao.TransactionDAO;
-import net.minecraft.item.Item;
+import com.github.fabricservertools.deltalogger.util.TaggedItem;
+import com.google.common.io.ByteArrayDataOutput;
+import com.google.common.io.ByteStreams;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket;
 import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
@@ -12,7 +14,6 @@ import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.Pair;
 import net.minecraft.util.registry.Registry;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -20,9 +21,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.io.IOException;
+import java.time.Instant;
+import java.util.*;
 
 /**
  * Hooks to log the transaction events with inventory screens
@@ -30,7 +31,7 @@ import java.util.UUID;
 @Mixin(ServerPlayNetworkHandler.class)
 public abstract class ServerPlayNetworkHandlerMixin {
     private UUID screenHandlerUUID;
-    private List<Pair<Item, Integer>> modified = new ArrayList<>();
+    private Map<TaggedItem, Integer> modified = new HashMap<>();
     private ItemStack[] tracked;
 
     @Shadow
@@ -48,18 +49,31 @@ public abstract class ServerPlayNetworkHandlerMixin {
 
     private void commit() {
         if (this.screenHandlerUUID != null) {
-            ItemUtils.compressTransactions(this.modified).forEach((item, count) -> {
-                if (count == 0) return;
-                Identifier id = Registry.ITEM.getId(item);
+            for (Map.Entry<TaggedItem, Integer> entry : this.modified.entrySet()) {
+                if (entry.getValue() == 0) continue;
+                Identifier id = Registry.ITEM.getId(entry.getKey().getItem());
+                /*if (entry.getKey().getTag() != null) {
+                    try {
+                        @SuppressWarnings("UnstableApiUsage")
+                        ByteArrayDataOutput dataOutput = ByteStreams.newDataOutput();
+                        entry.getKey().getTag().write(dataOutput);
+                        data = dataOutput.toByteArray();
+                    } catch (IOException e) {
+                        throw new AssertionError(e); // Should not happen
+                    }
+                } else {
+                    data = null;
+                }*/
+
                 DatabaseManager.getSingleton().queueOp(TransactionDAO.insert(
                         player.getUuid(),
                         screenHandlerUUID,
-                        java.time.Instant.now(),
+                        Instant.now(),
                         id,
-                        count,
-                        null
+                        entry.getValue(),
+                        entry.getKey().getTag()
                 ));
-            });
+            }
 
             this.modified.clear();
             this.screenHandlerUUID = null;
@@ -99,15 +113,8 @@ public abstract class ServerPlayNetworkHandlerMixin {
                 ItemStack current = player.currentScreenHandler.getSlot(i).getStack();
                 ItemStack prev = tracked[i];
                 if (!ItemStack.areEqual(prev, current)) {
-                    if (prev.isItemEqual(current) || current.isEmpty() || prev.isEmpty()) {
-                        // if same item then subtract and do transaction
-                        Item item = prev.isEmpty() ? current.getItem() : prev.getItem();
-                        modified.add(new Pair<>(item, current.getCount() - prev.getCount()));
-                    } else {
-                        // else treat as item swap
-                        modified.add(new Pair<>(prev.getItem(), -prev.getCount()));
-                        modified.add(new Pair<>(current.getItem(), current.getCount()));
-                    }
+                    if (!prev.isEmpty()) modified.merge(TaggedItem.fromStack(prev), -prev.getCount(), Integer::sum);
+                    if (!current.isEmpty()) modified.merge(TaggedItem.fromStack(current), current.getCount(), Integer::sum);
                     tracked[i] = current.copy();
                 }
             }
