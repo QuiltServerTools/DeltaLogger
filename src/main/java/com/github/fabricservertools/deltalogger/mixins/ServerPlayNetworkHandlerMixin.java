@@ -52,8 +52,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
             for (Map.Entry<TaggedItem, Integer> entry : this.modified.entrySet()) {
                 if (entry.getValue() == 0) continue;
                 Identifier id = Registry.ITEM.getId(entry.getKey().getItem());
-                byte[] data;
-                if (entry.getKey().getTag() != null) {
+                /*if (entry.getKey().getTag() != null) {
                     try {
                         @SuppressWarnings("UnstableApiUsage")
                         ByteArrayDataOutput dataOutput = ByteStreams.newDataOutput();
@@ -64,7 +63,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
                     }
                 } else {
                     data = null;
-                }
+                }*/
 
                 DatabaseManager.getSingleton().queueOp(TransactionDAO.insert(
                         player.getUuid(),
@@ -72,7 +71,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
                         Instant.now(),
                         id,
                         entry.getValue(),
-                        data
+                        entry.getKey().getTag()
                 ));
             }
 
