@@ -6,7 +6,7 @@ import com.github.fabricservertools.deltalogger.beans.Placement;
 import com.github.fabricservertools.deltalogger.beans.TransactionPos;
 import com.github.fabricservertools.deltalogger.command.DlPermissions;
 import com.github.fabricservertools.deltalogger.dao.DAO;
-import com.github.fabricservertools.deltalogger.network.client.SearchPacket;
+import com.github.fabricservertools.deltalogger.network.SearchPacket;
 import com.mojang.brigadier.LiteralMessage;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;

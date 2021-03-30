@@ -103,7 +103,7 @@ public class GQLWiring {
 										100
 								)
 								.map(tup ->
-										dataResult(DAO.entity.getLatestKilledEntities(tup._1, tup._2))
+										dataResult(DAO.entity.getLatestKilledEntities(tup._2))
 								)
 								.getOrElseGet(GQLWiring::errResult)
 						)

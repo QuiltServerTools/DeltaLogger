@@ -1,4 +1,4 @@
-package com.github.fabricservertools.deltalogger.network.client;
+package com.github.fabricservertools.deltalogger.network;
 
 import com.github.fabricservertools.deltalogger.beans.Placement;
 import com.github.fabricservertools.deltalogger.beans.TransactionPos;

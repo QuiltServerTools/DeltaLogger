@@ -4,8 +4,10 @@ import com.github.fabricservertools.deltalogger.QueueOperation;
 import com.github.fabricservertools.deltalogger.SQLUtils;
 import com.github.fabricservertools.deltalogger.beans.KilledEntity;
 import com.github.fabricservertools.deltalogger.beans.MobGrief;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.PreparedBatch;
@@ -22,7 +24,6 @@ public class EntityDAO {
 		jdbi.registerRowMapper(KilledEntity.class, (rs, ctx) -> {
 			return new KilledEntity(
 					rs.getInt("id"),
-					rs.getString("name"),
 					rs.getString("source"),
 					rs.getString("killer"),
 					rs.getString("dimension"),
@@ -30,7 +31,8 @@ public class EntityDAO {
 					rs.getInt("x"),
 					rs.getInt("y"),
 					rs.getInt("z"),
-					rs.getString("entity_type")
+					rs.getString("entity_type"),
+					rs.getString("entity_nbt")
 			);
 		});
 
@@ -63,12 +65,11 @@ public class EntityDAO {
 		);
 	}
 
-	public List<KilledEntity> getLatestKilledEntities(int idOffset, int limit) {
+	public List<KilledEntity> getLatestKilledEntities(int limit) {
 		return jdbi.withHandle(handle -> handle
 				.select(String.join(" ",
-						"SELECT KE.id, KE.name, source, PL.name as killer, DR.name as dimension, date, x, y, z",
-						"FROM (SELECT * FROM killed_entities WHERE id <",
-						SQLUtils.offsetOrZeroLatest("killed_entities", "id", idOffset),
+						"SELECT KE.id, KE.entity_nbt, source, PL.name as killer, DR.name as dimension, date, x, y, z",
+						"FROM (SELECT * FROM killed_entities",
 						"ORDER BY `id` DESC LIMIT ?) as KE",
 						"LEFT JOIN players as PL ON KE.killer_id = PL.id",
 						"LEFT JOIN registry as DR ON KE.dimension_id = DR.id"
@@ -81,13 +82,32 @@ public class EntityDAO {
 	public List<KilledEntity> searchEntities(String where) {
 		return jdbi.withHandle(handle -> handle
 				.select(String.join(" ",
-						"SELECT KE.id, KE.name, source, PL.name as killer, DR.name as dimension, date, x, y, z",
+						"SELECT KE.id, KE.entity_nbt, source, PL.name as killer, DR.name as dimension, date, x, y, z",
 						"FROM (SELECT * FROM killed_entities WHERE ",
 						where,
 						"ORDER BY `id` DESC LIMIT ?) as KE",
 						"LEFT JOIN players as PL ON KE.killer_id = PL.id",
 						"LEFT JOIN registry as DR ON KE.dimension_id = DR.id"
 				))
+				.mapTo(KilledEntity.class)
+				.list()
+		);
+	}
+
+	public List<KilledEntity> rollbackEntities(String where, String time, Identifier dimension, BlockPos posS, BlockPos posL) {
+		return jdbi.withHandle(handle -> handle
+				.select(String.join(" ",
+						"SELECT KE.id, DE.name as entity_type, KE.entity_nbt, source, PL.name as killer, DR.name as dimension, date, x, y, z",
+						"FROM (SELECT * FROM killed_entities WHERE",
+						"x >= :xs AND x <= :xl AND y >= :ys AND y <= :yl AND z >= :zs AND z <= :zl AND dimension_id = (SELECT id FROM registry WHERE name = :dim) AND date > \""+time+"\"",
+						where,
+						"ORDER BY `id` DESC) as KE",
+						"LEFT JOIN players as PL ON KE.killer_id = PL.id",
+						"LEFT JOIN registry as DR ON KE.dimension_id = DR.id",
+						"LEFT JOIN registry as DE ON KE.entity_type = DE.id"
+				))
+				.bind("dim", dimension.toString())
+				.bind("xs", posS.getX()).bind("xl", posL.getX()).bind("ys", posS.getY()).bind("yl", posL.getY()).bind("zs", posS.getZ()).bind("zl", posL.getZ())
 				.mapTo(KilledEntity.class)
 				.list()
 		);
@@ -129,13 +149,13 @@ public class EntityDAO {
 	}
 
 	public static QueueOperation insertKill(
-			String name,
 			String sourceName,
 			UUID killer_id,
 			Instant date,
 			BlockPos pos,
 			Identifier dimId,
-			Identifier entityType
+			Identifier entityType,
+			CompoundTag tag
 	) {
 		return new QueueOperation() {
 			public int getPriority() {
@@ -144,22 +164,22 @@ public class EntityDAO {
 
 			public PreparedBatch prepareBatch(Handle handle) {
 				return handle.prepareBatch(String.join("",
-						"INSERT INTO killed_entities (name, source, killer_id, date, x, y, z, dimension_id, entity_type) ",
-						"VALUES (:name, :source, ",
+						"INSERT INTO killed_entities (source, killer_id, date, x, y, z, dimension_id, entity_type, entity_nbt) ",
+						"VALUES (:source, ",
 						"(CASE WHEN :killer_id IS NULL THEN NULL ELSE (SELECT id FROM players WHERE uuid=:killer_id) END), ",
-						":date, :x, :y, :z, (SELECT `id` FROM registry WHERE `name`=:dimension), (SELECT `id` FROM registry WHERE `name`=:entity))"
+						":date, :x, :y, :z, (SELECT `id` FROM registry WHERE `name`=:dimension), (SELECT `id` FROM registry WHERE `name`=:entity), :nbt)"
 				));
 			}
 
 			public PreparedBatch addBindings(PreparedBatch batch) {
 				return batch
-						.bind("name", name)
 						.bind("source", sourceName)
 						.bind("killer_id", killer_id != null ? killer_id.toString() : null)
 						.bind("date", SQLUtils.instantToUTCString(date))
 						.bind("x", pos.getX()).bind("z", pos.getZ()).bind("y", pos.getY())
 						.bind("dimension", dimId.toString())
 						.bind("entity", entityType.toString())
+						.bind("nbt", tag != null ? tag.asString() : null)
 						.add();
 			}
 		};

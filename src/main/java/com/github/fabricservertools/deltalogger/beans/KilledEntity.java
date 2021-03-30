@@ -1,7 +1,7 @@
 package com.github.fabricservertools.deltalogger.beans;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.text.LiteralText;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 
@@ -9,7 +9,6 @@ import static com.github.fabricservertools.deltalogger.command.rollback.Rollback
 
 public class KilledEntity implements Bean {
 	private int id;
-	private String name;
 	private String source;
 	private String killer;
 	private String dimension;
@@ -17,11 +16,11 @@ public class KilledEntity implements Bean {
 	private int x;
 	private int y;
 	private int z;
-	private String entity_type;
+	private final String type;
+	private final String nbt;
 
-	public KilledEntity(int id, String name, String source, String killer, String dimension, String time, int x, int y, int z, String entity_type) {
+	public KilledEntity(int id, String source, String killer, String dimension, String time, int x, int y, int z, String type, String nbt) {
 		this.id = id;
-		this.name = name;
 		this.source = source;
 		this.killer = killer;
 		this.dimension = dimension;
@@ -29,7 +28,8 @@ public class KilledEntity implements Bean {
 		this.x = x;
 		this.y = y;
 		this.z = z;
-		this.entity_type = entity_type;
+		this.type = type;
+		this.nbt = nbt;
 	}
 
 	public int getId() {
@@ -40,12 +40,8 @@ public class KilledEntity implements Bean {
 		this.id = id;
 	}
 
-	public String getName() {
-		return this.name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
+	public String getNbt() {
+		return this.nbt;
 	}
 
 	public String getSource() {
@@ -104,12 +100,16 @@ public class KilledEntity implements Bean {
 		this.z = z;
 	}
 
+	public String getEntityType() {
+		return this.type;
+	}
+
 	@Override
 	public void rollback(World world) {
-		Entity entity = Registry.ENTITY_TYPE.get(createIdentifier(this.entity_type)).create(world);
+		/*Entity entity = Registry.ENTITY_TYPE.get(createIdentifier(this.type)).create(world);
 		assert entity != null;
-		entity.setCustomName(new LiteralText(name));
 		entity.setPos(x, y, z);
 		world.spawnEntity(entity);
+*/
 	}
 }

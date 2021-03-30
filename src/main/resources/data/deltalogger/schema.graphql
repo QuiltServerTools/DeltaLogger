@@ -43,7 +43,7 @@ type Transaction {
 
 type KilledEntity {
   id: Int
-  name: String
+  type: String
   source: String
   killer: String
   dimension: ID
@@ -51,6 +51,7 @@ type KilledEntity {
   x: Int
   y: Int
   z: Int
+  entity_nbt: String
 }
 
 type MobGrief {

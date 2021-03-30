@@ -13,6 +13,7 @@ import net.minecraft.entity.mob.CreeperEntity;
 import net.minecraft.entity.mob.GhastEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.FireballEntity;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
@@ -38,13 +39,13 @@ public class EntityEventListener {
 			return ActionResult.PASS;
 		}
 		DatabaseManager.getSingleton().queueOp(EntityDAO.insertKill(
-				entity.getCustomName().asString(),
 				source.getName(),
 				killer_id,
 				java.time.Instant.now(),
 				entity.getBlockPos(),
 				attacker.getEntityWorld().getRegistryKey().getValue(),
-				Registry.ENTITY_TYPE.getId(entity.getType())
+				Registry.ENTITY_TYPE.getId(entity.getType()),
+				entity.toTag(new CompoundTag())
 		));
 
 		return ActionResult.PASS;
