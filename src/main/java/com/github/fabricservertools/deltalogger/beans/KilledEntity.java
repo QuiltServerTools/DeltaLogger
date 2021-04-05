@@ -1,8 +1,15 @@
 package com.github.fabricservertools.deltalogger.beans;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.SpawnReason;
+import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.StringNbtReader;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.World;
 
 import static com.github.fabricservertools.deltalogger.command.rollback.RollbackUtils.createIdentifier;
@@ -106,10 +113,20 @@ public class KilledEntity implements Bean {
 
 	@Override
 	public void rollback(World world) {
-		/*Entity entity = Registry.ENTITY_TYPE.get(createIdentifier(this.type)).create(world);
+		Entity entity = Registry.ENTITY_TYPE.get(createIdentifier(this.type)).create(world);
 		assert entity != null;
-		entity.setPos(x, y, z);
+		entity.refreshPositionAndAngles(x, y, z, 0, 0);
+		if(entity instanceof MobEntity) {
+			((MobEntity) entity).initialize((ServerWorldAccess) world , world.getLocalDifficulty(new BlockPos(x, y, z)), SpawnReason.CHUNK_GENERATION, null, null);
+		};
+		try {
+			CompoundTag tag = StringNbtReader.parse(nbt);
+			tag.remove("Health");
+			tag.putFloat("Health", 10F);
+			entity.fromTag(tag);
+		} catch (CommandSyntaxException e) {
+			e.printStackTrace();
+		}
 		world.spawnEntity(entity);
-*/
 	}
 }

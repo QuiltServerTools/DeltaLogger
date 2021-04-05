@@ -86,7 +86,7 @@ public class RollbackCommand {
 
         rollbackEntities(criteria, world, dimension, new BlockPos(x2, y2, z2), new BlockPos(x1, y1, z1), timeValue);
 
-        source.sendFeedback(new TranslatableText("deltalogger.rollback.transaction.complete").formatted(Formatting.ITALIC, Formatting.GRAY).append(new TranslatableText("deltalogger.rollback.progress", 3, 3).formatted(Formatting.YELLOW)), false);
+        source.sendFeedback(new TranslatableText("deltalogger.rollback.entity.complete").formatted(Formatting.ITALIC, Formatting.GRAY).append(new TranslatableText("deltalogger.rollback.progress", 3, 3).formatted(Formatting.YELLOW)), false);
 
         sendFinishFeedback(source);
     }
@@ -101,7 +101,7 @@ public class RollbackCommand {
     }
 
     private static void sendFinishFeedback(ServerCommandSource scs) {
-        scs.sendFeedback(new TranslatableText("deltalogger.rollback.complete").formatted(Formatting.GREEN).append(new TranslatableText("deltalogger.rollback.progress", 2, 2).formatted(Formatting.YELLOW)), true);
+        scs.sendFeedback(new TranslatableText("deltalogger.rollback.complete").formatted(Formatting.GREEN).append(new TranslatableText("deltalogger.rollback.progress", 3, 3).formatted(Formatting.YELLOW)), true);
     }
 
     private static void rollbackEntities(String criteria, World world, Identifier dimension, BlockPos posS, BlockPos posL, String time) {
