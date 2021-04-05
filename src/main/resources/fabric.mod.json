@@ -16,9 +16,9 @@
   "license": "AGPL",
   "icon": "assets/deltalogger/icon.png",
 
-  "environment": "*",
+  "environment": "server",
   "entrypoints": {
-    "main": [
+    "server": [
       "com.github.fabricservertools.deltalogger.ModInit"
     ]
   },
