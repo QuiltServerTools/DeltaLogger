@@ -34,6 +34,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 import net.minecraft.world.explosion.Explosion;
+import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -44,6 +45,7 @@ public class PlayerEventListener {
         ServerPlayConnectionEvents.JOIN.register(this::onJoin);
         ServerPlayConnectionEvents.DISCONNECT.register(this::onQuit);
 
+        PlayerBlockBreakEvents.BEFORE.register(this::onBeforeBreak);
         PlayerBlockBreakEvents.AFTER.register(this::onBreakFinished);
         UseBlockCallback.EVENT.register(this::onUseBlock);
         BlockPlaceCallback.EVENT.register(this::onBlockPlace);
@@ -73,6 +75,9 @@ public class PlayerEventListener {
     }
 
     private ActionResult onBlockPlace(PlayerEntity playerEntity, ItemPlacementContext context) {
+        if (InspectCommand.hasToolEnabled(playerEntity))
+            return ActionResult.PASS;
+
         try {
             BlockPos pos = context.getBlockPos();
             PlayerEntity player = context.getPlayer();
@@ -104,7 +109,7 @@ public class PlayerEventListener {
         if (world.isClient) return ActionResult.PASS;
         ServerPlayerEntity player = (ServerPlayerEntity) playerEntity;
 
-        BlockPos pos = hit.getBlockPos();
+        BlockPos pos = hit.getBlockPos().offset(hit.getSide());
         BlockState state = world.getBlockState(pos);
 
         if (hand != Hand.MAIN_HAND) {
@@ -115,34 +120,7 @@ public class PlayerEventListener {
             return ActionResult.PASS;
         }
 
-        Block targetBlock = state.getBlock();
-        BlockEntity be = world.getBlockEntity(pos);
-        Identifier dimension = world.getRegistryKey().getValue();
-
-        if (be instanceof LockableContainerBlockEntity) {
-            Optional<UUID> opt;
-            if (targetBlock instanceof ChestBlock) {
-                opt = ((IChestBlockUUID) targetBlock).getNbtUuidAt(state, world, pos);
-            } else {
-                opt = Optional.of(((NbtUuid) be).getNbtUuid());
-            }
-            opt.ifPresent(uuid -> {
-                MutableText transactionMessage = DAO.transaction.getTransactionsFromUUID(uuid, 10).stream()
-                        .map(t -> t.getText()).reduce((t1, t2) -> Chat.concat("\n", t1, t2))
-                        .map(txt -> Chat.concat("\n", Chat.text("Transaction History"), txt))
-                        .orElse(Chat.text("No transactions found in container"));
-
-                Chat.send(player, transactionMessage);
-            });
-        }
-
-        MutableText placementMessage = DAO.block.getLatestPlacementsAt(dimension, pos, 0, 10).stream().map(Placement::getText)
-                .reduce((p1, p2) -> Chat.concat("\n", p1, p2))
-                .map(txt -> Chat.concat("\n", Chat.text("Placement history"), txt))
-                .orElse(Chat.text("No placements found at " + Chat.stringFrom(pos)));
-
-        Chat.send(player, placementMessage);
-
+        sendBlockData(world, player, pos, state);
 
         player.networkHandler.sendPacket(new ScreenHandlerSlotUpdateS2CPacket(
                 -2,
@@ -200,5 +178,45 @@ public class PlayerEventListener {
                 dimension,
                 java.time.Instant.now()
         ));
+    }
+
+    private boolean onBeforeBreak(World world, PlayerEntity playerEntity, BlockPos blockPos,
+                                  BlockState blockState, @Nullable BlockEntity blockEntity) {
+        if (InspectCommand.hasToolEnabled(playerEntity)) {
+            sendBlockData(world, playerEntity, blockPos, blockState);
+            return false;
+        }
+
+        return true;
+    }
+
+    private void sendBlockData(World world, PlayerEntity player, BlockPos pos, BlockState state) {
+        Block targetBlock = state.getBlock();
+        BlockEntity be = world.getBlockEntity(pos);
+        Identifier dimension = world.getRegistryKey().getValue();
+
+        if (be instanceof LockableContainerBlockEntity) {
+            Optional<UUID> opt;
+            if (targetBlock instanceof ChestBlock) {
+                opt = ((IChestBlockUUID) targetBlock).getNbtUuidAt(state, world, pos);
+            } else {
+                opt = Optional.of(((NbtUuid) be).getNbtUuid());
+            }
+            opt.ifPresent(uuid -> {
+                MutableText transactionMessage = DAO.transaction.getTransactionsFromUUID(uuid, 10).stream()
+                    .map(t -> t.getText()).reduce((t1, t2) -> Chat.concat("\n", t1, t2))
+                    .map(txt -> Chat.concat("\n", Chat.text("Transaction History"), txt))
+                    .orElse(Chat.text("No transactions found in container"));
+
+                Chat.send(player, transactionMessage);
+            });
+        }
+
+        MutableText placementMessage = DAO.block.getLatestPlacementsAt(dimension, pos, 0, 10).stream().map(Placement::getText)
+            .reduce((p1, p2) -> Chat.concat("\n", p1, p2))
+            .map(txt -> Chat.concat("\n", Chat.text("Placement history"), txt))
+            .orElse(Chat.text("No placements found at " + Chat.stringFrom(pos)));
+
+        Chat.send(player, placementMessage);
     }
 }
