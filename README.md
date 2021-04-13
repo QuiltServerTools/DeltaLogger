@@ -9,6 +9,8 @@
 Block and chest/container inventory tracking tool for fabric that can be configured to use MySQL or SQLite with a fast and responsive web UI.
 [Join the DeltaLogger discord](https://discord.gg/UxHnDWr)
 
+![player](https://media.discordapp.net/attachments/756264675905241210/828804618020061214/image.png?width=1023&height=215)
+
 ## Setup
 
 DeltaLogger supports two types of database: MySQL and SQLite
