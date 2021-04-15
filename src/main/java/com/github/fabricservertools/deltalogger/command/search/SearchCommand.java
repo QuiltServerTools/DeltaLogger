@@ -6,6 +6,7 @@ import com.github.fabricservertools.deltalogger.beans.Placement;
 import com.github.fabricservertools.deltalogger.beans.TransactionPos;
 import com.github.fabricservertools.deltalogger.command.DlPermissions;
 import com.github.fabricservertools.deltalogger.dao.DAO;
+import com.github.fabricservertools.deltalogger.network.NetworkUtils;
 import com.github.fabricservertools.deltalogger.network.SearchPacket;
 import com.mojang.brigadier.LiteralMessage;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -13,6 +14,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.Block;
 import net.minecraft.command.argument.BlockStateArgument;
 import net.minecraft.command.argument.GameProfileArgumentType;
@@ -162,7 +164,7 @@ public class SearchCommand {
      */
     private static void sendTransactions(ServerPlayerEntity player, String sqlContainer, int limit, boolean returnPackets) {
         if (returnPackets) {
-            DAO.transaction.search(limit, sqlContainer).forEach(transactionPos -> SearchPacket.sendToClient(transactionPos, player));
+            DAO.transaction.search(limit, sqlContainer).forEach(transactionPos -> ServerPlayNetworking.send(player, NetworkUtils.TRANSACTION_PACKET, NetworkUtils.setTransaction(transactionPos)));
         } else {
             MutableText transactionMessage = DAO.transaction.search(limit, sqlContainer).stream()
                     .map(TransactionPos::getText).reduce((t1, t2) -> Chat.concat("\n", t1, t2))
@@ -178,7 +180,7 @@ public class SearchCommand {
      */
     private static void sendPlacements(ServerPlayerEntity player, String sqlPlace, int limit, boolean returnPackets) {
         if (returnPackets) {
-            DAO.block.search(0, limit, sqlPlace).forEach(placement -> SearchPacket.sendToClient(placement, player));
+            DAO.block.search(0, limit, sqlPlace).forEach(placement -> ServerPlayNetworking.send(player, NetworkUtils.PLACEMENT_PACKET, NetworkUtils.setPlacement(placement)));
         } else {
             MutableText placementMessage = DAO.block.search(0, limit, sqlPlace).stream().map(Placement::getTextWithPos)
                     .reduce((p1, p2) -> Chat.concat("\n", p1, p2))
