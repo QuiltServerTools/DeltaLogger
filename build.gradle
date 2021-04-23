@@ -5,7 +5,9 @@ plugins {
 }
 
 repositories {
-    maven { url "https://porez.ml/maven"}
+    maven {
+        url = "https://maven.nucleoid.xyz"
+    }
     maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
 }
 sourceCompatibility = JavaVersion.VERSION_1_8
