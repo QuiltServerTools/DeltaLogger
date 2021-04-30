@@ -119,6 +119,10 @@ public class SearchCommand {
             limit = (int) propertyMap.get("limit");
         }
 
+        if (propertyMap.containsKey("packet")) {
+            returnPackets = (boolean) propertyMap.get("packet");
+        }
+
         // Check for an action and only query the relevant tables
         if (propertyMap.containsKey("action")) {
             String action = (String) propertyMap.get("action");

@@ -33,11 +33,10 @@ public class ModInit implements DedicatedServerModInitializer {
 
 	public static void loadConfig(Path configPath) {
 		Properties props = new Properties();
-
 		if (!configPath.toFile().exists()) {
 			// Create default config
 			try {
-				Files.copy(ModInit.class.getResourceAsStream("/data/deltalogger/default_config.properties"), configPath);
+				Files.copy(Objects.requireNonNull(ModInit.class.getResourceAsStream("/data/deltalogger/default_config.properties")), configPath);
 				DeltaLogger.LOG.info("Optional configuration for DeltaLogger created in `config` directory. Using SQLite by default.");
 			} catch (IOException e1) {
 				e1.printStackTrace();
