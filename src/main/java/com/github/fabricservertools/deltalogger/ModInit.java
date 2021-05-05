@@ -55,8 +55,6 @@ public class ModInit implements DedicatedServerModInitializer {
 
 	private void onServerSetup(MinecraftServer server) {
 		dm = DatabaseManager.create(server.getSavePath(WorldSavePath.ROOT).toFile());
-		new PlayerEventListener();
-		new EntityEventListener();
 		String portString = CONFIG.getProperty("webapp_port", "8080");
 		try {
 			if(CONFIG.getProperty("use_webapp", "true").equals("true")) {
@@ -72,6 +70,8 @@ public class ModInit implements DedicatedServerModInitializer {
 			SearchPacket.registerServer();
 			InspectPacket.registerServer();
 		}
+		new PlayerEventListener();
+		new EntityEventListener(!CONFIG.getProperty("log_entities_without_names", "false").equals("true"));
 	}
 
 	private void onServerStart(MinecraftServer server) {

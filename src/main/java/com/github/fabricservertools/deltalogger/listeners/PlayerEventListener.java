@@ -158,13 +158,13 @@ public class PlayerEventListener {
                     false, pos, world.getBlockState(pos), world.getRegistryKey().getValue(), Instant.now()
             ));
         }
-        if(explosion.getCausingEntity() instanceof CreeperEntity) {
+        /*if(explosion.getCausingEntity() instanceof CreeperEntity) {
             DatabaseManager.getSingleton().queueOp(BlockDAO.insertPlacement(
                     explosion.getCausingEntity().getUuid(),
                     Registry.BLOCK.getId(block),
                     false, pos, world.getBlockState(pos), world.getRegistryKey().getValue(), Instant.now()
             ));
-        }
+        }*/
         return ActionResult.PASS;
     }
 

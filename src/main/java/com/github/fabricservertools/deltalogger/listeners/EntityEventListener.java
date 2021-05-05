@@ -22,7 +22,9 @@ import net.minecraft.util.registry.Registry;
 import java.util.UUID;
 
 public class EntityEventListener {
-	public EntityEventListener() {
+	private final boolean requireNames;
+	public EntityEventListener(boolean requireNames) {
+		this.requireNames = requireNames;
 		CreeperExplodeCallback.EVENT.register(this::onCreeperExplode);
 		FireballExplodeCallback.EVENT.register(this::onFireballExplode);
 		EntityDeathCallback.EVENT.register(this::onEntityDeath);
@@ -30,11 +32,11 @@ public class EntityEventListener {
 
 	private ActionResult onEntityDeath(LivingEntity entity, DamageSource source) {
 		Entity attacker = source.getAttacker();
-		if (entity.getCustomName() == null) return ActionResult.PASS;
+		if (requireNames && entity.getCustomName() == null) return ActionResult.PASS;
 
 			UUID killer_id;
 		if (attacker instanceof PlayerEntity) {
-			killer_id = ((PlayerEntity) attacker).getUuid();
+			killer_id = attacker.getUuid();
 		} else {
 			return ActionResult.PASS;
 		}
@@ -59,7 +61,7 @@ public class EntityEventListener {
 		if (ghast.getTarget() == null || !(ghast.getTarget() instanceof PlayerEntity)) return ActionResult.PASS;
 
 		DatabaseManager.getSingleton().queueOp(EntityDAO.insertMobGrief(
-				((PlayerEntity) ghast.getTarget()).getUuid(),
+				ghast.getTarget().getUuid(),
 				java.time.Instant.now(),
 				Registry.ENTITY_TYPE.getId(EntityType.GHAST),
 				fireballEntity.getBlockPos(),
