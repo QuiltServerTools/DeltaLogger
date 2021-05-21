@@ -45,7 +45,7 @@ public class NetworkUtils {
         buf.setLong(5, SQLUtils.getInstantFromDBTimeString(placement.getTime()).getEpochSecond());
         byte[] blockType = placement.getBlockType().getBytes(StandardCharsets.UTF_8);
         buf.setBytes(6, blockType);
-        buf.setBytes(7, placement.getState().getBytes(StandardCharsets.UTF_8));
+        buf.setBytes(7, placement.getState() == null ? "" : placement.getState().getBytes(StandardCharsets.UTF_8));
 
         return buf;
     }
