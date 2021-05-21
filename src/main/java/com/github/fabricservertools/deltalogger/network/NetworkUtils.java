@@ -20,12 +20,10 @@ public class NetworkUtils {
         buf.writeInt(pos.getX());
         buf.writeInt(pos.getY());
         buf.writeInt(pos.getZ());
-        byte[] playerNameBytes = transaction.getPlayerName().getBytes(StandardCharsets.UTF_8);
-        buf.writeBytes(playerNameBytes);
+        buf.writeString(transaction.getPlayerName());
         buf.writeLong(SQLUtils.getInstantFromDBTimeString(transaction.getTime()).getEpochSecond());
         buf.writeInt(transaction.getCount());
-        byte[] itemType = transaction.getItemType().getBytes(StandardCharsets.UTF_8);
-        buf.writeBytes(itemType);
+        buf.writeString(transaction.getItemType());
 
         return buf;
     }
@@ -40,12 +38,10 @@ public class NetworkUtils {
         buf.writeInt(placement.getY());
         buf.writeInt(placement.getZ());
         buf.writeBoolean(placement.getPlaced());
-        byte[] playerNameBytes = placement.getPlayerName().getBytes(StandardCharsets.UTF_8);
-        buf.writeBytes(playerNameBytes);
+        buf.writeString(placement.getPlayerName());
         buf.writeLong(SQLUtils.getInstantFromDBTimeString(placement.getTime()).getEpochSecond());
-        byte[] blockType = placement.getBlockType().getBytes(StandardCharsets.UTF_8);
-        buf.writeBytes(blockType);
-        buf.writeBytes(placement.getState() == null ? "".getBytes(StandardCharsets.UTF_8) : placement.getState().getBytes(StandardCharsets.UTF_8));
+        buf.writeString(placement.getBlockType());
+        buf.writeString(placement.getState() == null ? "" : placement.getState());
 
         return buf;
     }
