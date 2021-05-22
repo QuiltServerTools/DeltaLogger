@@ -17,15 +17,13 @@ public class NetworkUtils {
     public static final Identifier TRANSACTION_PACKET = new Identifier("deltalogger", "transaction");
     public static PacketByteBuf setTransaction(Transaction transaction, BlockPos pos) {
         PacketByteBuf buf = PacketByteBufs.create();
-        buf.setInt(0, pos.getX());
-        buf.setInt(1, pos.getY());
-        buf.setInt(2, pos.getZ());
-        byte[] playerNameBytes = transaction.getPlayerName().getBytes(StandardCharsets.UTF_8);
-        buf.setBytes(3, playerNameBytes);
-        buf.setLong(4, SQLUtils.getInstantFromDBTimeString(transaction.getTime()).getEpochSecond());
-        buf.setInt(5, transaction.getCount());
-        byte[] itemType = transaction.getItemType().getBytes(StandardCharsets.UTF_8);
-        buf.setBytes(6, itemType);
+        buf.writeInt(pos.getX());
+        buf.writeInt(pos.getY());
+        buf.writeInt(pos.getZ());
+        buf.writeString(transaction.getPlayerName());
+        buf.writeLong(SQLUtils.getInstantFromDBTimeString(transaction.getTime()).getEpochSecond());
+        buf.writeInt(transaction.getCount());
+        buf.writeString(transaction.getItemType());
 
         return buf;
     }
@@ -36,16 +34,14 @@ public class NetworkUtils {
 
     public static PacketByteBuf setPlacement(Placement placement) {
         PacketByteBuf buf = PacketByteBufs.create();
-        buf.setInt(0, placement.getX());
-        buf.setInt(1, placement.getY());
-        buf.setInt(2, placement.getZ());
-        buf.setBoolean(3, placement.getPlaced());
-        byte[] playerNameBytes = placement.getPlayerName().getBytes(StandardCharsets.UTF_8);
-        buf.setBytes(4, playerNameBytes);
-        buf.setLong(5, SQLUtils.getInstantFromDBTimeString(placement.getTime()).getEpochSecond());
-        byte[] blockType = placement.getBlockType().getBytes(StandardCharsets.UTF_8);
-        buf.setBytes(6, blockType);
-        buf.setBytes(7, placement.getState() == null ? "".getBytes(StandardCharsets.UTF_8) : placement.getState().getBytes(StandardCharsets.UTF_8));
+        buf.writeInt(placement.getX());
+        buf.writeInt(placement.getY());
+        buf.writeInt(placement.getZ());
+        buf.writeBoolean(placement.getPlaced());
+        buf.writeString(placement.getPlayerName());
+        buf.writeLong(SQLUtils.getInstantFromDBTimeString(placement.getTime()).getEpochSecond());
+        buf.writeString(placement.getBlockType());
+        buf.writeString(placement.getState() == null ? "" : placement.getState());
 
         return buf;
     }
