@@ -21,7 +21,7 @@ public class TransactionDAO {
 	private final Jdbi jdbi;
 	private final String SELECT_TRANSACTIONS = String.join(" ",
 			"SELECT CT.id, C.uuid,", SQLUtils.getDateFormatted("CT.date", "date"),
-			", R.name as `item_type`, CT.item_count, P.name as `player_name`, CT.item_data"
+			", R.name as `item_type`, CT.item_count, P.name as `player_name`, CT.item_data, DT.name as `dimension`"
 	);
 	private final String JOIN_TRANSACTIONS = String.join(" ",
 			"INNER JOIN registry as R ON CT.item_type = R.id",
@@ -34,11 +34,11 @@ public class TransactionDAO {
 		this.jdbi = jdbi;
 		jdbi.registerRowMapper(Transaction.class,
 				(rs, ctx) -> new Transaction(rs.getInt("id"), rs.getString("player_name"), rs.getString("date"),
-						rs.getString("item_type"), rs.getInt("item_count"), UUID.fromString(rs.getString("uuid")), rs.getString("item_data")));
+						rs.getString("item_type"), rs.getInt("item_count"), UUID.fromString(rs.getString("uuid")), rs.getString("item_data"), rs.getString("dimension")));
 
 		jdbi.registerRowMapper(TransactionPos.class,
 				(rs, ctx) -> new TransactionPos(rs.getInt("id"), rs.getString("player_name"), rs.getString("date"),
-						rs.getString("item_type"), rs.getInt("item_count"), UUID.fromString(rs.getString("uuid")), rs.getInt("x"), rs.getInt("y"), rs.getInt("z"), rs.getString("item_data")));
+						rs.getString("item_type"), rs.getInt("item_count"), UUID.fromString(rs.getString("uuid")), rs.getInt("x"), rs.getInt("y"), rs.getInt("z"), rs.getString("item_data"), rs.getString("dimension")));
 	}
 
 	/**
@@ -92,7 +92,7 @@ public class TransactionDAO {
 					.withHandle(handle -> handle.select(String.join(" ",
 							String.join(" ",
 									"SELECT CT.id, C.x, C.y, C.z , C.uuid,", SQLUtils.getDateFormatted("CT.date", "date"),
-									", R.name as `item_type`, CT.item_count, P.name as `player_name`, CT.item_data"
+									", R.name as `item_type`, CT.item_count, P.name as `player_name`, CT.item_data, DT.name as `dimension`"
 							),
 							"FROM container_transactions as CT",
 							JOIN_TRANSACTIONS, builtWhere, "ORDER BY CT.date DESC LIMIT " + limit)
@@ -109,7 +109,7 @@ public class TransactionDAO {
 					String.join(" ",
 							// "SELECT CT.id, C.uuid,", SQLUtils.getDateFormatted("CT.date", "date"), ", CT.item_count, P.name as `player_name`",
 							"SELECT CT.id, C.uuid,", SQLUtils.getDateFormatted("CT.date", "date"),
-							", R.name as `item_type`, CT.item_count, P.name as `player_name`, C.x, C.y, C.z, CT.item_data",
+							", R.name as `item_type`, CT.item_count, P.name as `player_name`, C.x, C.y, C.z, CT.item_data, DT.name as `dimension`",
 							"FROM container_transactions as CT",
 							JOIN_TRANSACTIONS,
 							"WHERE C.x >= :xs AND C.x <= :xl AND C.y >= :ys AND C.y <= :yl AND C.z >= :zs AND C.z <= :zl AND DT.name = :dim AND CT.date > :time",

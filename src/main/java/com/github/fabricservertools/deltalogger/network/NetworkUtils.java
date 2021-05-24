@@ -24,12 +24,13 @@ public class NetworkUtils {
         buf.writeLong(SQLUtils.getInstantFromDBTimeString(transaction.getTime()).getEpochSecond());
         buf.writeInt(transaction.getCount());
         buf.writeString(transaction.getItemType());
+        buf.writeString(transaction.getDimension());
 
         return buf;
     }
 
     public static PacketByteBuf setTransaction(TransactionPos transactionPos) {
-        return setTransaction(new Transaction(0, transactionPos.getPlayerName(), transactionPos.getTime(), transactionPos.getItemType(), transactionPos.getCount(), Util.NIL_UUID, null), transactionPos.getPos());
+        return setTransaction(new Transaction(0, transactionPos.getPlayerName(), transactionPos.getTime(), transactionPos.getItemType(), transactionPos.getCount(), Util.NIL_UUID, null, transactionPos.getDimension()), transactionPos.getPos());
     }
 
     public static PacketByteBuf setPlacement(Placement placement) {
@@ -42,6 +43,7 @@ public class NetworkUtils {
         buf.writeLong(SQLUtils.getInstantFromDBTimeString(placement.getTime()).getEpochSecond());
         buf.writeString(placement.getBlockType());
         buf.writeString(placement.getState() == null ? "" : placement.getState());
+        buf.writeString(placement.getDimension());
 
         return buf;
     }

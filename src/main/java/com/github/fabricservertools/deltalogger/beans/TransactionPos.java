@@ -36,8 +36,9 @@ public class TransactionPos implements Bean {
     private UUID containerUUID;
     private final BlockPos pos;
     private final String data;
+    private String dimension;
 
-    public TransactionPos(int id, String playerName, String time, String itemType, int count, UUID containerUUID, int x, int y, int z, String data) {
+    public TransactionPos(int id, String playerName, String time, String itemType, int count, UUID containerUUID, int x, int y, int z, String data, String dimension) {
         this.id = id;
         this.playerName = playerName;
         this.time = time;
@@ -46,6 +47,7 @@ public class TransactionPos implements Bean {
         this.containerUUID = containerUUID;
         this.pos = new BlockPos(x, y, z);
         this.data = data;
+        this.dimension = dimension;
     }
 
     public int getId() {
@@ -102,6 +104,14 @@ public class TransactionPos implements Bean {
 
     public String getData() {
         return this.data;
+    }
+
+    public String getDimension() {
+        return this.dimension;
+    }
+
+    public void setDimension(String dimension) {
+        this.dimension = dimension;
     }
 
     public MutableText getText() {
