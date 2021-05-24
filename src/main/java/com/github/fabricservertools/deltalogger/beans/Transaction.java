@@ -20,8 +20,9 @@ public class Transaction {
 	private int count;
 	private UUID containerUUID;
 	private final String data;
+	private String dimension;
 
-	public Transaction(int id, String playerName, String time, String itemType, int count, UUID containerUUID, String data) {
+	public Transaction(int id, String playerName, String time, String itemType, int count, UUID containerUUID, String data, String dimension) {
 		this.id = id;
 		this.playerName = playerName;
 		this.time = time;
@@ -29,6 +30,7 @@ public class Transaction {
 		this.count = count;
 		this.containerUUID = containerUUID;
 		this.data = data;
+		this.dimension = dimension;
 	}
 
 	public int getId() {
@@ -81,6 +83,14 @@ public class Transaction {
 
 	public String getData() {
 		return this.data;
+	}
+
+	public String getDimension() {
+		return this.dimension;
+	}
+
+	public void setDimension(String dimension) {
+		this.dimension = dimension;
 	}
 
 	public MutableText getText() {
